@@ -1165,6 +1165,41 @@ function startResourceTick() {
 }
 
 // ============================================================
+//  KEYBOARD SUPPORT
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+
+  // E = Saldır (savaş modalı açıksa)
+  if (key === 'e') {
+    const battleModal = document.getElementById('battle-modal');
+    if (battleModal) {
+      doBattle();
+      return;
+    }
+    // E = Düşman listesindeyse ilk düşmana saldır
+    const activeScreen = document.querySelector('.screen.active');
+    if (activeScreen && activeScreen.id === 'screen-battle') {
+      const firstEnemy = document.querySelector('.enemy-card');
+      if (firstEnemy) firstEnemy.click();
+      return;
+    }
+  }
+
+  // ESC = Modalı kapat
+  if (key === 'escape') {
+    closeBattleModal();
+    return;
+  }
+
+  // 1-5 = Tab geçişleri
+  const tabMap = { '1': 'castle', '2': 'troops', '3': 'battle', '4': 'clan', '5': 'quests' };
+  if (tabMap[e.key]) {
+    switchTab(tabMap[e.key]);
+  }
+});
+
+// ============================================================
 //  INIT
 // ============================================================
 window.onload = () => {
