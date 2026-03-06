@@ -1,0 +1,17 @@
+{
+  "name": "fortress-fighters",
+  "version": "1.0.0",
+  "description": "Telegram Mini App Strategy Game — Fomo Fighters inspired",
+  "main": "bot/bot.js",
+  "scripts": {
+    "start": "node bot/bot.js",
+    "dev": "BOT_TOKEN=YOUR_TOKEN WEBAPP_URL=http://localhost:3000 node bot/bot.js"
+  },
+  "dependencies": {
+    "grammy": "^1.26.0",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
