@@ -306,14 +306,96 @@
       width: 38px; height: 38px; border-radius: 50%;
       background: linear-gradient(135deg, var(--blue), #2a5fb5);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 15px;
+      font-weight: 700; font-size: 15px; flex-shrink: 0;
     }
     .member-card .m-name { font-size: 14px; font-weight: 600; }
     .member-card .m-power { font-size: 12px; color: var(--muted); }
-    .member-card .m-rank {
-      margin-left: auto;
-      font-size: 18px;
+    .member-card .m-rank { margin-left: auto; font-size: 18px; flex-shrink: 0; }
+
+    /* Clan list (browse) */
+    .clan-list-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px; margin-bottom: 10px;
     }
+    .clan-list-card .cl-top { display: flex; align-items: center; gap: 12px; }
+    .clan-list-card .cl-icon { font-size: 36px; flex-shrink: 0; }
+    .clan-list-card .cl-info { flex: 1; }
+    .clan-list-card .cl-name { font-size: 15px; font-weight: 700; }
+    .clan-list-card .cl-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .clan-list-card .cl-desc { font-size: 12px; color: var(--muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+    .clan-list-card .cl-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .cl-btn {
+      flex: 1; padding: 8px; border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .cl-btn.join { background: var(--blue); color: #fff; }
+    .cl-btn.join:disabled { background: var(--border); color: var(--muted); cursor: default; }
+    .cl-btn.view { background: var(--border); color: var(--text); }
+
+    /* Pending request badge */
+    .req-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 8px;
+      font-size: 11px; font-weight: 700;
+      background: rgba(240,165,0,0.15); color: var(--accent);
+      border: 1px solid rgba(240,165,0,0.3);
+    }
+
+    /* Clan tabs */
+    .clan-tabs {
+      display: flex; gap: 6px; margin-bottom: 14px;
+    }
+    .clan-tab-btn {
+      flex: 1; padding: 8px 4px; border: 1px solid var(--border);
+      background: var(--panel); color: var(--muted);
+      border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .clan-tab-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+    /* Action buttons (leave / manage) */
+    .danger-btn {
+      width: 100%; padding: 10px; border: 1px solid var(--red);
+      background: rgba(231,76,60,0.1); color: var(--red);
+      border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+      margin-top: 10px;
+    }
+    .success-btn {
+      padding: 6px 12px; border: none; border-radius: 8px;
+      background: var(--green); color: #fff;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .reject-btn {
+      padding: 6px 12px; border: none; border-radius: 8px;
+      background: rgba(231,76,60,0.2); color: var(--red);
+      font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+
+    /* Create clan form */
+    .form-group { margin-bottom: 12px; }
+    .form-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 4px; display: block; }
+    .form-input {
+      width: 100%; padding: 10px 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 14px;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--blue); }
+    .form-textarea {
+      width: 100%; padding: 10px 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 13px;
+      outline: none; resize: none; height: 70px;
+    }
+    .create-btn {
+      width: 100%; padding: 12px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 4px;
+    }
+    .modal-panel {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px; margin-bottom: 14px;
+    }
+    .modal-panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
 
     /* ===== QUESTS SCREEN ===== */
     .quest-card {
@@ -436,18 +518,9 @@
 
   <!-- CLAN SCREEN -->
   <div class="screen" id="screen-clan">
-    <div class="clan-header">
-      <span class="clan-icon">🛡️</span>
-      <div class="clan-name" id="clan-name-display">Demir Kalkan</div>
-      <div class="clan-tag">#DEMİR • 18/30 üye</div>
-      <div class="clan-stats">
-        <div class="clan-stat"><div class="sv">1,250</div><div class="sl">Güç</div></div>
-        <div class="clan-stat"><div class="sv">3</div><div class="sl">Savaş Kazandı</div></div>
-        <div class="clan-stat"><div class="sv">2</div><div class="sl">Sezon</div></div>
-      </div>
+    <div id="clan-content">
+      <div style="color:var(--muted);text-align:center;padding:40px">⏳ Yükleniyor...</div>
     </div>
-    <div class="section-title">Üyeler</div>
-    <div id="members-list"></div>
   </div>
 
   <!-- QUESTS SCREEN -->
@@ -492,7 +565,8 @@ const DEFAULT_STATE = {
     xpNext: 100,
     gold: 500,
     food: 200,
-    lastOnline: Date.now()
+    lastOnline: Date.now(),
+    clanId: null   // oyuncunun üye olduğu klan ID'si
   },
   buildings: {
     castle:    { level: 1, upgrading: false, upgradeEnd: 0 },
@@ -516,13 +590,455 @@ let G = deepClone(DEFAULT_STATE);
 
 function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 
+// ============================================================
+//  PLAYER ID — her cihaz için kalıcı tekil kimlik
+// ============================================================
+function getPlayerId() {
+  let pid = localStorage.getItem('ff_player_id');
+  if (!pid) {
+    pid = 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+    localStorage.setItem('ff_player_id', pid);
+  }
+  return pid;
+}
+const PLAYER_ID = getPlayerId();
+
 // Load/save from localStorage
-function saveGame() { localStorage.setItem('ff_save', JSON.stringify(G)); }
+function saveGame() {
+  localStorage.setItem('ff_save', JSON.stringify(G));
+  // Shared storage'a da kaydet (diğer oyuncular görsün)
+  syncPlayerToShared();
+}
+
 function loadGame() {
   try {
     const raw = localStorage.getItem('ff_save');
     if (raw) G = JSON.parse(raw);
   } catch(e) { console.warn('Save load error', e); }
+}
+
+// ============================================================
+//  SHARED STORAGE — oyuncu & klan senkronizasyonu
+// ============================================================
+async function syncPlayerToShared() {
+  if (!window.storage) return;
+  try {
+    const playerData = {
+      name: G.player.name,
+      level: G.player.level,
+      power: calcTotalPower(),
+      clanId: G.player.clanId || null,
+      lastSeen: Date.now()
+    };
+    await window.storage.set(PLAYER_ID, JSON.stringify(playerData), true);
+  } catch(e) { console.warn('Shared sync error', e); }
+}
+
+async function loadSharedPlayers() {
+  if (!window.storage) return [];
+  try {
+    const result = await window.storage.list('player_', true);
+    if (!result || !result.keys) return [];
+    const players = [];
+    for (const key of result.keys) {
+      if (key === PLAYER_ID) continue;
+      try {
+        const entry = await window.storage.get(key, true);
+        if (!entry) continue;
+        const p = JSON.parse(entry.value);
+        if (Date.now() - p.lastSeen > 7 * 24 * 3600 * 1000) continue;
+        players.push({ ...p, pid: key });
+      } catch(e) {}
+    }
+    return players;
+  } catch(e) { return []; }
+}
+
+// ---- CLAN STORAGE HELPERS ----
+// clan key: clan_<id>   value: { id, name, tag, icon, desc, ownerId, ownerName, members:[pid], requests:[{pid,name,power}], createdAt }
+
+async function getAllClans() {
+  if (!window.storage) return [];
+  try {
+    const result = await window.storage.list('clan_', true);
+    if (!result || !result.keys) return [];
+    const clans = [];
+    for (const key of result.keys) {
+      try {
+        const e = await window.storage.get(key, true);
+        if (e) clans.push(JSON.parse(e.value));
+      } catch(e) {}
+    }
+    return clans;
+  } catch(e) { return []; }
+}
+
+async function getClan(clanId) {
+  if (!window.storage || !clanId) return null;
+  try {
+    const e = await window.storage.get('clan_' + clanId, true);
+    return e ? JSON.parse(e.value) : null;
+  } catch(e) { return null; }
+}
+
+async function saveClan(clan) {
+  if (!window.storage) return;
+  await window.storage.set('clan_' + clan.id, JSON.stringify(clan), true);
+}
+
+// ============================================================
+//  CLAN SCREEN RENDER (state machine)
+// ============================================================
+let clanView = 'main'; // 'main' | 'browse' | 'create' | 'my-clan'
+
+async function renderClan() {
+  const root = document.getElementById('clan-content');
+  root.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px">⏳ Yükleniyor...</div>';
+
+  await syncPlayerToShared();
+
+  if (G.player.clanId) {
+    await renderMyClan(root);
+  } else {
+    await renderNoClan(root);
+  }
+}
+
+async function renderNoClan(root) {
+  root.innerHTML = `
+    <div class="modal-panel" style="text-align:center">
+      <div style="font-size:56px">🛡️</div>
+      <div style="font-size:18px;font-weight:700;margin:10px 0 4px">Klansızsın</div>
+      <div style="font-size:13px;color:var(--muted)">Bir klana katıl veya kendi klanını kur!</div>
+    </div>
+    <div class="clan-tabs">
+      <button class="clan-tab-btn ${clanView==='browse'?'active':''}" onclick="setClanView('browse')">🔍 Klan Bul</button>
+      <button class="clan-tab-btn ${clanView==='create'?'active':''}" onclick="setClanView('create')">➕ Klan Kur</button>
+    </div>
+    <div id="clan-sub"></div>
+  `;
+
+  if (clanView === 'browse') await renderBrowseClans();
+  else if (clanView === 'create') renderCreateClan();
+}
+
+async function renderBrowseClans() {
+  const sub = document.getElementById('clan-sub');
+  if (!sub) return;
+  sub.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">⏳ Klanlar aranıyor...</div>';
+
+  const clans = await getAllClans();
+  if (clans.length === 0) {
+    sub.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">
+      Henüz hiç klan yok.<br>İlk klanı sen kur! 🚀
+    </div>`;
+    return;
+  }
+
+  sub.innerHTML = '';
+  for (const clan of clans) {
+    const memberCount = (clan.members || []).length;
+    const myReq = (clan.requests || []).find(r => r.pid === PLAYER_ID);
+    const isMember = (clan.members || []).includes(PLAYER_ID);
+    const full = memberCount >= 30;
+
+    const card = document.createElement('div');
+    card.className = 'clan-list-card';
+    card.innerHTML = `
+      <div class="cl-top">
+        <div class="cl-icon">${clan.icon || '🛡️'}</div>
+        <div class="cl-info">
+          <div class="cl-name">${clan.name}</div>
+          <div class="cl-meta">#${clan.tag} • ${memberCount}/30 üye • 👑 ${clan.ownerName}</div>
+        </div>
+      </div>
+      ${clan.desc ? `<div class="cl-desc">${clan.desc}</div>` : ''}
+      <div class="cl-actions">
+        ${isMember
+          ? `<button class="cl-btn view" disabled>✅ Üyesin</button>`
+          : myReq
+          ? `<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>`
+          : full
+          ? `<button class="cl-btn join" disabled>Dolu</button>`
+          : `<button class="cl-btn join" onclick="requestJoinClan('${clan.id}')">📨 Katılım Talebi</button>`
+        }
+      </div>
+    `;
+    sub.appendChild(card);
+  }
+}
+
+function renderCreateClan() {
+  const sub = document.getElementById('clan-sub');
+  if (!sub) return;
+  sub.innerHTML = `
+    <div class="modal-panel">
+      <h3>⚔️ Yeni Klan Kur</h3>
+      <div class="form-group">
+        <label class="form-label">Klan Adı *</label>
+        <input class="form-input" id="new-clan-name" placeholder="örn. Demir Kalkan" maxlength="24">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Klan Etiketi * (4 harf)</label>
+        <input class="form-input" id="new-clan-tag" placeholder="örn. DEMİR" maxlength="6" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label class="form-label">İkon (emoji)</label>
+        <input class="form-input" id="new-clan-icon" placeholder="🛡️" maxlength="4" value="🛡️">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Açıklama</label>
+        <textarea class="form-textarea" id="new-clan-desc" placeholder="Klanın hakkında kısa bir açıklama..."></textarea>
+      </div>
+      <button class="create-btn" onclick="createClan()">🏰 Klanı Kur</button>
+    </div>
+  `;
+}
+
+async function renderMyClan(root) {
+  const clan = await getClan(G.player.clanId);
+  if (!clan) {
+    // Klan silinmiş olabilir
+    G.player.clanId = null;
+    saveGame();
+    await renderNoClan(root);
+    return;
+  }
+
+  const isOwner = clan.ownerId === PLAYER_ID;
+  const memberCount = (clan.members || []).length;
+  const requests = clan.requests || [];
+
+  // member detay: shared'dan çek
+  const allPlayers = await loadSharedPlayers();
+  const mePlayer = { pid: PLAYER_ID, name: G.player.name, power: calcTotalPower(), level: G.player.level, isMe: true };
+
+  const members = [mePlayer, ...allPlayers.filter(p => (clan.members || []).includes(p.pid) && p.pid !== PLAYER_ID)];
+  members.sort((a, b) => b.power - a.power);
+
+  const totalPower = members.reduce((s, m) => s + (m.power || 0), 0);
+
+  root.innerHTML = `
+    <div class="clan-header">
+      <span class="clan-icon">${clan.icon || '🛡️'}</span>
+      <div class="clan-name">${clan.name}</div>
+      <div class="clan-tag">#${clan.tag} • ${memberCount}/30 üye</div>
+      <div class="clan-stats">
+        <div class="clan-stat"><div class="sv">${fmtNum(totalPower)}</div><div class="sl">Toplam Güç</div></div>
+        <div class="clan-stat"><div class="sv">${memberCount}</div><div class="sl">Üye</div></div>
+        <div class="clan-stat"><div class="sv">${isOwner ? '👑' : '🛡️'}</div><div class="sl">${isOwner ? 'Lider' : 'Üye'}</div></div>
+      </div>
+      ${clan.desc ? `<div style="font-size:12px;color:var(--muted);margin-top:10px">${clan.desc}</div>` : ''}
+    </div>
+
+    ${isOwner && requests.length > 0 ? `
+      <div class="section-title">📨 Katılım Talepleri (${requests.length})</div>
+      <div id="requests-list"></div>
+    ` : ''}
+
+    <div class="section-title">👥 Üyeler</div>
+    <div id="members-list"></div>
+
+    ${isOwner
+      ? `<button class="danger-btn" onclick="disbandClanConfirm()">💀 Klanı Dağıt</button>`
+      : `<button class="danger-btn" onclick="leaveClanConfirm()">🚪 Klandan Ayrıl</button>`
+    }
+  `;
+
+  // Requests render
+  if (isOwner && requests.length > 0) {
+    const reqList = document.getElementById('requests-list');
+    requests.forEach(req => {
+      const card = document.createElement('div');
+      card.className = 'member-card';
+      card.innerHTML = `
+        <div class="m-avatar" style="background:linear-gradient(135deg,#5a3a7a,#3a1a5a)">${req.name[0].toUpperCase()}</div>
+        <div style="flex:1">
+          <div class="m-name">${req.name}</div>
+          <div class="m-power">💪 ${fmtNum(req.power || 0)} güç • Sv.${req.level || 1}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="success-btn" onclick="approveRequest('${clan.id}','${req.pid}','${req.name}')">✅</button>
+          <button class="reject-btn" onclick="rejectRequest('${clan.id}','${req.pid}')">❌</button>
+        </div>
+      `;
+      reqList.appendChild(card);
+    });
+  }
+
+  // Members render
+  const memList = document.getElementById('members-list');
+  const rankIcons = ['🥇','🥈','🥉'];
+  members.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    const rank = i < 3 ? rankIcons[i] : `${i+1}`;
+    card.innerHTML = `
+      <div class="m-avatar" style="${m.isMe ? 'background:linear-gradient(135deg,var(--accent),var(--accent2))' : m.pid===clan.ownerId ? 'background:linear-gradient(135deg,#7a4a00,#5a3000)' : ''}">${m.name[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="m-name">${m.name}${m.isMe ? ' <span style="color:var(--accent);font-size:11px">(Sen)</span>' : ''}${m.pid===clan.ownerId ? ' 👑' : ''}</div>
+        <div class="m-power">💪 ${fmtNum(m.power || 0)} güç${m.level ? ` • Sv.${m.level}` : ''}</div>
+      </div>
+      ${isOwner && !m.isMe && m.pid !== clan.ownerId
+        ? `<button class="reject-btn" style="font-size:11px;padding:4px 8px" onclick="kickMember('${clan.id}','${m.pid}','${m.name}')">Çıkar</button>`
+        : `<div class="m-rank">${rank}</div>`
+      }
+    `;
+    memList.appendChild(card);
+  });
+}
+
+// ============================================================
+//  CLAN ACTIONS
+// ============================================================
+function setClanView(view) {
+  clanView = view;
+  renderClan();
+}
+
+async function createClan() {
+  const name = document.getElementById('new-clan-name')?.value.trim();
+  const tag = document.getElementById('new-clan-tag')?.value.trim().toUpperCase();
+  const icon = document.getElementById('new-clan-icon')?.value.trim() || '🛡️';
+  const desc = document.getElementById('new-clan-desc')?.value.trim();
+
+  if (!name || name.length < 2) { showToast('Klan adı en az 2 karakter!', 'error'); return; }
+  if (!tag || tag.length < 2) { showToast('Etiket en az 2 karakter!', 'error'); return; }
+  if (!window.storage) { showToast('Depolama erişimi yok!', 'error'); return; }
+
+  // Aynı tag var mı kontrol
+  const existing = await getAllClans();
+  if (existing.find(c => c.tag === tag)) { showToast('Bu etiket zaten alınmış!', 'error'); return; }
+
+  const clanId = 'c' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  const clan = {
+    id: clanId,
+    name, tag, icon, desc,
+    ownerId: PLAYER_ID,
+    ownerName: G.player.name,
+    members: [PLAYER_ID],
+    requests: [],
+    createdAt: Date.now()
+  };
+
+  await saveClan(clan);
+  G.player.clanId = clanId;
+  saveGame();
+  showToast(`🎉 ${name} klanı kuruldu!`, 'success');
+  clanView = 'main';
+  renderClan();
+}
+
+async function requestJoinClan(clanId) {
+  if (!window.storage) { showToast('Depolama erişimi yok!', 'error'); return; }
+  const clan = await getClan(clanId);
+  if (!clan) { showToast('Klan bulunamadı!', 'error'); return; }
+  if ((clan.members || []).includes(PLAYER_ID)) { showToast('Zaten üyesin!', 'error'); return; }
+  if ((clan.requests || []).find(r => r.pid === PLAYER_ID)) { showToast('Zaten talep gönderdin!', 'info'); return; }
+
+  clan.requests = clan.requests || [];
+  clan.requests.push({ pid: PLAYER_ID, name: G.player.name, power: calcTotalPower(), level: G.player.level, sentAt: Date.now() });
+  await saveClan(clan);
+  showToast(`📨 ${clan.name} klanına talep gönderildi!`, 'success');
+  renderClan();
+}
+
+async function approveRequest(clanId, pid, pname) {
+  const clan = await getClan(clanId);
+  if (!clan || clan.ownerId !== PLAYER_ID) return;
+  if ((clan.members || []).length >= 30) { showToast('Klan dolu!', 'error'); return; }
+
+  clan.requests = (clan.requests || []).filter(r => r.pid !== pid);
+  clan.members = clan.members || [];
+  if (!clan.members.includes(pid)) clan.members.push(pid);
+  await saveClan(clan);
+  showToast(`✅ ${pname} klana kabul edildi!`, 'success');
+  renderClan();
+}
+
+async function rejectRequest(clanId, pid) {
+  const clan = await getClan(clanId);
+  if (!clan || clan.ownerId !== PLAYER_ID) return;
+  clan.requests = (clan.requests || []).filter(r => r.pid !== pid);
+  await saveClan(clan);
+  showToast('❌ Talep reddedildi.', 'info');
+  renderClan();
+}
+
+async function kickMember(clanId, pid, pname) {
+  const clan = await getClan(clanId);
+  if (!clan || clan.ownerId !== PLAYER_ID) return;
+  clan.members = (clan.members || []).filter(m => m !== pid);
+  await saveClan(clan);
+  showToast(`🚫 ${pname} klandan çıkarıldı.`, 'info');
+  renderClan();
+}
+
+function leaveClanConfirm() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'confirm-modal';
+  overlay.innerHTML = `
+    <div class="modal" style="text-align:center">
+      <div style="font-size:48px">🚪</div>
+      <h3 style="margin:12px 0 8px">Klandan ayrıl?</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Bu işlem geri alınamaz. Klandan ayrılacaksın.</p>
+      <div style="display:flex;gap:10px">
+        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--border);color:var(--text);font-size:14px;font-weight:700;cursor:pointer" onclick="document.getElementById('confirm-modal').remove()">İptal</button>
+        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--red);color:#fff;font-size:14px;font-weight:700;cursor:pointer" onclick="leaveClan()">Ayrıl</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function leaveClan() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.remove();
+
+  const clan = await getClan(G.player.clanId);
+  if (clan) {
+    clan.members = (clan.members || []).filter(m => m !== PLAYER_ID);
+    await saveClan(clan);
+  }
+  G.player.clanId = null;
+  saveGame();
+  showToast('🚪 Klandan ayrıldın.', 'info');
+  clanView = 'browse';
+  renderClan();
+}
+
+function disbandClanConfirm() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'confirm-modal';
+  overlay.innerHTML = `
+    <div class="modal" style="text-align:center">
+      <div style="font-size:48px">💀</div>
+      <h3 style="margin:12px 0 8px">Klanı dağıt?</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Tüm üyeler klandan çıkarılır. Bu işlem geri alınamaz!</p>
+      <div style="display:flex;gap:10px">
+        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--border);color:var(--text);font-size:14px;font-weight:700;cursor:pointer" onclick="document.getElementById('confirm-modal').remove()">İptal</button>
+        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--red);color:#fff;font-size:14px;font-weight:700;cursor:pointer" onclick="disbandClan()">Dağıt</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+async function disbandClan() {
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.remove();
+  if (!window.storage) return;
+
+  const clanId = G.player.clanId;
+  try { await window.storage.delete('clan_' + clanId, true); } catch(e) {}
+
+  G.player.clanId = null;
+  saveGame();
+  showToast('💀 Klan dağıtıldı.', 'info');
+  clanView = 'browse';
+  renderClan();
 }
 
 // ============================================================
@@ -626,14 +1142,7 @@ const DAILY_QUESTS = [
   { id: 'q_login',    name: 'Sadık Komutan', icon: '📅', desc: 'Bugün giriş yap',              target: 1,  reward: { gold: 100, xp: 25 },  type: 'login' }
 ];
 
-const CLAN_MEMBERS = [
-  { name: 'SavaşKralı', power: 1850, rank: '🥇' },
-  { name: 'DevirFatihi', power: 1620, rank: '🥈' },
-  { name: 'GökKılıcı',  power: 1440, rank: '🥉' },
-  { name: 'IşıkSavaşçısı', power: 1280, rank: '4' },
-  { name: 'KaranlıkAvcı', power: 1100, rank: '5' },
-  { name: 'SilahlıKol',  power: 980,  rank: '6' }
-];
+// (Statik klan üyeleri kaldırıldı — artık shared storage kullanılıyor)
 
 // ============================================================
 //  COMPUTED POWER
@@ -797,29 +1306,6 @@ function renderEnemies() {
   });
 }
 
-function renderClan() {
-  const list = document.getElementById('members-list');
-  list.innerHTML = '';
-  // Add current player first
-  const myEntry = { name: G.player.name, power: calcTotalPower(), rank: '⭐' };
-  const all = [myEntry, ...CLAN_MEMBERS];
-  all.sort((a,b) => b.power - a.power);
-  all.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'member-card';
-    const rankIcons = ['🥇','🥈','🥉'];
-    const rank = i < 3 ? rankIcons[i] : `${i+1}`;
-    card.innerHTML = `
-      <div class="m-avatar">${m.name[0]}</div>
-      <div>
-        <div class="m-name">${m.name}${m.name === G.player.name ? ' (Sen)' : ''}</div>
-        <div class="m-power">💪 ${fmtNum(m.power)} güç</div>
-      </div>
-      <div class="m-rank">${rank}</div>
-    `;
-    list.appendChild(card);
-  });
-}
 
 function renderQuests() {
   const list = document.getElementById('quests-list');
@@ -872,7 +1358,7 @@ function renderAll() {
   renderBuildings();
   renderTroops();
   renderEnemies();
-  renderClan();
+  renderClan(); // async, kendi içinde handle ediyor
   renderQuests();
 }
 
@@ -1097,7 +1583,7 @@ function switchTab(tab) {
   document.getElementById('screen-' + tab).classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'quests') renderQuests();
-  if (tab === 'clan') renderClan();
+  if (tab === 'clan') renderClan(); // async
 }
 
 // ============================================================
@@ -1202,7 +1688,7 @@ document.addEventListener('keydown', (e) => {
 // ============================================================
 //  INIT
 // ============================================================
-window.onload = () => {
+window.onload = async () => {
   loadGame();
   initTelegram();
 
@@ -1218,6 +1704,9 @@ window.onload = () => {
   if (earned && (earned.gold > 10 || earned.food > 10)) {
     setTimeout(() => showIdlePopup(earned), 800);
   }
+
+  // Oyuncuyu shared storage'a kaydet (giriş bildirimi)
+  await syncPlayerToShared();
 
   renderAll();
   startResourceTick();
