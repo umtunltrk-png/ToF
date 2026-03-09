@@ -783,71 +783,68 @@ function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
 //  PLAYER ID
 // ============================================================
 function getPlayerId() {
-  let pid = localStorage.getItem('toe_player_id');
-  if (!pid) {
-    pid = 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
-    localStorage.setItem('toe_player_id', pid);
+  try {
+    let pid = localStorage.getItem('toe_player_id');
+    if (!pid) {
+      pid = 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+      localStorage.setItem('toe_player_id', pid);
+    }
+    return pid;
+  } catch(e) {
+    return 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
   }
-  return pid;
 }
 const PLAYER_ID = getPlayerId();
 
+// Kalıcı depo (tüm ortamlarda çalışır)
+const LS_PREFIX = 'toe_shared_';
+const MEM_STORE = {};
+
 function saveGame() {
-  localStorage.setItem('toe_save', JSON.stringify(G));
+  try { localStorage.setItem('toe_save', JSON.stringify(G)); } catch(e) { MEM_STORE['__save__'] = JSON.stringify(G); }
   syncPlayerToShared();
 }
 function loadGame() {
   try {
-    const raw = localStorage.getItem('toe_save');
+    const raw = localStorage.getItem('toe_save') ?? MEM_STORE['__save__'] ?? null;
     if (raw) G = JSON.parse(raw);
   } catch(e) { console.warn('Save load error', e); }
 }
 
 // ============================================================
-//  STORAGE LAYER — window.storage varsa kullan, yoksa localStorage
+//  STORAGE LAYER — Çoklu fallback: window.storage → localStorage → bellek
 // ============================================================
-const LS_PREFIX = 'toe_shared_';
+
+function lsSet(key, value) { try { localStorage.setItem(LS_PREFIX + key, value); } catch(e) { MEM_STORE[key] = value; } }
+function lsGet(key) { try { return localStorage.getItem(LS_PREFIX + key) ?? MEM_STORE[key] ?? null; } catch(e) { return MEM_STORE[key] ?? null; } }
+function lsDel(key) { try { localStorage.removeItem(LS_PREFIX + key); } catch(e) {} delete MEM_STORE[key]; }
+function lsList(prefix) {
+  const keys = new Set();
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(LS_PREFIX + prefix)) keys.add(k.slice(LS_PREFIX.length));
+    }
+  } catch(e) {}
+  Object.keys(MEM_STORE).forEach(k => { if (k.startsWith(prefix)) keys.add(k); });
+  return [...keys];
+}
 
 async function storeSet(key, value, shared) {
-  if (window.storage) {
-    try { await window.storage.set(key, value, shared); return; } catch(e) {}
-  }
-  localStorage.setItem(LS_PREFIX + key, value);
+  if (window.storage) { try { await window.storage.set(key, value, shared); return; } catch(e) {} }
+  lsSet(key, value);
 }
-
 async function storeGet(key, shared) {
-  if (window.storage) {
-    try {
-      const r = await window.storage.get(key, shared);
-      return r ? r.value : null;
-    } catch(e) {}
-  }
-  return localStorage.getItem(LS_PREFIX + key);
+  if (window.storage) { try { const r = await window.storage.get(key, shared); return r ? r.value : null; } catch(e) {} }
+  return lsGet(key);
 }
-
 async function storeDelete(key, shared) {
-  if (window.storage) {
-    try { await window.storage.delete(key, shared); return; } catch(e) {}
-  }
-  localStorage.removeItem(LS_PREFIX + key);
+  if (window.storage) { try { await window.storage.delete(key, shared); return; } catch(e) {} }
+  lsDel(key);
 }
-
 async function storeList(prefix, shared) {
-  if (window.storage) {
-    try {
-      const r = await window.storage.list(prefix, shared);
-      return r ? r.keys : [];
-    } catch(e) {}
-  }
-  // localStorage fallback: tüm anahtarları tara
-  const keys = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    if (k && k.startsWith(LS_PREFIX + prefix)) {
-      keys.push(k.slice(LS_PREFIX.length));
-    }
-  }
-  return keys;
+  if (window.storage) { try { const r = await window.storage.list(prefix, shared); return r ? r.keys : []; } catch(e) {} }
+  return lsList(prefix);
 }
 
 async function syncPlayerToShared() {
