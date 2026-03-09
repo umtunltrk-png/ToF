@@ -804,28 +804,69 @@ function loadGame() {
 }
 
 // ============================================================
-//  SHARED STORAGE
+//  STORAGE LAYER — window.storage varsa kullan, yoksa localStorage
 // ============================================================
+const LS_PREFIX = 'toe_shared_';
+
+async function storeSet(key, value, shared) {
+  if (window.storage) {
+    try { await window.storage.set(key, value, shared); return; } catch(e) {}
+  }
+  localStorage.setItem(LS_PREFIX + key, value);
+}
+
+async function storeGet(key, shared) {
+  if (window.storage) {
+    try {
+      const r = await window.storage.get(key, shared);
+      return r ? r.value : null;
+    } catch(e) {}
+  }
+  return localStorage.getItem(LS_PREFIX + key);
+}
+
+async function storeDelete(key, shared) {
+  if (window.storage) {
+    try { await window.storage.delete(key, shared); return; } catch(e) {}
+  }
+  localStorage.removeItem(LS_PREFIX + key);
+}
+
+async function storeList(prefix, shared) {
+  if (window.storage) {
+    try {
+      const r = await window.storage.list(prefix, shared);
+      return r ? r.keys : [];
+    } catch(e) {}
+  }
+  // localStorage fallback: tüm anahtarları tara
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(LS_PREFIX + prefix)) {
+      keys.push(k.slice(LS_PREFIX.length));
+    }
+  }
+  return keys;
+}
+
 async function syncPlayerToShared() {
-  if (!window.storage) return;
   try {
     const playerData = { name: G.player.name, level: G.player.level, power: calcTotalPower(), clanId: G.player.clanId || null, lastSeen: Date.now() };
-    await window.storage.set(PLAYER_ID, JSON.stringify(playerData), true);
+    await storeSet(PLAYER_ID, JSON.stringify(playerData), true);
   } catch(e) {}
 }
 
 async function loadSharedPlayers() {
-  if (!window.storage) return [];
   try {
-    const result = await window.storage.list('player_', true);
-    if (!result || !result.keys) return [];
+    const keys = await storeList('player_', true);
     const players = [];
-    for (const key of result.keys) {
+    for (const key of keys) {
       if (key === PLAYER_ID) continue;
       try {
-        const entry = await window.storage.get(key, true);
-        if (!entry) continue;
-        const p = JSON.parse(entry.value);
+        const raw = await storeGet(key, true);
+        if (!raw) continue;
+        const p = JSON.parse(raw);
         if (Date.now() - p.lastSeen > 7 * 24 * 3600 * 1000) continue;
         players.push({ ...p, pid: key });
       } catch(e) {}
@@ -835,30 +876,29 @@ async function loadSharedPlayers() {
 }
 
 async function getAllClans() {
-  if (!window.storage) return [];
   try {
-    const result = await window.storage.list('clan_', true);
-    if (!result || !result.keys) return [];
+    const keys = await storeList('clan_', true);
     const clans = [];
-    for (const key of result.keys) {
+    for (const key of keys) {
       try {
-        const e = await window.storage.get(key, true);
-        if (e) clans.push(JSON.parse(e.value));
+        const raw = await storeGet(key, true);
+        if (raw) clans.push(JSON.parse(raw));
       } catch(e) {}
     }
     return clans;
   } catch(e) { return []; }
 }
+
 async function getClan(clanId) {
-  if (!window.storage || !clanId) return null;
+  if (!clanId) return null;
   try {
-    const e = await window.storage.get('clan_' + clanId, true);
-    return e ? JSON.parse(e.value) : null;
+    const raw = await storeGet('clan_' + clanId, true);
+    return raw ? JSON.parse(raw) : null;
   } catch(e) { return null; }
 }
+
 async function saveClan(clan) {
-  if (!window.storage) return;
-  await window.storage.set('clan_' + clan.id, JSON.stringify(clan), true);
+  await storeSet('clan_' + clan.id, JSON.stringify(clan), true);
 }
 
 // ============================================================
@@ -1013,7 +1053,6 @@ async function createClan() {
   const desc = document.getElementById('new-clan-desc')?.value.trim();
   if (!name || name.length < 2) { showToast('Klan adı en az 2 karakter!', 'error'); return; }
   if (!tag || tag.length < 2) { showToast('Etiket en az 2 karakter!', 'error'); return; }
-  if (!window.storage) { showToast('Depolama erişimi yok!', 'error'); return; }
   const existing = await getAllClans();
   if (existing.find(c => c.tag === tag)) { showToast('Bu etiket zaten alınmış!', 'error'); return; }
   const clanId = 'c' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1026,7 +1065,6 @@ async function createClan() {
 }
 
 async function requestJoinClan(clanId) {
-  if (!window.storage) { showToast('Depolama erişimi yok!', 'error'); return; }
   const clan = await getClan(clanId);
   if (!clan) { showToast('Klan bulunamadı!', 'error'); return; }
   if ((clan.members || []).includes(PLAYER_ID)) { showToast('Zaten üyesin!', 'error'); return; }
@@ -1112,9 +1150,8 @@ function disbandClanConfirm() {
 async function disbandClan() {
   const modal = document.getElementById('confirm-modal');
   if (modal) modal.remove();
-  if (!window.storage) return;
   const clanId = G.player.clanId;
-  try { await window.storage.delete('clan_' + clanId, true); } catch(e) {}
+  try { await storeDelete('clan_' + clanId, true); } catch(e) {}
   G.player.clanId = null; saveGame();
   showToast('💀 Klan dağıtıldı.', 'info');
   clanView = 'browse'; renderClan();
