@@ -396,9 +396,9 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 <div id="toast-container"></div>
 
 <script>
-// STORAGE
+// STORAGE - Basitleştirilmiş Global Sistem
 var MEM={};
-var STORAGE_AVAILABLE=false;
+
 function lsGet(k){try{return localStorage.getItem(k)||null}catch(e){return MEM[k]||null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){MEM[k]=v}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){delete MEM[k]}}
@@ -408,79 +408,112 @@ function lsList(prefix){
   Object.keys(MEM).forEach(function(k){if(k.startsWith(prefix))keys.add(k)});
   return Array.from(keys);
 }
+
+// Shared storage fonksiyonları - localStorage kullanarak simüle et
+async function storeSet(k,v){
+  try{
+    // window.storage varsa kullan
+    if(window.storage){
+      var result=await window.storage.set(k,v,true);
+      if(result){
+        console.log('✓ Shared storage SET:',k);
+        return true;
+      }
+    }
+  }catch(e){
+    console.log('⚠ window.storage set hatası:',e.message);
+  }
+  
+  // Fallback: localStorage'a global prefix ile yaz
+  lsSet('SHARED_'+k,v);
+  console.log('→ localStorage SET (shared):',k);
+  return true;
+}
+
+async function storeGet(k){
+  try{
+    // window.storage varsa kullan
+    if(window.storage){
+      var result=await window.storage.get(k,true);
+      if(result&&result.value!==undefined){
+        console.log('✓ Shared storage GET:',k);
+        return result.value;
+      }
+    }
+  }catch(e){
+    console.log('⚠ window.storage get hatası:',e.message);
+  }
+  
+  // Fallback: localStorage'dan oku
+  var val=lsGet('SHARED_'+k);
+  if(val)console.log('→ localStorage GET (shared):',k);
+  return val;
+}
+
+async function storeDel(k){
+  try{
+    if(window.storage){
+      await window.storage.delete(k,true);
+      console.log('✓ Shared storage DELETE:',k);
+    }
+  }catch(e){}
+  
+  lsDel('SHARED_'+k);
+  console.log('→ localStorage DELETE (shared):',k);
+}
+
+async function storeList(prefix){
+  var allKeys=new Set();
+  
+  try{
+    // window.storage varsa kullan
+    if(window.storage){
+      var result=await window.storage.list(prefix,true);
+      if(result&&result.keys&&result.keys.length>0){
+        result.keys.forEach(function(k){allKeys.add(k)});
+        console.log('✓ Shared storage LIST:',prefix,'→',result.keys.length);
+      }
+    }
+  }catch(e){
+    console.log('⚠ window.storage list hatası:',e.message);
+  }
+  
+  // localStorage'dan da oku
+  var localKeys=lsList('SHARED_'+prefix);
+  localKeys.forEach(function(k){
+    allKeys.add(k.replace('SHARED_',''));
+  });
+  
+  var finalKeys=Array.from(allKeys);
+  console.log('→ Toplam key sayısı:',prefix,'→',finalKeys.length);
+  return finalKeys;
+}
+
 async function checkStorage(){
+  console.log('🔍 Storage kontrol ediliyor...');
+  
   if(!window.storage){
-    STORAGE_AVAILABLE=false;
-    console.warn('⚠️ window.storage API bulunamadı! localStorage fallback kullanılacak.');
-    toast('⚠️ Çevrimiçi mod devre dışı','info');
+    console.log('⚠️ window.storage bulunamadı - localStorage kullanılacak');
+    toast('📱 Yerel mod aktif','info');
     return;
   }
+  
   try{
-    console.log('🔍 Shared storage testi başlatılıyor...');
-    var testKey='toe_storage_test_'+Date.now();
-    var testValue='test_'+Math.random();
+    var testKey='test_'+Date.now();
+    var testVal='ok';
     
-    var setResult=await window.storage.set(testKey,testValue,true);
-    if(!setResult){
-      throw new Error('Storage set başarısız');
-    }
-    console.log('✅ Storage SET başarılı');
-    
-    var getResult=await window.storage.get(testKey,true);
-    if(!getResult||getResult.value!==testValue){
-      throw new Error('Storage get başarısız');
-    }
-    console.log('✅ Storage GET başarılı');
-    
+    await window.storage.set(testKey,testVal,true);
+    var result=await window.storage.get(testKey,true);
     await window.storage.delete(testKey,true);
-    console.log('✅ Storage DELETE başarılı');
     
-    STORAGE_AVAILABLE=true;
-    console.log('✅ Shared storage AKTIF! Çok oyunculu mod çalışıyor.');
-    toast('✅ Çevrimiçi mod aktif!','success');
-  }catch(e){
-    STORAGE_AVAILABLE=false;
-    console.error('❌ Shared storage BAŞARISIZ:',e);
-    toast('⚠️ Çevrimiçi mod kullanılamıyor','error');
-  }
-}
-async function storeSet(k,v){
-  if(!STORAGE_AVAILABLE){lsSet('TOE_'+k,v);return}
-  try{
-    var res=await window.storage.set(k,v,true);
-    if(!res){console.log('storeSet başarısız:',k);lsSet('TOE_'+k,v)}
-  }catch(e){
-    console.log('storeSet hata:',k,e);
-    lsSet('TOE_'+k,v)
-  }
-}
-async function storeGet(k){
-  if(!STORAGE_AVAILABLE){return lsGet('TOE_'+k)}
-  try{
-    var r=await window.storage.get(k,true);
-    if(r&&r.value!==undefined)return r.value;
-    return lsGet('TOE_'+k)
-  }catch(e){
-    return lsGet('TOE_'+k)
-  }
-}
-async function storeDel(k){
-  if(!STORAGE_AVAILABLE){lsDel('TOE_'+k);return}
-  try{await window.storage.delete(k,true)}catch(e){}
-  lsDel('TOE_'+k)
-}
-async function storeList(prefix){
-  if(!STORAGE_AVAILABLE){return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})}
-  try{
-    var r=await window.storage.list(prefix,true);
-    if(r&&r.keys){
-      console.log('storeList sonuç:',prefix,r.keys.length,'adet');
-      return r.keys
+    if(result&&result.value===testVal){
+      console.log('✅ window.storage çalışıyor!');
+      toast('✅ Çevrimiçi mod aktif!','success');
+    }else{
+      console.log('⚠️ window.storage yanıt vermiyor');
     }
-    return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})
   }catch(e){
-    console.log('storeList hata:',prefix,e);
-    return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})
+    console.log('❌ window.storage hatası:',e.message);
   }
 }
 
@@ -1544,18 +1577,86 @@ function initGame(){
   try{renderQuests()}catch(e){console.error('renderQuests',e)}
   try{updateTopBar()}catch(e){console.error('topbar',e)}
   
-  // İlk senkronizasyon
+  // İlk senkronizasyon ve demo içerik
   setTimeout(function(){
     console.log('📡 İlk senkronizasyon başlatılıyor...');
     syncPlayer().then(function(){
-      console.log('✅ İlk senkronizasyon tamamlandı');
+      console.log('✅ Senkronizasyon tamamlandı');
+      return createDemoContent();
+    }).then(function(){
+      console.log('✅ Demo içerik hazır');
     }).catch(function(e){
-      console.error('❌ İlk senkronizasyon hatası:',e);
+      console.error('❌ Senkronizasyon hatası:',e);
     });
   },500);
   
   startTick();
   console.log('✅ Oyun başlatıldı!');
+}
+
+// Demo klan ve oyuncular oluştur (sadece ilk açılışta)
+async function createDemoContent(){
+  try{
+    // Demo içerik zaten var mı kontrol et
+    var demoCheck=lsGet('demo_created');
+    if(demoCheck==='yes'){
+      console.log('Demo içerik zaten mevcut');
+      return;
+    }
+    
+    console.log('🎭 Demo içerik oluşturuluyor...');
+    
+    // Demo oyuncular
+    var demoPlayers=[
+      {pid:'demo_player_1',name:'Kral Arthur',level:10,power:500,clanId:'demo_clan_1',lastSeen:Date.now()},
+      {pid:'demo_player_2',name:'Prenses Diana',level:8,power:380,clanId:'demo_clan_1',lastSeen:Date.now()},
+      {pid:'demo_player_3',name:'Lord Maximus',level:12,power:620,clanId:'demo_clan_2',lastSeen:Date.now()},
+      {pid:'demo_player_4',name:'Şövalye Galahad',level:7,power:340,clanId:null,lastSeen:Date.now()}
+    ];
+    
+    for(var i=0;i<demoPlayers.length;i++){
+      await storeSet(demoPlayers[i].pid,JSON.stringify(demoPlayers[i]));
+    }
+    console.log('✓ Demo oyuncular oluşturuldu');
+    
+    // Demo klanlar
+    var demoClans=[
+      {
+        id:'demo_clan_1',
+        name:'Altın Ejderhalar',
+        tag:'GOLD',
+        icon:'🐉',
+        desc:'Güçlü ve onurlu savaşçılar topluluğu',
+        ownerId:'demo_player_1',
+        ownerName:'Kral Arthur',
+        members:['demo_player_1','demo_player_2'],
+        requests:[],
+        createdAt:Date.now()-86400000
+      },
+      {
+        id:'demo_clan_2',
+        name:'Demir Lejyon',
+        tag:'IRON',
+        icon:'⚔️',
+        desc:'Yenilmez savaşçılar birliği',
+        ownerId:'demo_player_3',
+        ownerName:'Lord Maximus',
+        members:['demo_player_3'],
+        requests:[],
+        createdAt:Date.now()-172800000
+      }
+    ];
+    
+    for(var j=0;j<demoClans.length;j++){
+      await saveClan(demoClans[j]);
+    }
+    console.log('✓ Demo klanlar oluşturuldu');
+    
+    lsSet('demo_created','yes');
+    console.log('✅ Demo içerik hazır!');
+  }catch(e){
+    console.error('Demo içerik hatası:',e);
+  }
 }
 
 window.onload=function(){
