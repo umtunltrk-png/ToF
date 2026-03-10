@@ -396,7 +396,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 <div id="toast-container"></div>
 
 <script>
-// STORAGE - Basitleştirilmiş Global Sistem
+// STORAGE - Gerçek Shared Storage Sistemi
 var MEM={};
 
 function lsGet(k){try{return localStorage.getItem(k)||null}catch(e){return MEM[k]||null}}
@@ -409,111 +409,145 @@ function lsList(prefix){
   return Array.from(keys);
 }
 
-// Shared storage fonksiyonları - localStorage kullanarak simüle et
+// GERÇEK SHARED STORAGE - Tüm kullanıcılar arasında paylaşılır
 async function storeSet(k,v){
-  try{
-    // window.storage varsa kullan
-    if(window.storage){
-      var result=await window.storage.set(k,v,true);
-      if(result){
-        console.log('✓ Shared storage SET:',k);
-        return true;
-      }
-    }
-  }catch(e){
-    console.log('⚠ window.storage set hatası:',e.message);
+  console.log('📝 storeSet çağrıldı:',k);
+  
+  if(!window.storage){
+    console.error('❌ window.storage bulunamadı!');
+    toast('⚠️ Multiplayer devre dışı','error');
+    return false;
   }
   
-  // Fallback: localStorage'a global prefix ile yaz
-  lsSet('SHARED_'+k,v);
-  console.log('→ localStorage SET (shared):',k);
-  return true;
+  try{
+    console.log('→ window.storage.set çağrılıyor...',k,v.substring(0,50)+'...');
+    var result=await window.storage.set(k,v,true); // shared=true ÇOK ÖNEMLİ!
+    
+    if(result){
+      console.log('✅ BAŞARILI! Key kaydedildi:',k);
+      return true;
+    }else{
+      console.error('❌ window.storage.set null döndü');
+      return false;
+    }
+  }catch(e){
+    console.error('❌ storeSet HATA:',k,e);
+    return false;
+  }
 }
 
 async function storeGet(k){
-  try{
-    // window.storage varsa kullan
-    if(window.storage){
-      var result=await window.storage.get(k,true);
-      if(result&&result.value!==undefined){
-        console.log('✓ Shared storage GET:',k);
-        return result.value;
-      }
-    }
-  }catch(e){
-    console.log('⚠ window.storage get hatası:',e.message);
+  console.log('📖 storeGet çağrıldı:',k);
+  
+  if(!window.storage){
+    console.error('❌ window.storage bulunamadı!');
+    return null;
   }
   
-  // Fallback: localStorage'dan oku
-  var val=lsGet('SHARED_'+k);
-  if(val)console.log('→ localStorage GET (shared):',k);
-  return val;
+  try{
+    console.log('→ window.storage.get çağrılıyor...',k);
+    var result=await window.storage.get(k,true); // shared=true ÇOK ÖNEMLİ!
+    
+    if(result&&result.value!==undefined){
+      console.log('✅ BAŞARILI! Value bulundu:',k,result.value.substring(0,50)+'...');
+      return result.value;
+    }else{
+      console.log('⚠️ Key bulunamadı:',k);
+      return null;
+    }
+  }catch(e){
+    console.error('❌ storeGet HATA:',k,e);
+    return null;
+  }
 }
 
 async function storeDel(k){
-  try{
-    if(window.storage){
-      await window.storage.delete(k,true);
-      console.log('✓ Shared storage DELETE:',k);
-    }
-  }catch(e){}
+  console.log('🗑️ storeDel çağrıldı:',k);
   
-  lsDel('SHARED_'+k);
-  console.log('→ localStorage DELETE (shared):',k);
+  if(!window.storage){
+    console.error('❌ window.storage bulunamadı!');
+    return false;
+  }
+  
+  try{
+    await window.storage.delete(k,true); // shared=true ÇOK ÖNEMLİ!
+    console.log('✅ Key silindi:',k);
+    return true;
+  }catch(e){
+    console.error('❌ storeDel HATA:',k,e);
+    return false;
+  }
 }
 
 async function storeList(prefix){
-  var allKeys=new Set();
+  console.log('📋 storeList çağrıldı:',prefix);
   
-  try{
-    // window.storage varsa kullan
-    if(window.storage){
-      var result=await window.storage.list(prefix,true);
-      if(result&&result.keys&&result.keys.length>0){
-        result.keys.forEach(function(k){allKeys.add(k)});
-        console.log('✓ Shared storage LIST:',prefix,'→',result.keys.length);
-      }
-    }
-  }catch(e){
-    console.log('⚠ window.storage list hatası:',e.message);
+  if(!window.storage){
+    console.error('❌ window.storage bulunamadı!');
+    return [];
   }
   
-  // localStorage'dan da oku
-  var localKeys=lsList('SHARED_'+prefix);
-  localKeys.forEach(function(k){
-    allKeys.add(k.replace('SHARED_',''));
-  });
-  
-  var finalKeys=Array.from(allKeys);
-  console.log('→ Toplam key sayısı:',prefix,'→',finalKeys.length);
-  return finalKeys;
+  try{
+    console.log('→ window.storage.list çağrılıyor...',prefix);
+    var result=await window.storage.list(prefix,true); // shared=true ÇOK ÖNEMLİ!
+    
+    if(result&&result.keys){
+      console.log('✅ BAŞARILI! '+result.keys.length+' key bulundu:',prefix);
+      console.log('Keys:',result.keys);
+      return result.keys;
+    }else{
+      console.log('⚠️ Liste boş:',prefix);
+      return [];
+    }
+  }catch(e){
+    console.error('❌ storeList HATA:',prefix,e);
+    return [];
+  }
 }
 
 async function checkStorage(){
-  console.log('🔍 Storage kontrol ediliyor...');
+  console.log('🔍 ===== STORAGE KONTROLÜ BAŞLIYOR =====');
   
   if(!window.storage){
-    console.log('⚠️ window.storage bulunamadı - localStorage kullanılacak');
-    toast('📱 Yerel mod aktif','info');
-    return;
+    console.error('❌ FATAL: window.storage API bulunamadı!');
+    console.error('Bu artifact muhtemelen Claude.ai dışında çalışıyor.');
+    toast('❌ Multiplayer sadece Claude.ai\'de çalışır','error');
+    return false;
   }
   
+  console.log('✅ window.storage API mevcut');
+  
   try{
-    var testKey='test_'+Date.now();
-    var testVal='ok';
+    var testKey='test_storage_'+Date.now();
+    var testValue='test_value_'+Math.random();
     
-    await window.storage.set(testKey,testVal,true);
-    var result=await window.storage.get(testKey,true);
-    await window.storage.delete(testKey,true);
-    
-    if(result&&result.value===testVal){
-      console.log('✅ window.storage çalışıyor!');
-      toast('✅ Çevrimiçi mod aktif!','success');
-    }else{
-      console.log('⚠️ window.storage yanıt vermiyor');
+    console.log('→ Test SET...');
+    var setResult=await window.storage.set(testKey,testValue,true);
+    if(!setResult){
+      throw new Error('SET failed');
     }
+    console.log('✅ Test SET başarılı');
+    
+    console.log('→ Test GET...');
+    var getResult=await window.storage.get(testKey,true);
+    if(!getResult||getResult.value!==testValue){
+      throw new Error('GET failed or value mismatch');
+    }
+    console.log('✅ Test GET başarılı');
+    
+    console.log('→ Test DELETE...');
+    await window.storage.delete(testKey,true);
+    console.log('✅ Test DELETE başarılı');
+    
+    console.log('🎉 ===== SHARED STORAGE TAMAMEN ÇALIŞIYOR! =====');
+    toast('✅ Multiplayer aktif!','success');
+    return true;
+    
   }catch(e){
-    console.log('❌ window.storage hatası:',e.message);
+    console.error('❌ ===== STORAGE TESTİ BAŞARISIZ! =====');
+    console.error('Hata:',e);
+    toast('❌ Multiplayer hatası: '+e.message,'error');
+    return false;
   }
 }
 
@@ -839,56 +873,54 @@ function renderOases(){
 }
 
 async function renderPvP(){
+  console.log('');
+  console.log('⚔️ === PvP OYUNCULAR YÜKLENİYOR ===');
   var list=document.getElementById('pvp-list');
   if(!list)return;
   list.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:12px">⏳ Oyuncular yükleniyor...</div>';
+  
   try{
     var players=await loadPlayers();
-    console.log('PvP için yüklenen gerçek oyuncular:',players.length);
-    
-    // Eğer oyuncu yoksa bot oyuncular ekle
-    if(players.length===0){
-      console.log('Gerçek oyuncu yok, botlar ekleniyor...');
-      var botNames=['Kral Marcus','Prenses Aria','Şövalye Roland','Büyücü Merlin','General Khan','Kraliçe Isabella','Lord Cedric','Savaşçı Athena'];
-      var botIcons=['👑','👸','🛡️','🧙','⚔️','👑','🗡️','🏹'];
-      for(var i=0;i<3;i++){
-        var botName=botNames[Math.floor(Math.random()*botNames.length)];
-        var botPower=100+Math.floor(Math.random()*300);
-        var botLevel=Math.ceil(botPower/50);
-        players.push({
-          pid:'bot_'+i,
-          name:botName,
-          power:botPower,
-          level:botLevel,
-          isBot:true
-        });
-      }
-      console.log('Bot oyuncular eklendi:',players.length);
-    }
+    console.log('📊 Toplam oyuncu bulundu:',players.length);
     
     if(players.length===0){
-      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px;font-size:13px">👥 Henüz oyuncu yok.<br><br>Arkadaşlarını davet et!</div>';
+      console.log('⚠️ Henüz başka oyuncu yok');
+      list.innerHTML='<div style="text-align:center;padding:30px">'
+        +'<div style="font-size:48px;margin-bottom:12px">👥</div>'
+        +'<div style="font-family:Cinzel,serif;font-size:15px;font-weight:700;color:var(--parchment);margin-bottom:8px">Henüz oyuncu yok</div>'
+        +'<div style="font-size:13px;color:var(--muted);margin-bottom:16px">Arkadaşlarını davet et!<br>Klan kur ve güçlen!</div>'
+        +'<div style="font-size:11px;color:var(--gold);background:rgba(212,146,10,0.1);border:1px solid rgba(212,146,10,0.3);border-radius:8px;padding:8px">💡 İpucu: Her 10 saniyede oyuncular güncellenir</div>'
+        +'</div>';
       return;
     }
     
     list.innerHTML='';
     var displayCount=0;
+    
     players.forEach(function(p){
-      if(p.pid===PID)return;
+      if(p.pid===PID)return; // Kendini gösterme
+      
       displayCount++;
-      var card=document.createElement('div');card.className='pvp-card';
+      var card=document.createElement('div');
+      card.className='pvp-card';
       var possibleLoot=Math.floor((p.power||100)*0.3);
-      var botTag=p.isBot?' <span style="color:var(--muted);font-size:10px">🤖</span>':'';
+      
       card.innerHTML='<div class="pvp-header"><div class="pvp-av">'+p.name[0].toUpperCase()+'</div>'
-        +'<div class="pvp-info"><div class="pvp-name">'+p.name+botTag+(p.clanId?' 🛡️':'')+'</div><div class="pvp-stats">💪 Güç: '+(p.power||0)+' • Sv.'+(p.level||1)+'</div></div>'
-        +'<div class="pvp-reward"><div class="pvp-loot">~'+possibleLoot+'🪙</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Olası ganimet</div></div></div>';
+        +'<div class="pvp-info"><div class="pvp-name">'+p.name+(p.clanId?' 🛡️':'')+'</div>'
+        +'<div class="pvp-stats">💪 Güç: '+(p.power||0)+' • Sv.'+(p.level||1)+'</div></div>'
+        +'<div class="pvp-reward"><div class="pvp-loot">~'+possibleLoot+'🪙</div>'
+        +'<div style="font-size:10px;color:var(--muted);margin-top:2px">Olası ganimet</div></div></div>';
+      
       card.onclick=function(){openPvPBattle(p)};
       list.appendChild(card);
     });
-    console.log('PvP listesinde gösterilen oyuncu:',displayCount);
+    
+    console.log('✅ '+displayCount+' oyuncu listelendi');
+    console.log('');
+    
   }catch(e){
-    console.error('renderPvP hatası:',e);
-    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">⚠️ Oyuncular yüklenemedi: '+e.message+'</div>';
+    console.error('❌ renderPvP HATASI:',e);
+    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">⚠️ Yükleme hatası: '+e.message+'</div>';
   }
 }
 
@@ -1541,19 +1573,33 @@ function startTick(){
     saveGame();
     updateTopBar();
     tickCount++;
-    if(tickCount%6===0){
-      console.log('Periyodik senkronizasyon (30 saniye)');
-      syncPlayer().catch(function(e){console.error('Tick senkronizasyonu hatası:',e)});
+    
+    // Her 10 saniyede senkronize et (2 tick = 10 saniye)
+    if(tickCount%2===0){
+      syncPlayer().catch(function(e){console.error('Senkronizasyon hatası:',e)});
     }
   },5000);
 }
 
 function initGame(){
-  console.log('=== TON OF EMPIRES BAŞLATILIYOR ===');
-  console.log('Oyuncu ID:',PID);
+  console.log('');
+  console.log('🏰 ═══════════════════════════════════════════════════');
+  console.log('   TON OF EMPIRES - MULTIPLAYER STRATEGY GAME');
+  console.log('🏰 ═══════════════════════════════════════════════════');
+  console.log('');
+  console.log('👤 Oyuncu ID:',PID);
+  console.log('');
   
-  // Storage kontrolü
-  checkStorage();
+  // Storage kontrolü - ÇÖZÜNMÜŞ BEKLE
+  checkStorage().then(function(success){
+    console.log('');
+    if(success){
+      console.log('✅ Multiplayer MOD AKTIF - Tüm oyuncular birbirini görebilir!');
+    }else{
+      console.log('⚠️ Multiplayer DEVRE DIŞI - Sadece tek oyuncu modu');
+    }
+    console.log('');
+  });
   
   try{loadGame()}catch(e){console.error('loadGame err',e)}
   try{initTelegram()}catch(e){console.error('tg err',e)}
@@ -1577,86 +1623,21 @@ function initGame(){
   try{renderQuests()}catch(e){console.error('renderQuests',e)}
   try{updateTopBar()}catch(e){console.error('topbar',e)}
   
-  // İlk senkronizasyon ve demo içerik
+  // İlk senkronizasyon - 1 saniye bekle ki storage hazır olsun
   setTimeout(function(){
-    console.log('📡 İlk senkronizasyon başlatılıyor...');
+    console.log('');
+    console.log('📡 Oyuncu bilgileri paylaşılıyor...');
     syncPlayer().then(function(){
-      console.log('✅ Senkronizasyon tamamlandı');
-      return createDemoContent();
-    }).then(function(){
-      console.log('✅ Demo içerik hazır');
+      console.log('✅ Profiliniz diğer oyuncular tarafından görülebilir!');
+      console.log('');
     }).catch(function(e){
       console.error('❌ Senkronizasyon hatası:',e);
     });
-  },500);
+  },1000);
   
   startTick();
-  console.log('✅ Oyun başlatıldı!');
-}
-
-// Demo klan ve oyuncular oluştur (sadece ilk açılışta)
-async function createDemoContent(){
-  try{
-    // Demo içerik zaten var mı kontrol et
-    var demoCheck=lsGet('demo_created');
-    if(demoCheck==='yes'){
-      console.log('Demo içerik zaten mevcut');
-      return;
-    }
-    
-    console.log('🎭 Demo içerik oluşturuluyor...');
-    
-    // Demo oyuncular
-    var demoPlayers=[
-      {pid:'demo_player_1',name:'Kral Arthur',level:10,power:500,clanId:'demo_clan_1',lastSeen:Date.now()},
-      {pid:'demo_player_2',name:'Prenses Diana',level:8,power:380,clanId:'demo_clan_1',lastSeen:Date.now()},
-      {pid:'demo_player_3',name:'Lord Maximus',level:12,power:620,clanId:'demo_clan_2',lastSeen:Date.now()},
-      {pid:'demo_player_4',name:'Şövalye Galahad',level:7,power:340,clanId:null,lastSeen:Date.now()}
-    ];
-    
-    for(var i=0;i<demoPlayers.length;i++){
-      await storeSet(demoPlayers[i].pid,JSON.stringify(demoPlayers[i]));
-    }
-    console.log('✓ Demo oyuncular oluşturuldu');
-    
-    // Demo klanlar
-    var demoClans=[
-      {
-        id:'demo_clan_1',
-        name:'Altın Ejderhalar',
-        tag:'GOLD',
-        icon:'🐉',
-        desc:'Güçlü ve onurlu savaşçılar topluluğu',
-        ownerId:'demo_player_1',
-        ownerName:'Kral Arthur',
-        members:['demo_player_1','demo_player_2'],
-        requests:[],
-        createdAt:Date.now()-86400000
-      },
-      {
-        id:'demo_clan_2',
-        name:'Demir Lejyon',
-        tag:'IRON',
-        icon:'⚔️',
-        desc:'Yenilmez savaşçılar birliği',
-        ownerId:'demo_player_3',
-        ownerName:'Lord Maximus',
-        members:['demo_player_3'],
-        requests:[],
-        createdAt:Date.now()-172800000
-      }
-    ];
-    
-    for(var j=0;j<demoClans.length;j++){
-      await saveClan(demoClans[j]);
-    }
-    console.log('✓ Demo klanlar oluşturuldu');
-    
-    lsSet('demo_created','yes');
-    console.log('✅ Demo içerik hazır!');
-  }catch(e){
-    console.error('Demo içerik hatası:',e);
-  }
+  console.log('🎮 Oyun başlatıldı!');
+  console.log('');
 }
 
 window.onload=function(){
