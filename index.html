@@ -95,6 +95,33 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .diff-medium{background:rgba(212,146,10,0.2);color:var(--gold);border:1px solid rgba(212,146,10,0.3)}
 .diff-hard{background:rgba(192,57,43,0.2);color:var(--red-light);border:1px solid rgba(192,57,43,0.3)}
 
+.battle-tabs{display:flex;gap:6px;margin-bottom:14px;background:rgba(20,10,0,0.6);border-radius:12px;padding:4px}
+.battle-tab-btn{flex:1;padding:9px;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:11px;font-weight:700;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s}
+.battle-tab-btn.active{background:linear-gradient(135deg,rgba(80,40,10,0.9),rgba(50,25,5,0.95));color:var(--parchment);border:1px solid rgba(180,130,50,0.3)}
+.battle-section{display:none}
+.battle-section.active{display:block}
+.oasis-card{background:linear-gradient(135deg,rgba(20,40,25,0.95),rgba(10,25,15,0.98));border:1px solid rgba(76,175,80,0.3);border-radius:12px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all 0.2s}
+.oasis-card:active{border-color:rgba(76,175,80,0.6);transform:scale(0.98)}
+.o-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.o-icon{font-size:40px;flex-shrink:0}
+.o-info{flex:1}
+.o-name{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--parchment)}
+.o-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.o-rewards{background:rgba(5,15,5,0.5);border:1px solid rgba(76,175,80,0.2);border-radius:8px;padding:8px;display:flex;justify-content:space-around}
+.o-reward-item{text-align:center}
+.o-reward-val{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold-light)}
+.o-reward-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.o-cd{font-size:11px;color:var(--gold);font-family:'Cinzel',serif;margin-top:6px;text-align:center}
+.pvp-card{background:linear-gradient(135deg,rgba(40,15,5,0.95),rgba(25,8,2,0.98));border:1px solid rgba(192,57,43,0.3);border-radius:12px;padding:13px;margin-bottom:9px;cursor:pointer;transition:all 0.2s}
+.pvp-card:active{border-color:rgba(192,57,43,0.6);transform:scale(0.98)}
+.pvp-header{display:flex;align-items:center;gap:12px}
+.pvp-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--red),#8a0a0a);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:700;font-size:16px;color:var(--parchment);border:2px solid rgba(192,57,43,0.5);flex-shrink:0}
+.pvp-info{flex:1}
+.pvp-name{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--parchment)}
+.pvp-stats{font-size:11px;color:var(--muted);margin-top:2px}
+.pvp-reward{text-align:right}
+.pvp-loot{color:var(--gold-light);font-family:'Cinzel',serif;font-size:13px;font-weight:700}
+
 .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,2,0,0.88);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{background:linear-gradient(160deg,#261508,#160b03);border:1px solid rgba(180,130,50,0.5);border-radius:18px;padding:22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.8)}
 .modal h3{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--parchment);margin-bottom:8px}
@@ -215,6 +242,23 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .idle-box p{font-size:13px;color:var(--muted)}
 .idle-amount{font-family:'Cinzel',serif;font-size:32px;font-weight:900;color:var(--gold);margin:12px 0}
 
+.battle-tabs{display:flex;gap:8px;margin-bottom:14px;background:rgba(10,5,0,0.6);padding:6px;border-radius:12px;border:1px solid rgba(100,60,10,0.3)}
+.battle-tab-btn{flex:1;padding:10px;border:1px solid rgba(100,60,10,0.3);border-radius:8px;background:rgba(20,10,2,0.6);color:var(--muted);font-family:'Cinzel',serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.battle-tab-btn.active{background:linear-gradient(135deg,rgba(100,60,5,0.8),rgba(60,35,3,0.9));color:var(--parchment2);border-color:rgba(180,130,50,0.5)}
+.battle-section{display:none}
+.battle-section.active{display:block}
+.player-card{background:linear-gradient(135deg,rgba(35,18,4,0.95),rgba(20,10,2,0.98));border:1px solid rgba(120,80,20,0.4);border-radius:12px;padding:13px;margin-bottom:9px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s}
+.player-card:active{border-color:rgba(212,146,10,0.7);transform:scale(0.98)}
+.player-card.offline{opacity:0.6;border-color:rgba(80,50,10,0.3)}
+.p-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--wood));border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:700;font-size:16px;color:#2c1a0e;flex-shrink:0}
+.p-info{flex:1}
+.p-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--parchment);display:flex;align-items:center;gap:6px}
+.p-stats{font-size:11px;color:var(--muted);margin-top:3px}
+.p-status{font-size:10px;padding:2px 6px;border-radius:5px;display:inline-block;margin-top:3px}
+.p-status.online{background:rgba(45,122,58,0.2);color:#4caf50;border:1px solid rgba(45,122,58,0.3)}
+.p-status.offline{background:rgba(80,50,10,0.2);color:var(--muted);border:1px solid rgba(80,50,10,0.3)}
+.pvp-badge{padding:2px 6px;border-radius:5px;font-size:9px;font-weight:700;background:rgba(192,57,43,0.2);color:var(--red-light);border:1px solid rgba(192,57,43,0.3)}
+
 #tabs{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(0deg,rgba(8,4,0,0.99),rgba(20,10,2,0.97));border-top:2px solid;border-image:linear-gradient(90deg,transparent,var(--gold),var(--parchment2),var(--gold),transparent) 1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #tabs::-webkit-scrollbar{display:none}
 #tabs-inner{display:flex;min-width:max-content;padding:0 4px}
@@ -244,6 +288,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
     <div class="resources-bar">
       <div class="res-pill"><span class="ri">🪙</span><span class="rv" id="rg">500</span></div>
       <div class="res-pill"><span class="ri">🌾</span><span class="rv" id="rf">200</span></div>
+      <div class="res-pill"><span class="ri">⚒️</span><span class="rv" id="ri">100</span></div>
       <div class="res-pill"><span class="ri">⚔️</span><span class="rv" id="rp">0</span></div>
     </div>
   </div>
@@ -272,13 +317,40 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
     <div id="troop-list"></div>
   </div>
 
+
   <div class="screen" id="screen-battle">
     <div class="battle-hero">
       <h2>⚔ ÇATIŞMALAR</h2>
-      <p>Düşmanları yenerek altın ve zafer kazan!</p>
+      <p>Savaşarak kaynak kazan, düşmanları yen!</p>
     </div>
-    <div class="sec-title">🩸 Düşmanlar</div>
-    <div id="enemy-list"></div>
+    <div class="battle-tabs">
+      <button class="battle-tab-btn active" id="btab-npc" onclick="setBattleTab('npc')">🐉 NPC</button>
+      <button class="battle-tab-btn" id="btab-oasis" onclick="setBattleTab('oasis')">🏝️ Vahalar</button>
+      <button class="battle-tab-btn" id="btab-pvp" onclick="setBattleTab('pvp')">⚔️ PvP</button>
+    </div>
+    <div id="battle-content">
+      <div id="npc-battle" class="battle-section active">
+        <div class="sec-title">🩸 Düşmanlar</div>
+        <div id="enemy-list"></div>
+      </div>
+      <div id="oasis-battle" class="battle-section">
+        <div class="sec-title">🏝️ Vahalar - Kaynak Kazan</div>
+        <div id="oasis-list"></div>
+      </div>
+      <div id="pvp-battle" class="battle-section">
+        <div class="sec-title">⚔️ Oyuncu Savaşları</div>
+        <div id="pvp-list"></div>
+      </div>
+    </div>
+  </div>
+        <div class="sec-title">🩸 Düşmanlar</div>
+        <div id="enemy-list"></div>
+      </div>
+      <div id="pvp-battle" class="battle-section">
+        <div class="sec-title">👥 Oyuncular</div>
+        <div id="player-list"></div>
+      </div>
+    </div>
   </div>
 
   <div class="screen" id="screen-clan">
@@ -337,20 +409,39 @@ function lsList(prefix){
   return Array.from(keys);
 }
 async function checkStorage(){
-  if(!window.storage){STORAGE_AVAILABLE=false;console.log('window.storage yok');return}
+  if(!window.storage){
+    STORAGE_AVAILABLE=false;
+    console.warn('⚠️ window.storage API bulunamadı! localStorage fallback kullanılacak.');
+    toast('⚠️ Çevrimiçi mod devre dışı','info');
+    return;
+  }
   try{
-    var testRes=await window.storage.set('toe_test','1',true);
-    if(testRes){
-      await window.storage.delete('toe_test',true);
-      STORAGE_AVAILABLE=true;
-      console.log('Shared storage aktif!');
-    }else{
-      STORAGE_AVAILABLE=false;
-      console.log('Shared storage set başarısız');
+    console.log('🔍 Shared storage testi başlatılıyor...');
+    var testKey='toe_storage_test_'+Date.now();
+    var testValue='test_'+Math.random();
+    
+    var setResult=await window.storage.set(testKey,testValue,true);
+    if(!setResult){
+      throw new Error('Storage set başarısız');
     }
+    console.log('✅ Storage SET başarılı');
+    
+    var getResult=await window.storage.get(testKey,true);
+    if(!getResult||getResult.value!==testValue){
+      throw new Error('Storage get başarısız');
+    }
+    console.log('✅ Storage GET başarılı');
+    
+    await window.storage.delete(testKey,true);
+    console.log('✅ Storage DELETE başarılı');
+    
+    STORAGE_AVAILABLE=true;
+    console.log('✅ Shared storage AKTIF! Çok oyunculu mod çalışıyor.');
+    toast('✅ Çevrimiçi mod aktif!','success');
   }catch(e){
     STORAGE_AVAILABLE=false;
-    console.log('Shared storage hatası:',e);
+    console.error('❌ Shared storage BAŞARISIZ:',e);
+    toast('⚠️ Çevrimiçi mod kullanılamıyor','error');
   }
 }
 async function storeSet(k,v){
@@ -395,7 +486,7 @@ async function storeList(prefix){
 
 // STATE
 var G={
-  player:{name:'Komutan',level:1,xp:0,xpNext:100,gold:500,food:200,lastOnline:Date.now(),clanId:null},
+  player:{name:'Komutan',level:1,xp:0,xpNext:100,gold:500,food:200,iron:100,lastOnline:Date.now(),clanId:null},
   buildings:{
     castle:{level:1,upgrading:false,upgradeEnd:0},
     barracks:{level:1,upgrading:false,upgradeEnd:0},
@@ -405,7 +496,9 @@ var G={
     forge:{level:0,upgrading:false,upgradeEnd:0}
   },
   troops:{swordsman:{count:5},archer:{count:3},cavalry:{count:0},catapult:{count:0}},
-  quests:{}
+  quests:{},
+  oasisCooldowns:{},
+  pvpHistory:[]
 };
 function saveGame(){
   lsSet('toe_save',JSON.stringify(G));
@@ -532,6 +625,12 @@ var QUESTS=[
   {id:'q_train',  name:'Komutan',      icon:'🪖',desc:'5 asker eğit',              target:5,reward:{gold:120,xp:30}, type:'train'},
   {id:'q_login',  name:'Sadık Komutan',icon:'📅',desc:'Bugün giriş yap',           target:1,reward:{gold:100,xp:25}, type:'login'}
 ];
+var OASES=[
+  {id:'oasis1',name:'Yeşil Vaha',     icon:'🌴',power:100, reward:{gold:200,food:300,iron:50, xp:30}, cd:3600000, desc:'Bereketli bir vaha'},
+  {id:'oasis2',name:'Altın Vaha',     icon:'🏜️',power:200, reward:{gold:500,food:200,iron:100,xp:60}, cd:5400000, desc:'Altın yataklarıyla dolu'},
+  {id:'oasis3',name:'Demir Madeni',   icon:'⛰️',power:350, reward:{gold:300,food:150,iron:300,xp:100},cd:7200000, desc:'Zengin demir madenleri'}
+];
+var battleTab='npc';
 
 // HELPERS
 function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(Math.floor(n))}
@@ -572,6 +671,7 @@ function updateTopBar(){
   document.getElementById('ulb').textContent='Sv.'+p.level;
   document.getElementById('rg').textContent=fmt(p.gold);
   document.getElementById('rf').textContent=fmt(p.food);
+  document.getElementById('ri').textContent=fmt(p.iron||0);
   document.getElementById('rp').textContent=fmt(calcPower());
   document.getElementById('xpf').style.width=pct+'%';
   document.getElementById('xpl').textContent=fmt(p.xp)+'/'+fmt(p.xpNext);
@@ -643,6 +743,71 @@ function renderEnemies(){
   });
 }
 
+function renderOases(){
+  var list=document.getElementById('oasis-list');
+  if(!list)return;
+  list.innerHTML='';
+  OASES.forEach(function(o){
+    var card=document.createElement('div');card.className='oasis-card';
+    var lastAttack=G.oasisCooldowns[o.id]||0;
+    var cdRemaining=Math.max(0,o.cd-(Date.now()-lastAttack));
+    var canAttack=cdRemaining===0;
+    var cdText='';
+    if(!canAttack){
+      var mins=Math.ceil(cdRemaining/60000);
+      if(mins>=60){var hrs=Math.floor(mins/60),m=mins%60;cdText=hrs+'sa '+(m?m+'dk':'Hazır!');}
+      else{cdText=mins+'dk';}
+    }
+    card.innerHTML='<div class="o-header"><div class="o-icon">'+o.icon+'</div>'
+      +'<div class="o-info"><div class="o-name">'+o.name+'</div><div class="o-desc">💪 '+o.power+' • '+o.desc+'</div></div></div>'
+      +'<div class="o-rewards"><div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div></div>'
+      +(canAttack?'':'<div class="o-cd">⏳ '+cdText+'</div>');
+    if(canAttack)card.onclick=function(){openOasisBattle(o)};
+    else card.style.opacity='0.6';
+    list.appendChild(card);
+  });
+}
+
+async function renderPvP(){
+  var list=document.getElementById('pvp-list');
+  if(!list)return;
+  list.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:12px">⏳ Oyuncular yükleniyor...</div>';
+  try{
+    var players=await loadPlayers();
+    console.log('PvP için yüklenen oyuncular:',players.length);
+    if(players.length===0){
+      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px;font-size:13px">👥 Henüz başka oyuncu yok.<br><br>Arkadaşlarını davet et!</div>';
+      return;
+    }
+    list.innerHTML='';
+    players.forEach(function(p){
+      if(p.pid===PID)return;
+      var card=document.createElement('div');card.className='pvp-card';
+      var possibleLoot=Math.floor((p.power||100)*0.3);
+      card.innerHTML='<div class="pvp-header"><div class="pvp-av">'+p.name[0].toUpperCase()+'</div>'
+        +'<div class="pvp-info"><div class="pvp-name">'+p.name+(p.clanId?' 🛡️':'')+'</div><div class="pvp-stats">💪 Güç: '+(p.power||0)+' • Sv.'+(p.level||1)+'</div></div>'
+        +'<div class="pvp-reward"><div class="pvp-loot">~'+possibleLoot+'🪙</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Olası ganimet</div></div></div>';
+      card.onclick=function(){openPvPBattle(p)};
+      list.appendChild(card);
+    });
+  }catch(e){
+    console.error('renderPvP hatası:',e);
+    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">⚠️ Oyuncular yüklenemedi</div>';
+  }
+}
+
+function setBattleTab(tab){
+  battleTab=tab;
+  document.querySelectorAll('.battle-tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.battle-section').forEach(function(s){s.classList.remove('active')});
+  var btn=document.getElementById('btab-'+tab);if(btn)btn.classList.add('active');
+  if(tab==='npc'){document.getElementById('npc-battle').classList.add('active');renderEnemies();}
+  else if(tab==='oasis'){document.getElementById('oasis-battle').classList.add('active');renderOases();}
+  else if(tab==='pvp'){document.getElementById('pvp-battle').classList.add('active');renderPvP();}
+}
+
 function renderQuests(){
   var list=document.getElementById('quest-list');
   if(!list)return;
@@ -709,6 +874,100 @@ function disbandTroop(id){
 
 // BATTLE
 var activeBattle=null;
+var battleTab='npc';
+function setBattleTab(tab){
+  battleTab=tab;
+  document.querySelectorAll('.battle-tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.battle-section').forEach(function(s){s.classList.remove('active')});
+  var btn=document.getElementById('btab-'+tab);if(btn)btn.classList.add('active');
+  var sec=document.getElementById(tab+'-battle');if(sec)sec.classList.add('active');
+  if(tab==='pvp')renderPvPPlayers();
+}
+async function renderPvPPlayers(){
+  console.log('=== PvP oyuncu listesi yükleniyor ===');
+  var list=document.getElementById('player-list');if(!list)return;
+  list.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">⏳ Oyuncular yükleniyor...</div>';
+  try{
+    var players=await loadPlayers();
+    console.log('PvP için yüklenen oyuncu sayısı:',players.length);
+    if(players.length===0){
+      list.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px"><div style="font-size:42px;margin-bottom:10px">👥</div><div style="font-size:13px">Henüz başka oyuncu yok.<br>Arkadaşlarını davet et!</div></div>';
+      return;
+    }
+    list.innerHTML='';
+    players.sort(function(a,b){return b.power-a.power});
+    players.forEach(function(p){
+      var isOnline=Date.now()-p.lastSeen<5*60*1000;
+      var card=document.createElement('div');
+      card.className='player-card'+(isOnline?'':' offline');
+      var clanBadge=p.clanId?'<span class="pvp-badge">🛡️ KLAN</span>':'';
+      card.innerHTML='<div class="p-avatar">'+p.name[0].toUpperCase()+'</div>'
+        +'<div class="p-info"><div class="p-name">'+p.name+' '+clanBadge+'</div>'
+        +'<div class="p-stats">💪 '+fmt(p.power||0)+' • Sv.'+(p.level||1)+'</div>'
+        +'<div class="p-status '+(isOnline?'online':'offline')+'">'+(isOnline?'🟢 Çevrimiçi':'⚫ Çevrimdışı')+'</div></div>';
+      card.onclick=function(){openPvPBattle(p)};
+      list.appendChild(card);
+    });
+  }catch(e){
+    console.error('renderPvPPlayers hatası:',e);
+    list.innerHTML='<div style="text-align:center;color:var(--red-light);padding:20px">⚠️ Oyuncular yüklenemedi</div>';
+  }
+}
+function openPvPBattle(player){
+  activeBattle={type:'pvp',player:player};
+  var myPower=calcPower(),enemyPower=player.power||100;
+  var wc=Math.min(95,Math.max(5,Math.round((myPower/(myPower+enemyPower))*100)));
+  var segs=10,ps=Math.round((myPower/(myPower+enemyPower))*segs),barH='';
+  for(var i=0;i<segs;i++)barH+='<div class="bar-seg '+(i<ps?'fp':'fe')+'"></div>';
+  var goldReward=Math.floor(enemyPower*0.8)+Math.floor(Math.random()*50);
+  var xpReward=Math.floor(enemyPower*0.3)+Math.floor(Math.random()*20);
+  var o=document.createElement('div');o.className='modal-overlay';o.id='battle-modal';
+  o.innerHTML='<div class="modal"><h3>⚔️ PvP Savaşı</h3><p style="color:var(--muted);font-size:12px;margin-top:4px">'+player.name+' ile savaşa hazır mısın?</p>'
+    +'<div class="battle-vs"><div class="combatant"><div class="icon">🏰</div><div class="lbl">'+G.player.name+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(myPower)+'</div></div>'
+    +'<div class="vs-text">VS</div>'
+    +'<div class="combatant"><div class="icon">'+player.name[0].toUpperCase()+'</div><div class="lbl">'+player.name+'</div><div style="color:var(--red-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(enemyPower)+'</div></div></div>'
+    +'<div class="pwr-cmp"><div class="p-row"><span>Kazanma şansı</span><span style="color:'+(wc>=50?'var(--green-light)':'var(--red-light)')+';font-family:Cinzel,serif;font-weight:700">%'+wc+'</span></div><div class="pwr-bars">'+barH+'</div></div>'
+    +'<div style="background:rgba(30,18,3,0.6);border:1px solid rgba(100,60,10,0.3);border-radius:8px;padding:10px;margin:12px 0;font-size:11px;color:var(--muted)"><div style="margin-bottom:4px">🏆 Kazanç:</div><div style="color:var(--gold-light)">🪙 '+goldReward+' Altın</div><div style="color:var(--green-light)">⭐ '+xpReward+' XP</div></div>'
+    +'<div class="modal-btns"><button class="btn-cancel" onclick="closeBattle()">İptal</button><button class="btn-attack" onclick="doPvPBattle()">⚔️ Saldır!</button></div></div>';
+  document.body.appendChild(o);
+}
+function doPvPBattle(){
+  if(!activeBattle||activeBattle.type!=='pvp')return;
+  var player=activeBattle.player;
+  var myPower=calcPower(),enemyPower=player.power||100;
+  var myChance=myPower/(myPower+enemyPower);
+  var won=Math.random()<myChance;
+  closeBattle();
+  var goldReward=Math.floor(enemyPower*0.8)+Math.floor(Math.random()*50);
+  var xpReward=Math.floor(enemyPower*0.3)+Math.floor(Math.random()*20);
+  if(won){
+    G.player.gold+=goldReward;
+    G.player.xp+=xpReward;
+    levelUp();
+    qProgress('battle',1);
+    saveGame();
+    showPvPResult(true,player,goldReward,xpReward);
+  }else{
+    var types=Object.keys(G.troops).filter(function(t){return G.troops[t]&&G.troops[t].count>0});
+    if(types.length){
+      var t=types[Math.floor(Math.random()*types.length)];
+      var loss=Math.min(G.troops[t].count,Math.ceil(Math.random()*5));
+      G.troops[t].count-=loss;
+    }
+    saveGame();
+    showPvPResult(false,player,goldReward,xpReward);
+  }
+  renderAll();
+}
+function showPvPResult(won,player,gold,xp){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='result-modal';
+  var rw=won?'<div class="res-rewards"><div class="rw-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+'+gold+'</span></div><div class="rw-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+'+xp+' XP</span></div></div>'
+    :'<div class="res-rewards"><div class="rw-row"><span>💀 Kayıplar</span><span style="color:var(--red-light)">Asker kaybedildi</span></div></div>';
+  o.innerHTML='<div class="modal result-modal"><div class="res-icon">'+(won?'🏆':'💔')+'</div><div class="res-title '+(won?'win':'lose')+'">'+(won?'ZAFER!':'YENİLGİ')+'</div>'
+    +'<div class="res-msg">'+(won?player.name+' yenildi!':player.name+' seni yendi...')+'</div>'+rw
+    +'<button class="collect-btn" style="background:'+(won?'linear-gradient(135deg,#1a5a2a,#0e3018)':'rgba(40,20,4,0.8)')+';color:var(--parchment);border:1px solid '+(won?'rgba(76,175,80,0.4)':'rgba(100,60,10,0.3)')+';" onclick="closeBattle()">Devam Et</button></div>';
+  document.body.appendChild(o);
+}
 function openBattle(enemy){
   activeBattle=enemy;var pp=calcPower();
   var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+enemy.power))*100)));
@@ -732,6 +991,121 @@ function doBattle(){
   else{var types=Object.keys(G.troops).filter(function(t){return G.troops[t]&&G.troops[t].count>0});if(types.length){var t=types[Math.floor(Math.random()*types.length)];G.troops[t].count-=Math.min(G.troops[t].count,Math.ceil(Math.random()*3))}saveGame();showResult(false,e)}
   renderAll();
 }
+
+function openOasisBattle(oasis){
+  activeBattle={...oasis,type:'oasis'};
+  var pp=calcPower();
+  var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+oasis.power))*100)));
+  var segs=10,ps=Math.round((pp/(pp+oasis.power))*segs),barH='';
+  for(var i=0;i<segs;i++)barH+='<div class="bar-seg '+(i<ps?'fp':'fe')+'"></div>';
+  var o=document.createElement('div');o.className='modal-overlay';o.id='battle-modal';
+  o.innerHTML='<div class="modal"><h3>🏝️ '+oasis.name+'</h3><p style="color:var(--muted);font-size:12px;margin-top:4px">'+oasis.desc+'</p>'
+    +'<div class="battle-vs"><div class="combatant"><div class="icon">🏰</div><div class="lbl">'+G.player.name+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(pp)+'</div></div>'
+    +'<div class="vs-text">VS</div>'
+    +'<div class="combatant"><div class="icon">'+oasis.icon+'</div><div class="lbl">Korumalar</div><div style="color:var(--red-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+oasis.power+'</div></div></div>'
+    +'<div class="pwr-cmp"><div class="p-row"><span>Kazanma şansı</span><span style="color:'+(wc>=50?'var(--green-light)':'var(--red-light)')+';font-family:Cinzel,serif;font-weight:700">%'+wc+'</span></div><div class="pwr-bars">'+barH+'</div></div>'
+    +'<div style="background:rgba(10,25,10,0.5);border:1px solid rgba(76,175,80,0.2);border-radius:8px;padding:10px;margin-bottom:14px"><div style="font-size:11px;color:var(--muted);margin-bottom:6px">Ödüller:</div><div style="display:flex;justify-content:space-around;font-size:12px;font-family:Cinzel,serif;font-weight:700"><span>🪙 +'+oasis.reward.gold+'</span><span>🌾 +'+oasis.reward.food+'</span><span>⚒️ +'+oasis.reward.iron+'</span><span style="color:var(--green-light)">+'+oasis.reward.xp+' XP</span></div></div>'
+    +'<div class="modal-btns"><button class="btn-cancel" onclick="closeBattle()">İptal</button><button class="btn-attack" onclick="doOasisBattle()">⚔️ Saldır!</button></div></div>';
+  document.body.appendChild(o);
+}
+
+function doOasisBattle(){
+  if(!activeBattle||activeBattle.type!=='oasis')return;
+  var o=activeBattle,pp=calcPower();
+  var won=Math.random()<Math.min(0.95,Math.max(0.05,pp/(pp+o.power)));
+  closeBattle();
+  if(won){
+    G.player.gold+=o.reward.gold;
+    G.player.food+=o.reward.food;
+    G.player.iron=(G.player.iron||0)+o.reward.iron;
+    G.player.xp+=o.reward.xp;
+    G.oasisCooldowns[o.id]=Date.now();
+    levelUp();qProgress('battle',1);saveGame();
+    var res=document.createElement('div');res.className='modal-overlay';res.id='result-modal';
+    res.innerHTML='<div class="modal result-modal"><div class="res-icon">🏆</div><div class="res-title win">ZAFER!</div>'
+      +'<div class="res-msg">Vaha ele geçirildi!</div><div class="res-rewards">'
+      +'<div class="rw-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+'+o.reward.gold+'</span></div>'
+      +'<div class="rw-row"><span>🌾 Yiyecek</span><span style="color:var(--green-light)">+'+o.reward.food+'</span></div>'
+      +'<div class="rw-row"><span>⚒️ Demir</span><span style="color:var(--blue-light)">+'+o.reward.iron+'</span></div>'
+      +'<div class="rw-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+'+o.reward.xp+' XP</span></div></div>'
+      +'<button class="collect-btn" style="background:linear-gradient(135deg,#1a5a2a,#0e3018);color:var(--parchment);border:1px solid rgba(76,175,80,0.4);" onclick="closeBattle()">Devam Et</button></div>';
+    document.body.appendChild(res);
+  }else{
+    var types=Object.keys(G.troops).filter(function(t){return G.troops[t]&&G.troops[t].count>0});
+    if(types.length){var t=types[Math.floor(Math.random()*types.length)];G.troops[t].count-=Math.min(G.troops[t].count,Math.ceil(Math.random()*3))}
+    saveGame();
+    var res=document.createElement('div');res.className='modal-overlay';res.id='result-modal';
+    res.innerHTML='<div class="modal result-modal"><div class="res-icon">💔</div><div class="res-title lose">YENİLGİ</div>'
+      +'<div class="res-msg">Vaha savunucuları seni geri püskürttü...</div><div class="res-rewards"><div class="rw-row"><span>💀 Kayıplar</span><span style="color:var(--red-light)">Asker kaybedildi</span></div></div>'
+      +'<button class="collect-btn" style="background:rgba(40,20,4,0.8);color:var(--parchment);border:1px solid rgba(100,60,10,0.3);" onclick="closeBattle()">Devam Et</button></div>';
+    document.body.appendChild(res);
+  }
+  renderAll();
+}
+
+function openPvPBattle(player){
+  activeBattle={...player,type:'pvp'};
+  var pp=calcPower(),ep=player.power||100;
+  var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+ep))*100)));
+  var segs=10,ps=Math.round((pp/(pp+ep))*segs),barH='';
+  for(var i=0;i<segs;i++)barH+='<div class="bar-seg '+(i<ps?'fp':'fe')+'"></div>';
+  var possibleLoot=Math.floor(ep*0.3);
+  var o=document.createElement('div');o.className='modal-overlay';o.id='battle-modal';
+  o.innerHTML='<div class="modal"><h3>⚔️ '+player.name+'</h3><p style="color:var(--muted);font-size:12px;margin-top:4px">Seviye '+(player.level||1)+' oyuncuyla savaş</p>'
+    +'<div class="battle-vs"><div class="combatant"><div class="icon">🏰</div><div class="lbl">'+G.player.name+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(pp)+'</div></div>'
+    +'<div class="vs-text">VS</div>'
+    +'<div class="combatant"><div class="icon">🏰</div><div class="lbl">'+player.name+'</div><div style="color:var(--red-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+ep+'</div></div></div>'
+    +'<div class="pwr-cmp"><div class="p-row"><span>Kazanma şansı</span><span style="color:'+(wc>=50?'var(--green-light)':'var(--red-light)')+';font-family:Cinzel,serif;font-weight:700">%'+wc+'</span></div><div class="pwr-bars">'+barH+'</div></div>'
+    +'<div style="background:rgba(25,15,5,0.5);border:1px solid rgba(212,146,10,0.2);border-radius:8px;padding:10px;margin-bottom:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Olası Ganimet</div><div style="font-size:16px;font-family:Cinzel,serif;font-weight:700;color:var(--gold-light)">~'+possibleLoot+'🪙 + Kaynaklar</div></div>'
+    +'<div class="modal-btns"><button class="btn-cancel" onclick="closeBattle()">İptal</button><button class="btn-attack" onclick="doPvPBattle()">⚔️ Saldır!</button></div></div>';
+  document.body.appendChild(o);
+}
+
+function doPvPBattle(){
+  if(!activeBattle||activeBattle.type!=='pvp')return;
+  var p=activeBattle,pp=calcPower(),ep=p.power||100;
+  var won=Math.random()<Math.min(0.95,Math.max(0.05,pp/(pp+ep)));
+  closeBattle();
+  if(won){
+    var loot=Math.floor(ep*0.2)+Math.floor(Math.random()*ep*0.2);
+    var foodLoot=Math.floor(Math.random()*200)+50;
+    var ironLoot=Math.floor(Math.random()*100)+20;
+    var xp=Math.floor(ep*0.1)+30;
+    G.player.gold+=loot;
+    G.player.food+=foodLoot;
+    G.player.iron=(G.player.iron||0)+ironLoot;
+    G.player.xp+=xp;
+    G.pvpHistory.push({opponent:p.name,won:true,loot:loot,timestamp:Date.now()});
+    if(G.pvpHistory.length>20)G.pvpHistory.shift();
+    levelUp();qProgress('battle',1);saveGame();
+    var res=document.createElement('div');res.className='modal-overlay';res.id='result-modal';
+    res.innerHTML='<div class="modal result-modal"><div class="res-icon">🏆</div><div class="res-title win">ZAFER!</div>'
+      +'<div class="res-msg">'+p.name+' yenildi!</div><div class="res-rewards">'
+      +'<div class="rw-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+'+loot+'</span></div>'
+      +'<div class="rw-row"><span>🌾 Yiyecek</span><span style="color:var(--green-light)">+'+foodLoot+'</span></div>'
+      +'<div class="rw-row"><span>⚒️ Demir</span><span style="color:var(--blue-light)">+'+ironLoot+'</span></div>'
+      +'<div class="rw-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+'+xp+' XP</span></div></div>'
+      +'<button class="collect-btn" style="background:linear-gradient(135deg,#1a5a2a,#0e3018);color:var(--parchment);border:1px solid rgba(76,175,80,0.4);" onclick="closeBattle()">Devam Et</button></div>';
+    document.body.appendChild(res);
+  }else{
+    var types=Object.keys(G.troops).filter(function(t){return G.troops[t]&&G.troops[t].count>0});
+    if(types.length){var t=types[Math.floor(Math.random()*types.length)];G.troops[t].count-=Math.min(G.troops[t].count,Math.ceil(Math.random()*5))}
+    var goldLost=Math.floor(Math.random()*100)+50;
+    G.player.gold=Math.max(0,G.player.gold-goldLost);
+    G.pvpHistory.push({opponent:p.name,won:false,loot:-goldLost,timestamp:Date.now()});
+    if(G.pvpHistory.length>20)G.pvpHistory.shift();
+    saveGame();
+    var res=document.createElement('div');res.className='modal-overlay';res.id='result-modal';
+    res.innerHTML='<div class="modal result-modal"><div class="res-icon">💔</div><div class="res-title lose">YENİLGİ</div>'
+      +'<div class="res-msg">'+p.name+' seni yendi...</div><div class="res-rewards">'
+      +'<div class="rw-row"><span>💀 Kayıplar</span><span style="color:var(--red-light)">Asker kaybedildi</span></div>'
+      +'<div class="rw-row"><span>🪙 Yağma</span><span style="color:var(--red-light)">-'+goldLost+' altın</span></div></div>'
+      +'<button class="collect-btn" style="background:rgba(40,20,4,0.8);color:var(--parchment);border:1px solid rgba(100,60,10,0.3);" onclick="closeBattle()">Devam Et</button></div>';
+    document.body.appendChild(res);
+  }
+  renderAll();
+}
+
 function showResult(won,e){
   var o=document.createElement('div');o.className='modal-overlay';o.id='result-modal';
   var rw=won?'<div class="res-rewards"><div class="rw-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+'+e.reward.gold+'</span></div><div class="rw-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+'+e.reward.xp+' XP</span></div></div>'
@@ -745,8 +1119,15 @@ function showResult(won,e){
 // CLAN
 var clanView='main';
 async function renderClan(){
+  console.log('=== renderClan başlatıldı. View:',clanView,'Storage:',STORAGE_AVAILABLE?'AKTIF':'DEVRE DIŞI','===');
   var root=document.getElementById('clan-content');if(!root)return;
   root.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px;font-family:Cinzel,serif">⏳ Yükleniyor...</div>';
+  
+  if(!STORAGE_AVAILABLE){
+    root.innerHTML='<div class="mpanel" style="text-align:center;padding:30px"><div style="font-size:48px;margin-bottom:12px">⚠️</div><h3 style="margin-bottom:8px;color:var(--gold)">Çevrimdışı Mod</h3><p style="color:var(--muted);font-size:13px;margin-bottom:16px">Shared storage çalışmıyor.<br>Klan özellikleri kullanılamıyor.</p><button class="create-btn" onclick="location.reload()">🔄 Yenile</button></div>';
+    return;
+  }
+  
   await syncPlayer();
   if(G.player.clanId)await renderMyClan(root);else await renderNoClan(root);
 }
@@ -794,13 +1175,38 @@ function renderCreateClan(){
     +'<button class="create-btn" onclick="createClan()">🏰 Klanı Kur</button></div>';
 }
 async function renderMyClan(root){
+  console.log('=== renderMyClan. Klan ID:',G.player.clanId,'===');
   var clan=await getClan(G.player.clanId);
-  if(!clan){G.player.clanId=null;saveGame();await renderNoClan(root);return}
+  if(!clan){
+    console.warn('Klan bulunamadı, ID:',G.player.clanId);
+    G.player.clanId=null;
+    saveGame();
+    await renderNoClan(root);
+    return;
+  }
+  console.log('Klan yüklendi:',clan.name,'Üye sayısı:',clan.members.length);
   var isOwner=clan.ownerId===PID,mc=(clan.members||[]).length,reqs=clan.requests||[];
-  var allP=await loadPlayers(),meP={pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,isMe:true};
-  var members=[meP].concat(allP.filter(function(p){return(clan.members||[]).includes(p.pid)&&p.pid!==PID}));
+  var allP=await loadPlayers();
+  console.log('Tüm oyuncular yüklendi:',allP.length);
+  
+  var meP={pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,isMe:true};
+  var members=[meP];
+  
+  clan.members.forEach(function(memberId){
+    if(memberId===PID)return;
+    var found=allP.find(function(p){return p.pid===memberId});
+    if(found){
+      members.push(found);
+    }else{
+      console.warn('Üye bulunamadı:',memberId);
+      members.push({pid:memberId,name:'Oyuncu',power:0,level:1});
+    }
+  });
+  
   members.sort(function(a,b){return b.power-a.power});
   var totalP=members.reduce(function(s,m){return s+(m.power||0)},0);
+  console.log('Toplam üye listesi:',members.length,'Toplam güç:',totalP);
+  
   root.innerHTML='<div class="clan-hdr"><span class="clan-icon">'+(clan.icon||'🛡️')+'</span><div class="clan-nm">'+clan.name+'</div><div class="clan-tag">#'+clan.tag+' • '+mc+'/30 üye</div>'
     +'<div class="clan-stats"><div class="clan-stat"><div class="c-sv">'+fmt(totalP)+'</div><div class="c-sl">Toplam Güç</div></div><div class="clan-stat"><div class="c-sv">'+mc+'</div><div class="c-sl">Üye</div></div><div class="clan-stat"><div class="c-sv">'+(isOwner?'👑':'🛡️')+'</div><div class="c-sl">'+(isOwner?'Lider':'Üye')+'</div></div></div>'
     +(clan.desc?'<div style="font-size:12px;color:var(--muted);margin-top:10px">'+clan.desc+'</div>':'')+'</div>'
@@ -1012,20 +1418,21 @@ function switchTab(tab){
   if(tab==='quests')renderQuests();
   if(tab==='clan')renderClan();
   if(tab==='reward')initWheel();
+  if(tab==='battle')setBattleTab(battleTab);
 }
 
 // IDLE
 function showIdlePopup(earned){
-  if(earned.gold<10&&earned.food<10)return;
+  if(earned.gold<10&&earned.food<10&&(earned.iron||0)<5)return;
   var p=document.createElement('div');p.className='idle-popup';
-  p.innerHTML='<div class="idle-box"><div class="idle-icon">⏰</div><h3>Hoş Geldin, Komutan!</h3><p>'+earned.hours+' saatlik yokluğunda kaynaklar toplandı.</p><div class="idle-amount">🪙 +'+fmt(earned.gold)+'</div><div style="color:var(--green-light);font-family:Cinzel,serif;font-size:18px;font-weight:700;margin-bottom:12px">🌾 +'+fmt(earned.food)+'</div><button onclick="this.closest(\'.idle-popup\').remove()" style="width:100%;padding:14px;border:1px solid rgba(212,146,10,0.4);border-radius:12px;background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);font-family:Cinzel,serif;font-size:15px;font-weight:800;cursor:pointer">✅ Topla!</button></div>';
+  p.innerHTML='<div class="idle-box"><div class="idle-icon">⏰</div><h3>Hoş Geldin, Komutan!</h3><p>'+earned.hours+' saatlik yokluğunda kaynaklar toplandı.</p><div class="idle-amount">🪙 +'+fmt(earned.gold)+'</div><div style="color:var(--green-light);font-family:Cinzel,serif;font-size:18px;font-weight:700">🌾 +'+fmt(earned.food)+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:18px;font-weight:700;margin-bottom:12px">⚒️ +'+fmt(earned.iron||0)+'</div><button onclick="this.closest(\'.idle-popup\').remove()" style="width:100%;padding:14px;border:1px solid rgba(212,146,10,0.4);border-radius:12px;background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);font-family:Cinzel,serif;font-size:15px;font-weight:800;cursor:pointer">✅ Topla!</button></div>';
   document.body.appendChild(p);
 }
 function processIdleIncome(){
   var now=Date.now(),elapsed=(now-G.player.lastOnline)/3600000;if(elapsed<0.01)return null;
-  var hours=Math.min(elapsed,8),gold=Math.floor((G.buildings.mine.level*15+10)*hours),food=Math.floor((G.buildings.farm.level*10+5)*hours);
-  G.player.gold+=gold;G.player.food+=food;G.player.lastOnline=now;saveGame();
-  return{gold:gold,food:food,hours:hours.toFixed(1)};
+  var hours=Math.min(elapsed,8),gold=Math.floor((G.buildings.mine.level*15+10)*hours),food=Math.floor((G.buildings.farm.level*10+5)*hours),iron=Math.floor((G.buildings.mine.level*5+2)*hours);
+  G.player.gold+=gold;G.player.food+=food;G.player.iron=(G.player.iron||0)+iron;G.player.lastOnline=now;saveGame();
+  return{gold:gold,food:food,iron:iron,hours:hours.toFixed(1)};
 }
 function initTelegram(){
   var tg=window.Telegram&&window.Telegram.WebApp;
