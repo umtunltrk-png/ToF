@@ -643,6 +643,88 @@
       background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
     }
 
+    /* ─── REWARD SCREEN ─── */
+    .reward-hero {
+      background: linear-gradient(160deg, #1a1205 0%, #0e0a03 100%);
+      border: 1px solid rgba(212,146,10,0.4);
+      border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 14px;
+      position: relative; overflow: hidden;
+    }
+    .reward-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(212,146,10,0.18) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .reward-hero-icon { font-size: 52px; line-height:1; }
+    .reward-hero-title {
+      font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
+      color: var(--gold-light); letter-spacing: 4px; margin-top: 8px;
+      text-shadow: 0 2px 10px rgba(212,146,10,0.5);
+    }
+    .reward-hero-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    #wheel-container { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+    .wheel-wrap {
+      position: relative; width: 300px; height: 300px;
+      filter: drop-shadow(0 8px 24px rgba(212,146,10,0.3));
+    }
+    .wheel-pointer {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      font-size: 28px; color: var(--gold-light); z-index: 10;
+      text-shadow: 0 2px 8px rgba(212,146,10,0.8);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+    }
+    #wheel-canvas { border-radius: 50%; cursor: pointer; display: block; }
+
+    .wt-label { font-family: 'Cinzel', serif; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+    .wt-time {
+      font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
+      color: var(--gold-light); text-shadow: 0 2px 8px rgba(212,146,10,0.4);
+      margin-top: 4px;
+    }
+    #wheel-timer-box { text-align: center; }
+
+    .spin-btn {
+      width: 200px; padding: 14px;
+      background: linear-gradient(135deg, #8a5a08, #5a3a04);
+      border: 2px solid var(--gold);
+      border-radius: 14px;
+      color: var(--parchment2); font-family: 'Cinzel', serif;
+      font-size: 16px; font-weight: 900; cursor: pointer; letter-spacing: 2px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(212,146,10,0.3);
+    }
+    .spin-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #aa7010, #7a5008);
+      box-shadow: 0 6px 20px rgba(212,146,10,0.5);
+      transform: translateY(-1px);
+    }
+    .spin-btn:disabled {
+      background: rgba(30,15,2,0.7); color: var(--muted);
+      border-color: rgba(100,60,10,0.3); cursor: not-allowed;
+      box-shadow: none; transform: none;
+    }
+
+    #wheel-result-box {
+      background: linear-gradient(160deg, rgba(30,18,3,0.95), rgba(15,8,1,0.98));
+      border: 2px solid var(--gold);
+      border-radius: 16px; padding: 20px; text-align: center; width: 100%;
+      animation: slideUp 0.4s ease;
+      box-shadow: 0 0 30px rgba(212,146,10,0.2);
+    }
+    .wr-icon { font-size: 56px; }
+    .wr-title { font-family:'Cinzel',serif; font-size:20px; font-weight:900; color:var(--gold-light); margin:8px 0 4px; letter-spacing:2px; }
+    .wr-troops { font-family:'Cinzel',serif; font-size:28px; font-weight:900; color:var(--parchment); margin: 6px 0; }
+    .wr-sub { font-size:12px; color:var(--muted); margin-bottom:14px; }
+    .wr-close-btn {
+      padding: 10px 28px; border: 1px solid rgba(212,146,10,0.4);
+      border-radius: 10px; background: linear-gradient(135deg,#7a5010,#4a2e08);
+      color: var(--parchment2); font-family:'Cinzel',serif;
+      font-size:13px; font-weight:700; cursor:pointer;
+    }
+
     /* ─── SCROLLBAR ─── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: rgba(10,5,0,0.5); }
@@ -721,6 +803,27 @@
     <div id="quests-list"></div>
   </div>
 
+  <!-- REWARD SCREEN -->
+  <div class="screen" id="screen-reward">
+    <div class="reward-hero">
+      <div class="reward-hero-icon">🎡</div>
+      <div class="reward-hero-title">ÖDÜL ÇARKI</div>
+      <div class="reward-hero-sub">Her 12 saatte bir çevir, asker kazan!</div>
+    </div>
+    <div id="wheel-container">
+      <div class="wheel-wrap">
+        <div class="wheel-pointer">▼</div>
+        <canvas id="wheel-canvas" width="300" height="300"></canvas>
+      </div>
+      <div id="wheel-timer-box">
+        <div class="wt-label">⏳ Sonraki Çevirme</div>
+        <div class="wt-time" id="wheel-countdown">Hazır!</div>
+      </div>
+      <button class="spin-btn" id="spin-btn" onclick="spinWheel()">🎰 ÇEVİR!</button>
+      <div id="wheel-result-box" style="display:none"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- TABS -->
@@ -739,6 +842,9 @@
   </button>
   <button class="tab-btn" onclick="switchTab('quests')" id="tab-quests">
     <span class="t-icon">📋</span>Görevler
+  </button>
+  <button class="tab-btn" onclick="switchTab('reward')" id="tab-reward">
+    <span class="t-icon">🎡</span>Ödül
   </button>
 </div>
 
@@ -1556,6 +1662,7 @@ function switchTab(tab) {
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'quests') renderQuests();
   if (tab === 'clan') renderClan();
+  if (tab === 'reward') initWheel();
 }
 
 // ============================================================
@@ -1631,9 +1738,249 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (key === 'escape') { closeBattleModal(); return; }
-  const tabMap = {'1':'castle','2':'troops','3':'battle','4':'clan','5':'quests'};
+  const tabMap = {'1':'castle','2':'troops','3':'battle','4':'clan','5':'quests','6':'reward'};
   if (tabMap[e.key]) switchTab(tabMap[e.key]);
 });
+
+// ============================================================
+//  ÖDÜL ÇARKI
+// ============================================================
+const WHEEL_SEGMENTS = [
+  { label: '100
+Asker',  troops: 100,  color: '#3a5a20', textColor: '#a8d870' },
+  { label: '250
+Asker',  troops: 250,  color: '#5a3010', textColor: '#f0b870' },
+  { label: '500
+Asker',  troops: 500,  color: '#1a3a5a', textColor: '#70b0f0' },
+  { label: '150
+Asker',  troops: 150,  color: '#4a1a1a', textColor: '#f07070' },
+  { label: '750
+Asker',  troops: 750,  color: '#4a3a08', textColor: '#f0d050' },
+  { label: '200
+Asker',  troops: 200,  color: '#2a1a4a', textColor: '#b080f0' },
+  { label: '1000
+Asker', troops: 1000, color: '#6a4a00', textColor: '#ffd060' },
+  { label: '300
+Asker',  troops: 300,  color: '#0a3a2a', textColor: '#60d0a0' },
+];
+
+const SPIN_COOLDOWN = 12 * 60 * 60 * 1000; // 12 saat ms
+let wheelAngle = 0;
+let wheelSpinning = false;
+let wheelInited = false;
+let countdownInterval = null;
+
+function getLastSpinTime() {
+  try { return parseInt(localStorage.getItem('toe_last_spin') || '0'); } catch(e) { return 0; }
+}
+function setLastSpinTime(t) {
+  try { localStorage.setItem('toe_last_spin', String(t)); } catch(e) {}
+}
+
+function canSpin() {
+  return Date.now() - getLastSpinTime() >= SPIN_COOLDOWN;
+}
+
+function getTimeUntilSpin() {
+  const diff = SPIN_COOLDOWN - (Date.now() - getLastSpinTime());
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function drawWheel(angle) {
+  const canvas = document.getElementById('wheel-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const r = cx - 6;
+  const seg = WHEEL_SEGMENTS.length;
+  const arc = (Math.PI * 2) / seg;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(212,146,10,0.8)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  for (let i = 0; i < seg; i++) {
+    const startAngle = angle + i * arc;
+    const endAngle = startAngle + arc;
+    const s = WHEEL_SEGMENTS[i];
+
+    // Segment fill
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(212,146,10,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = s.textColor;
+    ctx.font = 'bold 12px Cinzel, serif';
+    const lines = s.label.split('
+');
+    lines.forEach((line, li) => {
+      ctx.fillText(line, r - 10, (li - (lines.length - 1) / 2) * 16);
+    });
+    ctx.restore();
+  }
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 26);
+  grad.addColorStop(0, '#d4920a');
+  grad.addColorStop(1, '#5a3a04');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,210,80,0.6)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Center icon
+  ctx.font = '20px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('⚔️', cx, cy);
+}
+
+function initWheel() {
+  if (!document.getElementById('wheel-canvas')) return;
+  drawWheel(wheelAngle);
+  updateSpinUI();
+  if (!wheelInited) {
+    wheelInited = true;
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(updateSpinUI, 1000);
+  }
+}
+
+function updateSpinUI() {
+  const btn = document.getElementById('spin-btn');
+  const cd = document.getElementById('wheel-countdown');
+  if (!btn || !cd) return;
+  if (canSpin()) {
+    cd.textContent = 'Hazır!';
+    cd.style.color = 'var(--green-light)';
+    btn.disabled = false;
+    btn.textContent = '🎰 ÇEVİR!';
+  } else {
+    const t = getTimeUntilSpin();
+    cd.textContent = t || 'Hazır!';
+    cd.style.color = 'var(--gold)';
+    btn.disabled = true;
+    btn.textContent = '⏳ Bekleniyor...';
+  }
+}
+
+function spinWheel() {
+  if (wheelSpinning || !canSpin()) return;
+  wheelSpinning = true;
+
+  // Hide result
+  const resultBox = document.getElementById('wheel-result-box');
+  if (resultBox) resultBox.style.display = 'none';
+
+  const btn = document.getElementById('spin-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '🌀 Dönüyor...'; }
+
+  // Pick random segment
+  const seg = WHEEL_SEGMENTS.length;
+  const arc = (Math.PI * 2) / seg;
+  const winIndex = Math.floor(Math.random() * seg);
+
+  // Calculate target angle: spin 5-8 full rounds + land on winner
+  const extraSpins = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
+  // We want pointer (top = -π/2) to point at center of winIndex segment
+  // Segment i starts at: wheelAngle + i*arc, center at: wheelAngle + i*arc + arc/2
+  // We want that center to be at -π/2 (top)
+  const targetSegCenter = winIndex * arc + arc / 2;
+  const targetAngle = -Math.PI / 2 - targetSegCenter;
+  const fullTarget = wheelAngle + extraSpins + ((targetAngle - wheelAngle) % (Math.PI * 2));
+
+  const duration = 4000 + Math.random() * 1000;
+  const startTime = performance.now();
+  const startAngle = wheelAngle;
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = easeOut(progress);
+    const current = startAngle + (fullTarget - startAngle) * easedProgress;
+    wheelAngle = current;
+    drawWheel(current);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      wheelAngle = current % (Math.PI * 2);
+      wheelSpinning = false;
+      setLastSpinTime(Date.now());
+
+      // Determine actual winner from final angle
+      const normalizedAngle = (((-wheelAngle - Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const actualIndex = Math.floor(normalizedAngle / arc) % seg;
+      const winner = WHEEL_SEGMENTS[actualIndex];
+      const troopCount = winner.troops;
+
+      // Give troops — distribute randomly across unlocked types
+      giveWheelTroops(troopCount);
+      showWheelResult(winner, troopCount);
+      updateSpinUI();
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function giveWheelTroops(count) {
+  // Distribute to unlocked troop types proportionally
+  const unlocked = Object.keys(TROOPS_CONFIG).filter(id => G.buildings.barracks.level >= TROOPS_CONFIG[id].requiresBarracks);
+  if (unlocked.length === 0) { G.troops.swordsman.count += count; }
+  else {
+    let remaining = count;
+    unlocked.forEach((id, i) => {
+      const share = i === unlocked.length - 1 ? remaining : Math.floor(count / unlocked.length);
+      G.troops[id].count += share;
+      remaining -= share;
+    });
+  }
+  G.player.xp += 20;
+  checkLevelUp();
+  saveGame();
+  renderAll();
+}
+
+function showWheelResult(winner, troopCount) {
+  const resultBox = document.getElementById('wheel-result-box');
+  if (!resultBox) return;
+  resultBox.style.display = 'block';
+  resultBox.innerHTML = `
+    <div class="wr-icon">🏆</div>
+    <div class="wr-title">TEBRİKLER!</div>
+    <div class="wr-troops">⚔️ +${troopCount} Asker</div>
+    <div class="wr-sub">Birlikler orduna katıldı! Bir sonraki çevirme 12 saat sonra.</div>
+    <button class="wr-close-btn" onclick="document.getElementById('wheel-result-box').style.display='none'">✅ Harika!</button>
+  `;
+  showToast(`🎡 ${troopCount} asker kazandın!`, 'success');
+}
 
 // ============================================================
 //  INIT
