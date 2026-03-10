@@ -326,6 +326,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 <script>
 // STORAGE
 var MEM={};
+var STORAGE_AVAILABLE=false;
 function lsGet(k){try{return localStorage.getItem(k)||null}catch(e){return MEM[k]||null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){MEM[k]=v}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){delete MEM[k]}}
@@ -335,12 +336,61 @@ function lsList(prefix){
   Object.keys(MEM).forEach(function(k){if(k.startsWith(prefix))keys.add(k)});
   return Array.from(keys);
 }
-async function storeSet(k,v){if(window.storage){try{await window.storage.set(k,v,true);return}catch(e){}}lsSet('TOE_'+k,v)}
-async function storeGet(k){if(window.storage){try{var r=await window.storage.get(k,true);return r?r.value:null}catch(e){}}return lsGet('TOE_'+k)}
-async function storeDel(k){if(window.storage){try{await window.storage.delete(k,true);return}catch(e){}}lsDel('TOE_'+k)}
+async function checkStorage(){
+  if(!window.storage){STORAGE_AVAILABLE=false;console.log('window.storage yok');return}
+  try{
+    var testRes=await window.storage.set('toe_test','1',true);
+    if(testRes){
+      await window.storage.delete('toe_test',true);
+      STORAGE_AVAILABLE=true;
+      console.log('Shared storage aktif!');
+    }else{
+      STORAGE_AVAILABLE=false;
+      console.log('Shared storage set başarısız');
+    }
+  }catch(e){
+    STORAGE_AVAILABLE=false;
+    console.log('Shared storage hatası:',e);
+  }
+}
+async function storeSet(k,v){
+  if(!STORAGE_AVAILABLE){lsSet('TOE_'+k,v);return}
+  try{
+    var res=await window.storage.set(k,v,true);
+    if(!res){console.log('storeSet başarısız:',k);lsSet('TOE_'+k,v)}
+  }catch(e){
+    console.log('storeSet hata:',k,e);
+    lsSet('TOE_'+k,v)
+  }
+}
+async function storeGet(k){
+  if(!STORAGE_AVAILABLE){return lsGet('TOE_'+k)}
+  try{
+    var r=await window.storage.get(k,true);
+    if(r&&r.value!==undefined)return r.value;
+    return lsGet('TOE_'+k)
+  }catch(e){
+    return lsGet('TOE_'+k)
+  }
+}
+async function storeDel(k){
+  if(!STORAGE_AVAILABLE){lsDel('TOE_'+k);return}
+  try{await window.storage.delete(k,true)}catch(e){}
+  lsDel('TOE_'+k)
+}
 async function storeList(prefix){
-  if(window.storage){try{var r=await window.storage.list(prefix,true);return r?r.keys:[]}catch(e){}}
-  return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')});
+  if(!STORAGE_AVAILABLE){return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})}
+  try{
+    var r=await window.storage.list(prefix,true);
+    if(r&&r.keys){
+      console.log('storeList sonuç:',prefix,r.keys.length,'adet');
+      return r.keys
+    }
+    return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})
+  }catch(e){
+    console.log('storeList hata:',prefix,e);
+    return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')})
+  }
 }
 
 // STATE
@@ -357,25 +407,101 @@ var G={
   troops:{swordsman:{count:5},archer:{count:3},cavalry:{count:0},catapult:{count:0}},
   quests:{}
 };
-function saveGame(){lsSet('toe_save',JSON.stringify(G));syncPlayer()}
-function loadGame(){try{var r=lsGet('toe_save');if(r)G=JSON.parse(r)}catch(e){}}
-function getPid(){var p=lsGet('toe_pid');if(!p){p='player_'+Math.random().toString(36).slice(2,10)+'_'+Date.now();lsSet('toe_pid',p)}return p}
+function saveGame(){
+  lsSet('toe_save',JSON.stringify(G));
+  syncPlayer().catch(function(e){console.error('Senkronizasyon hatası:',e)});
+}
+function loadGame(){try{var r=lsGet('toe_save');if(r)G=JSON.parse(r)}catch(e){console.error('loadGame hatası:',e)}}
+function getPid(){var p=lsGet('toe_pid');if(!p){p='player_'+Math.random().toString(36).slice(2,10)+'_'+Date.now();lsSet('toe_pid',p);console.log('Yeni oyuncu ID:',p)}return p}
 var PID=getPid();
+console.log('Oyuncu ID:',PID);
 
 // SHARED
-async function syncPlayer(){try{await storeSet(PID,JSON.stringify({name:G.player.name,level:G.player.level,power:calcPower(),clanId:G.player.clanId||null,lastSeen:Date.now()}))}catch(e){}}
+async function syncPlayer(){
+  try{
+    var playerData={
+      name:G.player.name,
+      level:G.player.level,
+      power:calcPower(),
+      clanId:G.player.clanId||null,
+      lastSeen:Date.now()
+    };
+    await storeSet(PID,JSON.stringify(playerData));
+    console.log('Oyuncu senkronize edildi:',PID,playerData);
+  }catch(e){
+    console.error('syncPlayer hatası:',e);
+  }
+}
 async function loadPlayers(){
   try{
-    var keys=await storeList('player_'),pl=[];
-    for(var i=0;i<keys.length;i++){if(keys[i]===PID)continue;try{var r=await storeGet(keys[i]);if(!r)continue;var p=JSON.parse(r);if(Date.now()-p.lastSeen>7*24*3600000)continue;pl.push(Object.assign({},p,{pid:keys[i]}))}catch(e){}}
+    var keys=await storeList('player_');
+    console.log('Bulunan oyuncu sayısı:',keys.length);
+    var pl=[];
+    for(var i=0;i<keys.length;i++){
+      if(keys[i]===PID)continue;
+      try{
+        var r=await storeGet(keys[i]);
+        if(!r)continue;
+        var p=JSON.parse(r);
+        if(Date.now()-p.lastSeen>7*24*3600000)continue;
+        pl.push(Object.assign({},p,{pid:keys[i]}));
+      }catch(e){
+        console.log('Oyuncu yükleme hatası:',keys[i],e);
+      }
+    }
+    console.log('Yüklenen aktif oyuncu:',pl.length);
     return pl;
-  }catch(e){return[]}
+  }catch(e){
+    console.error('loadPlayers hatası:',e);
+    return[];
+  }
 }
 async function getAllClans(){
-  try{var keys=await storeList('clan_'),cl=[];for(var i=0;i<keys.length;i++){try{var r=await storeGet(keys[i]);if(r)cl.push(JSON.parse(r))}catch(e){}}return cl}catch(e){return[]}
+  try{
+    var keys=await storeList('clan_');
+    console.log('Bulunan klan sayısı:',keys.length);
+    var cl=[];
+    for(var i=0;i<keys.length;i++){
+      try{
+        var r=await storeGet(keys[i]);
+        if(r){
+          var clan=JSON.parse(r);
+          console.log('Klan yüklendi:',clan.name,clan.tag,clan.id);
+          cl.push(clan);
+        }
+      }catch(e){
+        console.log('Klan yükleme hatası:',keys[i],e);
+      }
+    }
+    return cl;
+  }catch(e){
+    console.error('getAllClans hatası:',e);
+    return[];
+  }
 }
-async function getClan(id){if(!id)return null;try{var r=await storeGet('clan_'+id);return r?JSON.parse(r):null}catch(e){return null}}
-async function saveClan(c){await storeSet('clan_'+c.id,JSON.stringify(c))}
+async function getClan(id){
+  if(!id)return null;
+  try{
+    var r=await storeGet('clan_'+id);
+    if(r){
+      var clan=JSON.parse(r);
+      console.log('Klan detayı alındı:',clan.name);
+      return clan;
+    }
+    return null;
+  }catch(e){
+    console.error('getClan hatası:',id,e);
+    return null;
+  }
+}
+async function saveClan(c){
+  try{
+    await storeSet('clan_'+c.id,JSON.stringify(c));
+    console.log('Klan kaydedildi:',c.name,c.id);
+  }catch(e){
+    console.error('saveClan hatası:',c.id,e);
+  }
+}
 
 // CONFIG
 var BC={
@@ -632,19 +758,31 @@ async function renderNoClan(root){
   else if(clanView==='create')renderCreateClan();
 }
 async function renderBrowseClans(){
+  console.log('=== renderBrowseClans başlatıldı ===');
   var sub=document.getElementById('clan-sub');if(!sub)return;
-  sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Yükleniyor...</div>';
-  var clans=await getAllClans();
-  if(!clans.length){sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz hiç klan yok. İlk klanı sen kur! 🚀</div>';return}
-  sub.innerHTML='';
-  clans.forEach(function(clan){
-    var mc=(clan.members||[]).length,myReq=(clan.requests||[]).find(function(r){return r.pid===PID}),isMem=(clan.members||[]).includes(PID),full=mc>=30;
-    var card=document.createElement('div');card.className='clan-list-card';
-    card.innerHTML='<div class="cl-top"><div class="cl-icon">'+(clan.icon||'🛡️')+'</div><div class="cl-info"><div class="cl-name">'+clan.name+'</div><div class="cl-meta">#'+clan.tag+' • '+mc+'/30 üye • 👑 '+clan.ownerName+'</div></div></div>'
-      +(clan.desc?'<div class="cl-desc">'+clan.desc+'</div>':'')
-      +'<div class="cl-acts">'+(isMem?'<button class="cl-btn view" disabled>✅ Üyesin</button>':myReq?'<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>':full?'<button class="cl-btn join" disabled>Dolu</button>':'<button class="cl-btn join" onclick="reqJoin(\''+clan.id+'\')">📨 Katılım Talebi</button>')+'</div>';
-    sub.appendChild(card);
-  });
+  sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Klanlar yükleniyor...</div>';
+  try{
+    var clans=await getAllClans();
+    console.log('getAllClans tamamlandı. Klan sayısı:',clans.length);
+    if(!clans.length){
+      sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz hiç klan yok. İlk klanı sen kur! 🚀</div>';
+      return;
+    }
+    sub.innerHTML='';
+    clans.forEach(function(clan){
+      var mc=(clan.members||[]).length,myReq=(clan.requests||[]).find(function(r){return r.pid===PID}),isMem=(clan.members||[]).includes(PID),full=mc>=30;
+      console.log('Klan:',clan.name,'Üye:',mc,'Üyemiyim:',isMem,'Talebim var mı:',!!myReq);
+      var card=document.createElement('div');card.className='clan-list-card';
+      card.innerHTML='<div class="cl-top"><div class="cl-icon">'+(clan.icon||'🛡️')+'</div><div class="cl-info"><div class="cl-name">'+clan.name+'</div><div class="cl-meta">#'+clan.tag+' • '+mc+'/30 üye • 👑 '+clan.ownerName+'</div></div></div>'
+        +(clan.desc?'<div class="cl-desc">'+clan.desc+'</div>':'')
+        +'<div class="cl-acts">'+(isMem?'<button class="cl-btn view" disabled>✅ Üyesin</button>':myReq?'<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>':full?'<button class="cl-btn join" disabled>Dolu</button>':'<button class="cl-btn join" onclick="reqJoin(\''+clan.id+'\')">📨 Katılım Talebi</button>')+'</div>';
+      sub.appendChild(card);
+    });
+    console.log('Klan listesi oluşturuldu');
+  }catch(e){
+    console.error('renderBrowseClans hatası:',e);
+    sub.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px;font-size:13px">⚠️ Klanlar yüklenemedi: '+e.message+'<br><button class="create-btn" onclick="renderClan()" style="margin-top:12px">🔄 Tekrar Dene</button></div>';
+  }
 }
 function renderCreateClan(){
   var sub=document.getElementById('clan-sub');if(!sub)return;
@@ -689,6 +827,7 @@ async function renderMyClan(root){
 }
 function setClanView(v){clanView=v;renderClan()}
 async function createClan(){
+  console.log('=== createClan başlatıldı ===');
   var name=(document.getElementById('nc-name')||{}).value||'';name=name.trim();
   var tag=(document.getElementById('nc-tag')||{}).value||'';tag=tag.trim().toUpperCase();
   var icon=(document.getElementById('nc-icon')||{}).value||'🛡️';icon=icon.trim();
@@ -699,22 +838,45 @@ async function createClan(){
   if(existing.find(function(c){return c.tag===tag})){toast('Bu etiket zaten alınmış!','error');return}
   var cid='c'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);
   var clan={id:cid,name:name,tag:tag,icon:icon,desc:desc,ownerId:PID,ownerName:G.player.name,members:[PID],requests:[],createdAt:Date.now()};
-  await saveClan(clan);G.player.clanId=cid;saveGame();
-  toast('🎉 '+name+' klanı kuruldu!','success');clanView='main';renderClan();
+  console.log('Yeni klan oluşturuluyor:',clan);
+  await saveClan(clan);
+  G.player.clanId=cid;
+  saveGame();
+  await syncPlayer();
+  toast('🎉 '+name+' klanı kuruldu!','success');
+  clanView='main';
+  renderClan();
 }
 async function reqJoin(cid){
-  var clan=await getClan(cid);if(!clan){toast('Klan bulunamadı!','error');return}
+  console.log('=== reqJoin başlatıldı. Klan ID:',cid,'Oyuncu:',PID,G.player.name,'===');
+  var clan=await getClan(cid);
+  if(!clan){toast('Klan bulunamadı!','error');console.error('Klan bulunamadı:',cid);return}
+  console.log('Klan bulundu:',clan.name,'Mevcut üyeler:',clan.members);
   if((clan.members||[]).includes(PID)){toast('Zaten üyesin!','error');return}
   if((clan.requests||[]).find(function(r){return r.pid===PID})){toast('Zaten talep gönderdin!','info');return}
-  clan.requests=clan.requests||[];clan.requests.push({pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,sentAt:Date.now()});
-  await saveClan(clan);toast('📨 '+clan.name+' klanına talep gönderildi!','success');renderClan();
+  clan.requests=clan.requests||[];
+  var req={pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,sentAt:Date.now()};
+  console.log('Talep ekleniyor:',req);
+  clan.requests.push(req);
+  await saveClan(clan);
+  toast('📨 '+clan.name+' klanına talep gönderildi!','success');
+  renderClan();
 }
 async function approveReq(cid,pid,pname){
-  var clan=await getClan(cid);if(!clan||clan.ownerId!==PID)return;
+  console.log('=== approveReq. Klan:',cid,'Onaylanan:',pid,pname,'===');
+  var clan=await getClan(cid);
+  if(!clan||clan.ownerId!==PID){console.error('Yetkisiz erişim veya klan yok');return}
   if((clan.members||[]).length>=30){toast('Klan dolu!','error');return}
+  console.log('Talep onaylanıyor. Önceki üyeler:',clan.members);
   clan.requests=(clan.requests||[]).filter(function(r){return r.pid!==pid});
-  clan.members=clan.members||[];if(!clan.members.includes(pid))clan.members.push(pid);
-  await saveClan(clan);toast('✅ '+pname+' klana kabul edildi!','success');renderClan();
+  clan.members=clan.members||[];
+  if(!clan.members.includes(pid)){
+    clan.members.push(pid);
+    console.log('Üye eklendi. Yeni üyeler:',clan.members);
+  }
+  await saveClan(clan);
+  toast('✅ '+pname+' klana kabul edildi!','success');
+  renderClan();
 }
 async function rejectReq(cid,pid){
   var clan=await getClan(cid);if(!clan||clan.ownerId!==PID)return;
@@ -870,24 +1032,45 @@ function initTelegram(){
   if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0d0805');tg.setBackgroundColor('#0d0805');var u=tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u)G.player.name=u.first_name||'Komutan'}
 }
 function startTick(){
-  setInterval(function(){G.player.gold+=G.buildings.mine.level*2;G.player.food+=G.buildings.farm.level;G.player.lastOnline=Date.now();saveGame();updateTopBar()},5000);
+  var tickCount=0;
+  setInterval(function(){
+    G.player.gold+=G.buildings.mine.level*2;
+    G.player.food+=G.buildings.farm.level;
+    G.player.lastOnline=Date.now();
+    saveGame();
+    updateTopBar();
+    tickCount++;
+    if(tickCount%6===0){
+      console.log('Periyodik senkronizasyon (30 saniye)');
+      syncPlayer().catch(function(e){console.error('Tick senkronizasyonu hatası:',e)});
+    }
+  },5000);
 }
 
 function initGame(){
+  console.log('=== Oyun başlatılıyor ===');
+  checkStorage().then(function(){
+    console.log('Storage kontrolü tamamlandı. STORAGE_AVAILABLE:',STORAGE_AVAILABLE);
+  });
   try{loadGame()}catch(e){console.error('loadGame err',e)}
   try{initTelegram()}catch(e){console.error('tg err',e)}
   try{
     var today=new Date().toDateString();
     if(!G.quests['q_login']||G.quests['q_login'].date!==today){G.quests['q_login']={progress:1,claimed:false,date:today};saveGame()}
-  }catch(e){}
-  try{var earned=processIdleIncome();if(earned&&(earned.gold>10||earned.food>10))setTimeout(function(){showIdlePopup(earned)},800)}catch(e){}
+  }catch(e){console.error('quest err',e)}
+  try{var earned=processIdleIncome();if(earned&&(earned.gold>10||earned.food>10))setTimeout(function(){showIdlePopup(earned)},800)}catch(e){console.error('idle err',e)}
   try{renderBuildings()}catch(e){console.error('renderBuildings',e)}
   try{renderTroops()}catch(e){console.error('renderTroops',e)}
   try{renderEnemies()}catch(e){console.error('renderEnemies',e)}
   try{renderQuests()}catch(e){console.error('renderQuests',e)}
   try{updateTopBar()}catch(e){console.error('topbar',e)}
-  syncPlayer().catch(function(){});
-  renderClan().catch(function(){});
+  setTimeout(function(){
+    console.log('İlk senkronizasyon başlatılıyor...');
+    syncPlayer().then(function(){
+      console.log('İlk senkronizasyon tamamlandı');
+      renderClan();
+    }).catch(function(e){console.error('İlk senkronizasyon hatası:',e)});
+  },1000);
   startTick();
 }
 
