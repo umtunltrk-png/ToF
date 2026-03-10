@@ -625,10 +625,21 @@
       background: linear-gradient(0deg, rgba(8,4,0,0.99) 0%, rgba(20,10,2,0.97) 100%);
       border-top: 2px solid;
       border-image: linear-gradient(90deg, transparent, var(--gold), var(--parchment2), var(--gold), transparent) 1;
-      display: flex; padding: 0 4px;
+      overflow-x: auto; overflow-y: hidden;
+      display: flex; padding: 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #tabs::-webkit-scrollbar { display: none; }
+    #tabs-inner {
+      display: flex; flex-direction: row;
+      min-width: max-content;
+      padding: 0 4px;
     }
     .tab-btn {
-      flex: 1; padding: 9px 4px 7px;
+      flex-shrink: 0;
+      min-width: 68px;
+      padding: 9px 10px 7px;
       background: none; border: none; color: rgba(140,100,40,0.7);
       cursor: pointer; font-family:'Cinzel',serif; font-size: 9px; font-weight: 600;
       display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -638,9 +649,22 @@
     .tab-btn.active { color: var(--gold-light); }
     .tab-btn.active .t-icon { transform: translateY(-1px); }
     .tab-btn.active::before {
-      content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+      content: ''; position: absolute; top: 0; left: 15%; right: 15%;
       height: 2px;
       background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    }
+    /* Fade edges to hint scrollability */
+    #tabs::before, #tabs::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 18px;
+      pointer-events: none; z-index: 2;
+    }
+    #tabs::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(8,4,0,0.8), transparent);
+    }
+    #tabs::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(8,4,0,0.8), transparent);
     }
 
     /* ─── REWARD SCREEN ─── */
@@ -828,24 +852,26 @@
 
 <!-- TABS -->
 <div id="tabs">
-  <button class="tab-btn active" onclick="switchTab('castle')" id="tab-castle">
-    <span class="t-icon">🏰</span>Şehir
-  </button>
-  <button class="tab-btn" onclick="switchTab('troops')" id="tab-troops">
-    <span class="t-icon">⚔️</span>Ordu
-  </button>
-  <button class="tab-btn" onclick="switchTab('battle')" id="tab-battle">
-    <span class="t-icon">🔥</span>Savaş
-  </button>
-  <button class="tab-btn" onclick="switchTab('clan')" id="tab-clan">
-    <span class="t-icon">🛡️</span>Klan
-  </button>
-  <button class="tab-btn" onclick="switchTab('quests')" id="tab-quests">
-    <span class="t-icon">📋</span>Görevler
-  </button>
-  <button class="tab-btn" onclick="switchTab('reward')" id="tab-reward">
-    <span class="t-icon">🎡</span>Ödül
-  </button>
+  <div id="tabs-inner">
+    <button class="tab-btn active" onclick="switchTab('castle')" id="tab-castle">
+      <span class="t-icon">🏰</span>Şehir
+    </button>
+    <button class="tab-btn" onclick="switchTab('troops')" id="tab-troops">
+      <span class="t-icon">⚔️</span>Ordu
+    </button>
+    <button class="tab-btn" onclick="switchTab('battle')" id="tab-battle">
+      <span class="t-icon">🔥</span>Savaş
+    </button>
+    <button class="tab-btn" onclick="switchTab('clan')" id="tab-clan">
+      <span class="t-icon">🛡️</span>Klan
+    </button>
+    <button class="tab-btn" onclick="switchTab('quests')" id="tab-quests">
+      <span class="t-icon">📋</span>Görevler
+    </button>
+    <button class="tab-btn" onclick="switchTab('reward')" id="tab-reward">
+      <span class="t-icon">🎡</span>Ödül
+    </button>
+  </div>
 </div>
 
 <div id="toast-container"></div>
@@ -1659,7 +1685,11 @@ function switchTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + tab).classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
+  const activeBtn = document.getElementById('tab-' + tab);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
   if (tab === 'quests') renderQuests();
   if (tab === 'clan') renderClan();
   if (tab === 'reward') initWheel();
@@ -1746,22 +1776,14 @@ document.addEventListener('keydown', (e) => {
 //  ÖDÜL ÇARKI
 // ============================================================
 const WHEEL_SEGMENTS = [
-  { label: '100
-Asker',  troops: 100,  color: '#3a5a20', textColor: '#a8d870' },
-  { label: '250
-Asker',  troops: 250,  color: '#5a3010', textColor: '#f0b870' },
-  { label: '500
-Asker',  troops: 500,  color: '#1a3a5a', textColor: '#70b0f0' },
-  { label: '150
-Asker',  troops: 150,  color: '#4a1a1a', textColor: '#f07070' },
-  { label: '750
-Asker',  troops: 750,  color: '#4a3a08', textColor: '#f0d050' },
-  { label: '200
-Asker',  troops: 200,  color: '#2a1a4a', textColor: '#b080f0' },
-  { label: '1000
-Asker', troops: 1000, color: '#6a4a00', textColor: '#ffd060' },
-  { label: '300
-Asker',  troops: 300,  color: '#0a3a2a', textColor: '#60d0a0' },
+  { label: '100\nAsker',  troops: 100,  color: '#3a5a20', textColor: '#a8d870' },
+  { label: '250\nAsker',  troops: 250,  color: '#5a3010', textColor: '#f0b870' },
+  { label: '500\nAsker',  troops: 500,  color: '#1a3a5a', textColor: '#70b0f0' },
+  { label: '150\nAsker',  troops: 150,  color: '#4a1a1a', textColor: '#f07070' },
+  { label: '750\nAsker',  troops: 750,  color: '#4a3a08', textColor: '#f0d050' },
+  { label: '200\nAsker',  troops: 200,  color: '#2a1a4a', textColor: '#b080f0' },
+  { label: '1000\nAsker', troops: 1000, color: '#6a4a00', textColor: '#ffd060' },
+  { label: '300\nAsker',  troops: 300,  color: '#0a3a2a', textColor: '#60d0a0' },
 ];
 
 const SPIN_COOLDOWN = 12 * 60 * 60 * 1000; // 12 saat ms
@@ -1832,8 +1854,7 @@ function drawWheel(angle) {
     ctx.textAlign = 'right';
     ctx.fillStyle = s.textColor;
     ctx.font = 'bold 12px Cinzel, serif';
-    const lines = s.label.split('
-');
+    const lines = s.label.split('\n');
     lines.forEach((line, li) => {
       ctx.fillText(line, r - 10, (li - (lines.length - 1) / 2) * 16);
     });
@@ -1938,11 +1959,12 @@ function spinWheel() {
       const normalizedAngle = (((-wheelAngle - Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
       const actualIndex = Math.floor(normalizedAngle / arc) % seg;
       const winner = WHEEL_SEGMENTS[actualIndex];
+      // Random troop count between 100-1000 (segment value is the max hint, actual is random in range)
       const troopCount = winner.troops;
 
-      // Give troops — distribute randomly across unlocked types
-      giveWheelTroops(troopCount);
-      showWheelResult(winner, troopCount);
+      // Give troops first, then show result
+      const chosenTroop = giveWheelTroops(troopCount);
+      showWheelResult(winner, troopCount, chosenTroop);
       updateSpinUI();
     }
   }
@@ -1951,35 +1973,48 @@ function spinWheel() {
 }
 
 function giveWheelTroops(count) {
-  // Distribute to unlocked troop types proportionally
-  const unlocked = Object.keys(TROOPS_CONFIG).filter(id => G.buildings.barracks.level >= TROOPS_CONFIG[id].requiresBarracks);
-  if (unlocked.length === 0) { G.troops.swordsman.count += count; }
-  else {
-    let remaining = count;
-    unlocked.forEach((id, i) => {
-      const share = i === unlocked.length - 1 ? remaining : Math.floor(count / unlocked.length);
-      G.troops[id].count += share;
-      remaining -= share;
-    });
+  // Önce tüm birlik slotlarının var olduğundan emin ol
+  Object.keys(TROOPS_CONFIG).forEach(id => {
+    if (!G.troops[id]) G.troops[id] = { count: 0 };
+  });
+
+  // Açık (kilidi açılmış) birlik türleri
+  const unlocked = Object.keys(TROOPS_CONFIG).filter(
+    id => G.buildings.barracks.level >= TROOPS_CONFIG[id].requiresBarracks
+  );
+
+  // Hiç açık yoksa kılıçlıya ver
+  let chosen = 'swordsman';
+  if (unlocked.length > 0) {
+    chosen = unlocked[Math.floor(Math.random() * unlocked.length)];
   }
+
+  // Güvenli şekilde ekle
+  if (!G.troops[chosen]) G.troops[chosen] = { count: 0 };
+  G.troops[chosen].count = (G.troops[chosen].count || 0) + count;
+
   G.player.xp += 20;
   checkLevelUp();
   saveGame();
   renderAll();
+  updateTopBar();
+  return chosen; // hangi birliğe verildiğini döndür
 }
 
-function showWheelResult(winner, troopCount) {
+function showWheelResult(winner, troopCount, chosenTroop) {
   const resultBox = document.getElementById('wheel-result-box');
   if (!resultBox) return;
+  const troopName = chosenTroop && TROOPS_CONFIG[chosenTroop] ? TROOPS_CONFIG[chosenTroop].name : 'Asker';
+  const troopIcon = chosenTroop && TROOPS_CONFIG[chosenTroop] ? TROOPS_CONFIG[chosenTroop].icon : '⚔️';
   resultBox.style.display = 'block';
   resultBox.innerHTML = `
     <div class="wr-icon">🏆</div>
     <div class="wr-title">TEBRİKLER!</div>
-    <div class="wr-troops">⚔️ +${troopCount} Asker</div>
-    <div class="wr-sub">Birlikler orduna katıldı! Bir sonraki çevirme 12 saat sonra.</div>
+    <div class="wr-troops">${troopIcon} +${troopCount} ${troopName}</div>
+    <div class="wr-sub">Birlikler orduna katıldı! Ordu sekmesinden kontrol edebilirsin.</div>
     <button class="wr-close-btn" onclick="document.getElementById('wheel-result-box').style.display='none'">✅ Harika!</button>
   `;
-  showToast(`🎡 ${troopCount} asker kazandın!`, 'success');
+  showToast(`🎡 +${troopCount} ${troopName} kazandın!`, 'success');
 }
 
 // ============================================================
