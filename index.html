@@ -1,2041 +1,909 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Ton of Empires</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
+<title>Ton of Empires</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --parchment:#f0d99a;--parchment2:#e8c870;
+  --gold:#d4920a;--gold-bright:#f0b030;--gold-light:#ffd060;
+  --red:#c0392b;--red-light:#e74c3c;
+  --green:#2d7a3a;--green-light:#4caf50;
+  --blue:#1a5276;--blue-light:#2e86c1;
+  --wood:#5c3a1e;--muted:#a08060;
+}
+body{background:#1a1008;color:var(--parchment);font-family:'Crimson Text',Georgia,serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 30% 20%,rgba(100,80,30,0.3) 0%,transparent 50%),linear-gradient(160deg,#2a1a08 0%,#0e0a03 100%)}
 
-    :root {
-      --earth:       #2c1a0e;
-      --bark:        #3d2410;
-      --wood:        #5c3a1e;
-      --wood-light:  #7a4f2a;
-      --parchment:   #f0d99a;
-      --parchment2:  #e8c870;
-      --field:       #8b7355;
-      --gold:        #d4920a;
-      --gold-bright: #f0b030;
-      --gold-light:  #ffd060;
-      --red:         #c0392b;
-      --red-light:   #e74c3c;
-      --green:       #2d7a3a;
-      --green-light: #4caf50;
-      --blue:        #1a5276;
-      --blue-light:  #2e86c1;
-      --stone:       #7f8c8d;
-      --stone-light: #aab7b8;
-      --sky:         #5d8aa8;
-      --grass:       #c8a84b;
-      --muted:       #a08060;
-      --border:      rgba(180,130,50,0.4);
-      --border2:     rgba(212,146,10,0.6);
-      --shadow:      rgba(20,10,0,0.6);
-      --overlay:     rgba(15,8,0,0.85);
-    }
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:linear-gradient(180deg,rgba(20,10,0,0.98),rgba(30,16,4,0.95));border-bottom:2px solid;border-image:linear-gradient(90deg,transparent,var(--gold),var(--parchment2),var(--gold),transparent) 1}
+.topbar-inner{display:flex;align-items:center;padding:6px 10px;gap:8px}
+.avatar-wrap{position:relative}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--wood));border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:#2c1a0e;box-shadow:0 0 8px rgba(212,146,10,0.5)}
+.level-ring{position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);background:var(--gold);color:#2c1a0e;font-family:'Cinzel',serif;font-size:9px;font-weight:700;padding:1px 5px;border-radius:6px;white-space:nowrap}
+.player-name{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--parchment);line-height:1.2}
+.player-title{font-size:10px;color:var(--muted)}
+.resources-bar{display:flex;gap:6px;flex:1;justify-content:flex-end;flex-wrap:wrap}
+.res-pill{display:flex;align-items:center;gap:4px;background:rgba(40,22,5,0.8);border:1px solid rgba(180,130,50,0.3);border-radius:20px;padding:3px 8px;font-family:'Cinzel',serif;font-size:11px;font-weight:600}
+.res-pill .ri{font-size:13px}
+.res-pill .rv{color:var(--parchment2)}
+.power-strip{background:rgba(10,5,0,0.7);border-top:1px solid rgba(100,60,10,0.3);padding:3px 10px;display:flex;align-items:center;gap:6px}
+.ps-label{font-size:10px;color:var(--muted);font-family:'Cinzel',serif}
+.ps-bar{flex:1;height:4px;background:rgba(80,50,10,0.6);border-radius:2px;overflow:hidden}
+.ps-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:2px;transition:width 0.5s}
+.ps-val{font-size:10px;color:var(--gold-light);font-family:'Cinzel',serif;font-weight:700}
 
-    body {
-      background: #1a1008;
-      color: var(--parchment);
-      font-family: 'Crimson Text', Georgia, serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+#main{margin-top:78px;margin-bottom:72px;padding:10px}
+.screen{display:none}
+.screen.active{display:block}
+.sec-title{font-family:'Cinzel',serif;font-size:11px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent)}
 
-    /* ─── BACKGROUND MAP TEXTURE ─── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: -2;
-      background:
-        radial-gradient(ellipse at 30% 20%, rgba(100,80,30,0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(60,40,10,0.4) 0%, transparent 50%),
-        linear-gradient(160deg, #2a1a08 0%, #1a1005 40%, #0e0a03 100%);
-    }
+.castle-hero{position:relative;background:linear-gradient(180deg,#1a3020,#0a0e06);border:1px solid rgba(180,130,50,0.5);border-radius:16px;padding:20px;text-align:center;margin-bottom:14px;overflow:hidden}
+.castle-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(180,120,0,0.15),transparent 60%);pointer-events:none}
+.castle-emoji{font-size:90px;line-height:1;display:block;filter:drop-shadow(0 4px 12px rgba(212,146,10,0.4))}
+.castle-name{font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold-light);margin-top:8px;text-shadow:0 2px 8px rgba(212,146,10,0.6);letter-spacing:2px}
+.castle-level{font-size:12px;color:var(--muted);margin-top:2px;font-family:'Cinzel',serif;letter-spacing:1px}
+.xp-bar{height:7px;background:rgba(30,15,0,0.8);border:1px solid rgba(180,130,50,0.3);border-radius:4px;overflow:hidden;margin-top:12px}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,#8b4a00,var(--gold),var(--gold-light));border-radius:4px;transition:width 0.5s}
+.xp-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-family:'Cinzel',serif}
 
-    /* Noise texture overlay */
-    body::after {
-      content: '';
-      position: fixed; inset: 0; z-index: -1; pointer-events: none;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      opacity: 0.4;
-    }
+.buildings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.b-card{background:linear-gradient(160deg,rgba(40,22,5,0.9),rgba(25,12,2,0.95));border:1px solid rgba(120,80,20,0.4);border-radius:12px;padding:11px;cursor:pointer;transition:all 0.2s}
+.b-card:active{transform:scale(0.97)}
+.b-card.can-up{border-color:rgba(212,146,10,0.7);box-shadow:0 0 10px rgba(212,146,10,0.2)}
+.b-head{display:flex;align-items:center;justify-content:space-between}
+.b-icon{font-size:30px}
+.b-lvl{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);background:rgba(40,20,0,0.7);padding:2px 6px;border:1px solid rgba(180,130,50,0.3);border-radius:8px}
+.b-name{font-family:'Cinzel',serif;font-size:12px;font-weight:600;margin-top:6px;color:var(--parchment)}
+.b-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.up-btn{width:100%;margin-top:8px;padding:6px;border:1px solid rgba(180,130,50,0.5);border-radius:7px;background:linear-gradient(135deg,rgba(100,60,5,0.8),rgba(60,35,3,0.9));color:var(--parchment2);font-family:'Cinzel',serif;font-size:10px;font-weight:700;cursor:pointer}
+.up-btn:disabled{background:rgba(30,15,0,0.6);color:var(--muted);cursor:not-allowed;border-color:rgba(80,50,10,0.3)}
+.up-prog{height:3px;background:rgba(40,20,0,0.7);border-radius:2px;margin-top:6px;overflow:hidden}
+.up-prog-fill{height:100%;background:var(--blue-light);border-radius:2px}
 
-    /* ─── TOP BAR ─── */
-    #topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: linear-gradient(180deg, rgba(20,10,0,0.98) 0%, rgba(30,16,4,0.95) 100%);
-      border-bottom: 2px solid;
-      border-image: linear-gradient(90deg, transparent, var(--gold), var(--parchment2), var(--gold), transparent) 1;
-      padding: 0;
-    }
+.troop-card{background:linear-gradient(135deg,rgba(35,18,4,0.95),rgba(20,10,2,0.98));border:1px solid rgba(120,80,20,0.4);border-radius:12px;padding:12px;margin-bottom:9px;display:flex;align-items:center;gap:12px}
+.ti-wrap{font-size:42px;flex-shrink:0}
+.t-info{flex:1}
+.t-name{font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--parchment)}
+.t-stats{font-size:11px;color:var(--muted);margin-top:3px}
+.t-count{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.t-acts{display:flex;flex-direction:column;gap:5px}
+.troop-btn{padding:5px 12px;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:11px;font-weight:700;cursor:pointer}
+.troop-btn.train{background:linear-gradient(135deg,#1a4a6a,#0d2a3a);color:var(--parchment);border:1px solid rgba(46,134,193,0.4)}
+.troop-btn.train:disabled{background:rgba(20,10,0,0.6);color:var(--muted);cursor:not-allowed}
+.troop-btn.disband{background:rgba(80,20,10,0.4);color:#c0a080;border:1px solid rgba(150,60,30,0.3);font-size:10px}
 
-    .topbar-inner {
-      display: flex; align-items: center; padding: 6px 10px; gap: 8px;
-    }
+.battle-hero{background:linear-gradient(160deg,#2a0808,#180303);border:1px solid rgba(192,57,43,0.4);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;position:relative;overflow:hidden}
+.battle-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(192,57,43,0.15),transparent 60%)}
+.battle-hero h2{font-family:'Cinzel',serif;font-size:20px;font-weight:900;color:#e74c3c;letter-spacing:3px;text-shadow:0 2px 10px rgba(231,76,60,0.5)}
+.battle-hero p{font-size:12px;color:var(--muted);margin-top:4px}
+.enemy-card{background:linear-gradient(135deg,rgba(35,15,5,0.95),rgba(20,8,2,0.98));border:1px solid rgba(120,60,20,0.4);border-radius:12px;padding:13px;margin-bottom:9px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s}
+.enemy-card:active{border-color:rgba(192,57,43,0.7);transform:scale(0.98)}
+.e-icon{font-size:38px;flex-shrink:0}
+.e-info{flex:1}
+.e-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--parchment)}
+.e-power{font-size:11px;color:var(--muted);margin-top:2px}
+.e-reward{text-align:right}
+.r-gold{color:var(--gold-light);font-family:'Cinzel',serif;font-size:13px;font-weight:700}
+.r-xp{color:var(--green-light);font-size:11px}
+.diff-badge{padding:2px 7px;border-radius:6px;font-family:'Cinzel',serif;font-size:9px;font-weight:700;display:inline-block;margin-top:4px}
+.diff-easy{background:rgba(45,122,58,0.2);color:#4caf50;border:1px solid rgba(45,122,58,0.3)}
+.diff-medium{background:rgba(212,146,10,0.2);color:var(--gold);border:1px solid rgba(212,146,10,0.3)}
+.diff-hard{background:rgba(192,57,43,0.2);color:var(--red-light);border:1px solid rgba(192,57,43,0.3)}
 
-    .player-badge {
-      display: flex; align-items: center; gap: 7px; flex-shrink: 0;
-    }
-    .avatar-wrap {
-      position: relative;
-    }
-    .avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), var(--wood));
-      border: 2px solid var(--gold);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Cinzel', serif;
-      font-weight: 700; font-size: 15px; color: var(--earth);
-      box-shadow: 0 0 8px rgba(212,146,10,0.5);
-    }
-    .level-ring {
-      position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%);
-      background: var(--gold); color: var(--earth);
-      font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
-      padding: 1px 5px; border-radius: 6px;
-      white-space: nowrap;
-      box-shadow: 0 1px 4px var(--shadow);
-    }
-    .player-name {
-      font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
-      color: var(--parchment); line-height: 1.2;
-    }
-    .player-title { font-size: 10px; color: var(--muted); }
+.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(5,2,0,0.88);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:linear-gradient(160deg,#261508,#160b03);border:1px solid rgba(180,130,50,0.5);border-radius:18px;padding:22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.8)}
+.modal h3{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--parchment);margin-bottom:8px}
+.battle-vs{display:flex;align-items:center;justify-content:space-around;padding:14px 0}
+.combatant{text-align:center}
+.combatant .icon{font-size:50px}
+.combatant .lbl{font-size:12px;color:var(--muted);margin-top:4px;font-family:'Cinzel',serif}
+.vs-text{font-family:'Cinzel',serif;font-size:24px;font-weight:900;color:var(--red-light)}
+.pwr-cmp{background:rgba(10,5,0,0.7);border:1px solid rgba(100,60,10,0.3);border-radius:10px;padding:12px;margin-bottom:16px}
+.p-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.pwr-bars{display:flex;gap:3px;margin-top:4px}
+.bar-seg{height:5px;flex:1;border-radius:2px;background:rgba(60,30,5,0.6)}
+.bar-seg.fp{background:var(--blue-light)}
+.bar-seg.fe{background:var(--red-light)}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;padding:12px;border:none;border-radius:10px;font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer}
+.btn-attack{background:linear-gradient(135deg,#7a1010,#5a0808);color:var(--parchment);border:1px solid rgba(192,57,43,0.5)}
+.btn-cancel{background:rgba(40,22,5,0.8);color:var(--muted);border:1px solid rgba(100,60,10,0.3)}
+.result-modal{text-align:center}
+.res-icon{font-size:64px;margin-bottom:8px}
+.res-title{font-family:'Cinzel',serif;font-size:22px;font-weight:900;margin-bottom:4px;letter-spacing:3px}
+.res-title.win{color:var(--gold-light)}
+.res-title.lose{color:var(--red-light)}
+.res-msg{font-size:13px;color:var(--muted);margin-bottom:16px}
+.res-rewards{background:rgba(10,5,0,0.6);border:1px solid rgba(100,60,10,0.3);border-radius:12px;padding:12px;margin-bottom:16px}
+.rw-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;font-family:'Cinzel',serif}
+.collect-btn{width:100%;padding:12px;border:none;border-radius:10px;font-family:'Cinzel',serif;font-size:14px;font-weight:700;cursor:pointer}
 
-    /* Resources row */
-    .resources-bar {
-      display: flex; gap: 6px; flex: 1; justify-content: flex-end; flex-wrap: wrap;
-    }
-    .res-pill {
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(40,22,5,0.8);
-      border: 1px solid rgba(180,130,50,0.3);
-      border-radius: 20px; padding: 3px 8px;
-      font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
-    }
-    .res-pill .ri { font-size: 13px; }
-    .res-pill .rv { color: var(--parchment2); }
+.clan-hdr{background:linear-gradient(160deg,rgba(10,25,40,0.9),rgba(5,15,25,0.95));border:1px solid rgba(30,90,140,0.4);border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+.clan-icon{font-size:60px;display:block}
+.clan-nm{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--blue-light);margin-top:6px}
+.clan-tag{font-size:12px;color:var(--muted)}
+.clan-stats{display:flex;justify-content:space-around;margin-top:12px}
+.clan-stat{text-align:center}
+.c-sv{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--gold)}
+.c-sl{font-size:11px;color:var(--muted)}
+.member-card{background:rgba(25,12,2,0.9);border:1px solid rgba(100,60,10,0.3);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.m-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#0d2a3a);display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:var(--parchment);flex-shrink:0;border:1px solid rgba(46,134,193,0.3)}
+.m-name{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--parchment)}
+.m-power{font-size:12px;color:var(--muted)}
+.m-rank{margin-left:auto;font-size:18px;flex-shrink:0}
+.clan-list-card{background:rgba(25,12,2,0.9);border:1px solid rgba(100,60,10,0.3);border-radius:14px;padding:14px;margin-bottom:10px}
+.cl-top{display:flex;align-items:center;gap:12px}
+.cl-icon{font-size:36px;flex-shrink:0}
+.cl-info{flex:1}
+.cl-name{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--parchment)}
+.cl-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.cl-desc{font-size:12px;color:var(--muted);margin-top:8px;border-top:1px solid rgba(100,60,10,0.3);padding-top:8px}
+.cl-acts{display:flex;gap:8px;margin-top:10px}
+.cl-btn{flex:1;padding:8px;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:11px;font-weight:700;cursor:pointer}
+.cl-btn.join{background:linear-gradient(135deg,rgba(26,82,118,0.9),rgba(13,42,58,0.95));color:var(--parchment);border:1px solid rgba(46,134,193,0.4)}
+.cl-btn.join:disabled{background:rgba(20,10,0,0.5);color:var(--muted);cursor:default}
+.cl-btn.view{background:rgba(40,20,4,0.8);color:var(--muted);border:1px solid rgba(80,50,10,0.3)}
+.clan-tabs{display:flex;gap:6px;margin-bottom:14px}
+.clan-tab-btn{flex:1;padding:8px 4px;border:1px solid rgba(100,60,10,0.3);background:rgba(25,12,2,0.8);color:var(--muted);border-radius:10px;font-family:'Cinzel',serif;font-size:11px;font-weight:600;cursor:pointer}
+.clan-tab-btn.active{background:linear-gradient(135deg,rgba(26,82,118,0.9),rgba(13,42,58,0.95));color:var(--parchment);border-color:rgba(46,134,193,0.5)}
+.danger-btn{width:100%;padding:10px;border:1px solid rgba(192,57,43,0.4);background:rgba(100,20,10,0.2);color:var(--red-light);border-radius:10px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;cursor:pointer;margin-top:10px}
+.success-btn{padding:6px 12px;border:1px solid rgba(76,175,80,0.3);border-radius:8px;background:linear-gradient(135deg,#1a5a2a,#0e3018);color:var(--parchment);font-family:'Cinzel',serif;font-size:11px;font-weight:700;cursor:pointer}
+.reject-btn{padding:6px 12px;border:1px solid rgba(192,57,43,0.3);border-radius:8px;background:rgba(100,20,10,0.3);color:var(--red-light);font-family:'Cinzel',serif;font-size:11px;font-weight:700;cursor:pointer}
+.form-group{margin-bottom:12px}
+.form-lbl{font-family:'Cinzel',serif;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px;display:block}
+.form-input{width:100%;padding:10px 12px;background:rgba(10,5,0,0.7);border:1px solid rgba(120,80,20,0.4);border-radius:10px;color:var(--parchment);font-family:'Crimson Text',serif;font-size:14px;outline:none}
+.form-input:focus{border-color:rgba(212,146,10,0.6)}
+.form-textarea{width:100%;padding:10px 12px;background:rgba(10,5,0,0.7);border:1px solid rgba(120,80,20,0.4);border-radius:10px;color:var(--parchment);font-family:'Crimson Text',serif;font-size:13px;outline:none;resize:none;height:70px}
+.create-btn{width:100%;padding:12px;border:1px solid rgba(212,146,10,0.4);border-radius:12px;background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);font-family:'Cinzel',serif;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px}
+.mpanel{background:rgba(20,10,2,0.9);border:1px solid rgba(100,60,10,0.3);border-radius:16px;padding:18px;margin-bottom:14px}
+.mpanel h3{font-family:'Cinzel',serif;font-size:15px;font-weight:700;margin-bottom:14px;color:var(--parchment)}
 
-    /* power bar below */
-    .power-strip {
-      background: rgba(10,5,0,0.7);
-      border-top: 1px solid rgba(100,60,10,0.3);
-      padding: 3px 10px;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .power-strip .ps-label { font-size: 10px; color: var(--muted); font-family:'Cinzel',serif; }
-    .power-strip .ps-bar { flex:1; height:4px; background:rgba(80,50,10,0.6); border-radius:2px; overflow:hidden; }
-    .power-strip .ps-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:2px; transition:width 0.5s; }
-    .power-strip .ps-val { font-size:10px; color:var(--gold-light); font-family:'Cinzel',serif; font-weight:700; }
+.quest-card{background:linear-gradient(135deg,rgba(35,18,4,0.95),rgba(20,10,2,0.98));border:1px solid rgba(100,60,10,0.35);border-radius:12px;padding:14px;margin-bottom:10px}
+.q-hdr{display:flex;align-items:flex-start;justify-content:space-between}
+.q-icon{font-size:28px}
+.q-info{flex:1;margin-left:10px}
+.q-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--parchment)}
+.q-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.q-reward{text-align:right}
+.qr-gold{color:var(--gold);font-family:'Cinzel',serif;font-size:12px;font-weight:700}
+.q-prog-bar{height:6px;background:rgba(30,15,0,0.7);border-radius:3px;overflow:hidden;border:1px solid rgba(80,50,10,0.3);margin-top:10px}
+.q-prog-fill{height:100%;background:linear-gradient(90deg,#2d7a3a,#4caf50);border-radius:3px;transition:width 0.4s}
+.q-prog-lbl{font-size:11px;color:var(--muted);margin-top:3px;display:flex;justify-content:space-between;font-family:'Cinzel',serif}
+.claim-btn{width:100%;margin-top:10px;padding:8px;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;cursor:pointer}
+.claim-btn:not(:disabled){background:linear-gradient(135deg,#1a5a2a,#0e3018);color:var(--parchment);border:1px solid rgba(76,175,80,0.4)}
+.claim-btn:disabled{background:rgba(20,10,0,0.5);color:var(--muted);cursor:default;border:1px solid rgba(60,30,5,0.2)}
 
-    /* ─── MAIN ─── */
-    #main {
-      margin-top: 78px;
-      margin-bottom: 72px;
-      padding: 10px;
-    }
+.rw-hero{position:relative;background:linear-gradient(160deg,#1a1205,#0e0a03);border:1px solid rgba(212,146,10,0.4);border-radius:16px;padding:20px;text-align:center;margin-bottom:14px;overflow:hidden}
+.rw-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(212,146,10,0.18),transparent 65%);pointer-events:none}
+.rw-hero-icon{font-size:52px;line-height:1}
+.rw-hero-title{font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold-light);letter-spacing:4px;margin-top:8px;text-shadow:0 2px 10px rgba(212,146,10,0.5)}
+.rw-hero-sub{font-size:12px;color:var(--muted);margin-top:4px}
+#wheel-container{display:flex;flex-direction:column;align-items:center;gap:14px}
+.wheel-wrap{position:relative;width:300px;height:300px;filter:drop-shadow(0 8px 24px rgba(212,146,10,0.3))}
+.wheel-ptr{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:28px;color:var(--gold-light);z-index:10;text-shadow:0 2px 8px rgba(212,146,10,0.8)}
+#wheel-canvas{border-radius:50%;display:block}
+.wt-lbl{font-family:'Cinzel',serif;font-size:11px;color:var(--muted);letter-spacing:1px}
+.wt-time{font-family:'Cinzel',serif;font-size:22px;font-weight:900;color:var(--gold-light);text-shadow:0 2px 8px rgba(212,146,10,0.4);margin-top:4px}
+#wheel-timer-box{text-align:center}
+.spin-btn{width:200px;padding:14px;background:linear-gradient(135deg,#8a5a08,#5a3a04);border:2px solid var(--gold);border-radius:14px;color:var(--parchment2);font-family:'Cinzel',serif;font-size:16px;font-weight:900;cursor:pointer;letter-spacing:2px;transition:all 0.2s;box-shadow:0 4px 16px rgba(212,146,10,0.3)}
+.spin-btn:hover:not(:disabled){background:linear-gradient(135deg,#aa7010,#7a5008);transform:translateY(-1px)}
+.spin-btn:disabled{background:rgba(30,15,2,0.7);color:var(--muted);border-color:rgba(100,60,10,0.3);cursor:not-allowed;box-shadow:none;transform:none}
+#wheel-result-box{background:linear-gradient(160deg,rgba(30,18,3,0.95),rgba(15,8,1,0.98));border:2px solid var(--gold);border-radius:16px;padding:20px;text-align:center;width:100%;box-shadow:0 0 30px rgba(212,146,10,0.2)}
+.wr-icon{font-size:56px}
+.wr-title{font-family:'Cinzel',serif;font-size:20px;font-weight:900;color:var(--gold-light);margin:8px 0 4px;letter-spacing:2px}
+.wr-troops{font-family:'Cinzel',serif;font-size:28px;font-weight:900;color:var(--parchment);margin:6px 0}
+.wr-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.wr-close-btn{padding:10px 28px;border:1px solid rgba(212,146,10,0.4);border-radius:10px;background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer}
 
-    /* ─── SCREENS ─── */
-    .screen { display: none; }
-    .screen.active { display: block; }
+#toast-container{position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:rgba(20,10,2,0.95);border:1px solid;border-radius:12px;padding:8px 16px;font-family:'Cinzel',serif;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.5);animation:tIn 0.3s ease,tOut 0.3s ease 2.2s forwards}
+.toast.success{border-color:rgba(76,175,80,0.6);color:#4caf50}
+.toast.error{border-color:rgba(192,57,43,0.6);color:var(--red-light)}
+.toast.info{border-color:rgba(212,146,10,0.5);color:var(--gold)}
+@keyframes tIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tOut{from{opacity:1}to{opacity:0}}
 
-    /* ─── SECTION TITLE ─── */
-    .section-title {
-      font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
-      color: var(--gold); text-transform: uppercase; letter-spacing: 2px;
-      margin-bottom: 10px; margin-top: 4px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .section-title::after {
-      content: ''; flex: 1; height: 1px;
-      background: linear-gradient(90deg, var(--gold), transparent);
-    }
+.idle-popup{position:fixed;inset:0;z-index:150;background:rgba(5,2,0,0.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px}
+.idle-box{background:linear-gradient(160deg,#261508,#160b03);border:2px solid var(--gold);border-radius:20px;padding:28px;text-align:center;width:100%;max-width:320px}
+.idle-icon{font-size:56px}
+.idle-box h3{font-family:'Cinzel',serif;font-size:18px;font-weight:700;margin:10px 0 4px;color:var(--gold-light);letter-spacing:2px}
+.idle-box p{font-size:13px;color:var(--muted)}
+.idle-amount{font-family:'Cinzel',serif;font-size:32px;font-weight:900;color:var(--gold);margin:12px 0}
 
-    /* ─── CASTLE SCREEN ─── */
-    .castle-hero {
-      position: relative;
-      background: linear-gradient(180deg, #1a3020 0%, #0e1a10 50%, #0a0e06 100%);
-      border: 1px solid;
-      border-image: linear-gradient(135deg, var(--gold-bright), var(--wood), var(--gold)) 1;
-      border-radius: 16px; overflow: hidden;
-      padding: 20px; text-align: center;
-      margin-bottom: 14px;
-    }
-    .castle-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(ellipse at 50% 30%, rgba(180,120,0,0.15) 0%, transparent 60%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,220,100,0.15)'/%3E%3C/svg%3E") repeat;
-      pointer-events: none;
-    }
-
-    /* Decorative corner lines */
-    .castle-hero::after {
-      content: '';
-      position: absolute; top:8px; left:8px; right:8px; bottom:8px;
-      border: 1px solid rgba(212,146,10,0.15);
-      border-radius: 12px; pointer-events: none;
-    }
-
-    .castle-emoji { font-size: 90px; line-height:1; display:block; filter:drop-shadow(0 4px 12px rgba(212,146,10,0.4)); }
-    .castle-name {
-      font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
-      color: var(--gold-light); margin-top: 8px;
-      text-shadow: 0 2px 8px rgba(212,146,10,0.6);
-      letter-spacing: 2px;
-    }
-    .castle-level {
-      font-size: 12px; color: var(--muted); margin-top: 2px;
-      font-family: 'Cinzel', serif; letter-spacing: 1px;
-    }
-    .xp-bar-wrap { margin-top: 12px; }
-    .xp-bar {
-      height: 7px; background: rgba(30,15,0,0.8);
-      border: 1px solid rgba(180,130,50,0.3);
-      border-radius: 4px; overflow: hidden;
-    }
-    .xp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #8b4a00, var(--gold), var(--gold-light));
-      border-radius: 4px; transition: width 0.5s;
-      box-shadow: 0 0 6px rgba(212,146,10,0.5);
-    }
-    .xp-label { font-size: 11px; color: var(--muted); margin-top: 4px; font-family:'Cinzel',serif; }
-
-    /* ─── BUILDINGS GRID ─── */
-    .buildings-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
-      margin-bottom: 16px;
-    }
-    .building-card {
-      background: linear-gradient(160deg, rgba(40,22,5,0.9) 0%, rgba(25,12,2,0.95) 100%);
-      border: 1px solid rgba(120,80,20,0.4);
-      border-radius: 12px; padding: 11px;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative; overflow: hidden;
-    }
-    .building-card::before {
-      content: ''; position:absolute; inset:0; border-radius:12px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(212,146,10,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .building-card:active { transform: scale(0.97); }
-    .building-card.can-upgrade {
-      border-color: rgba(212,146,10,0.7);
-      box-shadow: 0 0 10px rgba(212,146,10,0.2);
-    }
-    .b-header { display: flex; align-items: center; justify-content: space-between; }
-    .b-icon { font-size: 30px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-    .b-lvl {
-      font-family: 'Cinzel', serif; font-size: 10px; color: var(--gold);
-      background: rgba(40,20,0,0.7); padding: 2px 6px;
-      border: 1px solid rgba(180,130,50,0.3); border-radius: 8px;
-    }
-    .b-name { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; margin-top: 6px; color: var(--parchment); }
-    .b-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .upgrade-btn {
-      width: 100%; margin-top: 8px; padding: 6px;
-      border: 1px solid;
-      border-image: linear-gradient(90deg, var(--gold), var(--parchment2)) 1;
-      border-radius: 7px;
-      background: linear-gradient(135deg, rgba(100,60,5,0.8), rgba(60,35,3,0.9));
-      color: var(--parchment2);
-      font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; cursor: pointer;
-      transition: all 0.2s; letter-spacing: 0.5px;
-    }
-    .upgrade-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(140,85,10,0.9), rgba(90,50,5,0.95));
-    }
-    .upgrade-btn:disabled {
-      background: rgba(30,15,0,0.6);
-      color: var(--muted); cursor: not-allowed;
-      border-image: none; border-color: rgba(80,50,10,0.3);
-    }
-    .upgrade-progress {
-      height: 3px; background: rgba(40,20,0,0.7); border-radius: 2px; margin-top: 6px; overflow: hidden;
-    }
-    .upgrade-progress-fill { height: 100%; background: var(--blue-light); border-radius: 2px; }
-
-    /* ─── TROOPS ─── */
-    .troop-card {
-      background: linear-gradient(135deg, rgba(35,18,4,0.95) 0%, rgba(20,10,2,0.98) 100%);
-      border: 1px solid rgba(120,80,20,0.4);
-      border-radius: 12px; padding: 12px;
-      margin-bottom: 9px;
-      display: flex; align-items: center; gap: 12px;
-      transition: border-color 0.2s;
-    }
-    .troop-card:hover { border-color: rgba(180,130,50,0.5); }
-    .t-icon-wrap { font-size: 42px; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
-    .t-info { flex: 1; }
-    .t-name { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: var(--parchment); }
-    .t-stats { font-size: 11px; color: var(--muted); margin-top: 3px; }
-    .t-count { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 700; color: var(--gold); }
-    .t-actions { display: flex; flex-direction: column; gap: 5px; }
-    .troop-btn {
-      padding: 5px 12px; border: none; border-radius: 8px;
-      font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
-    }
-    .troop-btn.train {
-      background: linear-gradient(135deg, #1a4a6a, #0d2a3a);
-      color: var(--parchment); border: 1px solid rgba(46,134,193,0.4);
-    }
-    .troop-btn.train:disabled { background: rgba(20,10,0,0.6); color: var(--muted); cursor: not-allowed; border-color: rgba(80,50,10,0.2); }
-    .troop-btn.disband {
-      background: rgba(80,20,10,0.4); color: #c0a080;
-      border: 1px solid rgba(150,60,30,0.3); font-size: 10px;
-    }
-
-    /* ─── BATTLE ─── */
-    .battle-hero {
-      background: linear-gradient(160deg, #2a0808 0%, #180303 100%);
-      border: 1px solid rgba(192,57,43,0.4);
-      border-radius: 16px; padding: 16px;
-      text-align: center; margin-bottom: 14px;
-      position: relative; overflow: hidden;
-    }
-    .battle-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(192,57,43,0.15) 0%, transparent 60%);
-    }
-    .battle-hero h2 {
-      font-family: 'Cinzel', serif; font-size: 20px; font-weight: 900;
-      color: #e74c3c; letter-spacing: 3px;
-      text-shadow: 0 2px 10px rgba(231,76,60,0.5);
-    }
-    .battle-hero p { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-    .enemy-card {
-      background: linear-gradient(135deg, rgba(35,15,5,0.95), rgba(20,8,2,0.98));
-      border: 1px solid rgba(120,60,20,0.4);
-      border-radius: 12px; padding: 13px;
-      margin-bottom: 9px;
-      display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .enemy-card:active { border-color: rgba(192,57,43,0.7); transform: scale(0.98); }
-    .e-icon { font-size: 38px; flex-shrink: 0; }
-    .e-info { flex: 1; }
-    .e-name { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; color: var(--parchment); }
-    .e-power { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .e-reward { text-align: right; }
-    .r-gold { color: var(--gold-light); font-family:'Cinzel',serif; font-size: 13px; font-weight: 700; }
-    .r-xp { color: var(--green-light); font-size: 11px; }
-    .difficulty-badge {
-      padding: 2px 7px; border-radius: 6px;
-      font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700;
-      display: inline-block; margin-top: 4px; letter-spacing: 0.5px;
-    }
-    .diff-easy { background: rgba(45,122,58,0.2); color: #4caf50; border: 1px solid rgba(45,122,58,0.3); }
-    .diff-medium { background: rgba(212,146,10,0.2); color: var(--gold); border: 1px solid rgba(212,146,10,0.3); }
-    .diff-hard { background: rgba(192,57,43,0.2); color: var(--red-light); border: 1px solid rgba(192,57,43,0.3); }
-
-    /* ─── MODALS ─── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(5,2,0,0.88);
-      backdrop-filter: blur(3px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.2s ease;
-    }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .modal {
-      background: linear-gradient(160deg, #261508 0%, #160b03 100%);
-      border: 1px solid rgba(180,130,50,0.5);
-      border-radius: 18px; padding: 22px; width: 100%; max-width: 360px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(212,146,10,0.2);
-      animation: slideUp 0.25s ease;
-    }
-    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-    .modal h3 {
-      font-family: 'Cinzel', serif; font-size: 17px; font-weight: 700;
-      color: var(--parchment); margin-bottom: 8px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-    }
-    .battle-vs {
-      display: flex; align-items: center; justify-content: space-around;
-      padding: 14px 0;
-    }
-    .combatant { text-align: center; }
-    .combatant .icon { font-size: 50px; }
-    .combatant .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; font-family:'Cinzel',serif; }
-    .vs-text {
-      font-family: 'Cinzel', serif; font-size: 24px; font-weight: 900;
-      color: var(--red-light);
-      text-shadow: 0 2px 8px rgba(231,76,60,0.5);
-    }
-    .power-compare {
-      background: rgba(10,5,0,0.7); border: 1px solid rgba(100,60,10,0.3);
-      border-radius: 10px; padding: 12px; margin-bottom: 16px;
-    }
-    .p-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
-    .power-bar-wrap { display:flex; gap:3px; margin-top:4px; }
-    .bar-seg { height:5px; flex:1; border-radius:2px; background:rgba(60,30,5,0.6); }
-    .bar-seg.fill-player { background: var(--blue-light); }
-    .bar-seg.fill-enemy { background: var(--red-light); }
-    .modal-btns { display:flex; gap:10px; }
-    .modal-btns button {
-      flex:1; padding:12px; border:none; border-radius:10px;
-      font-family:'Cinzel',serif; font-size:13px; font-weight:700; cursor:pointer;
-      transition: all 0.2s;
-    }
-    .btn-attack {
-      background: linear-gradient(135deg, #7a1010, #5a0808);
-      color: var(--parchment);
-      border: 1px solid rgba(192,57,43,0.5);
-    }
-    .btn-attack:hover { background: linear-gradient(135deg, #9a1a1a, #7a1010); }
-    .btn-cancel {
-      background: rgba(40,22,5,0.8); color: var(--muted);
-      border: 1px solid rgba(100,60,10,0.3);
-    }
-
-    /* ─── BATTLE RESULT ─── */
-    .result-modal { text-align: center; }
-    .result-icon { font-size: 64px; margin-bottom: 8px; }
-    .result-title { font-family:'Cinzel',serif; font-size: 22px; font-weight: 900; margin-bottom: 4px; letter-spacing: 3px; }
-    .result-title.win { color: var(--gold-light); text-shadow: 0 2px 10px rgba(212,146,10,0.5); }
-    .result-title.lose { color: var(--red-light); }
-    .result-msg { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-    .result-rewards {
-      background: rgba(10,5,0,0.6); border: 1px solid rgba(100,60,10,0.3);
-      border-radius: 12px; padding: 12px; margin-bottom: 16px;
-    }
-    .reward-row { display:flex; justify-content:space-between; font-size:14px; margin-bottom:6px; font-family:'Cinzel',serif; }
-    .collect-btn {
-      width:100%; padding:12px; border:none; border-radius:10px;
-      font-family:'Cinzel',serif; font-size:14px; font-weight:700; cursor:pointer;
-    }
-
-    /* ─── CLAN ─── */
-    .clan-header {
-      background: linear-gradient(160deg, rgba(10,25,40,0.9), rgba(5,15,25,0.95));
-      border: 1px solid rgba(30,90,140,0.4);
-      border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: center;
-    }
-    .clan-icon { font-size: 60px; display: block; }
-    .clan-name {
-      font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700;
-      color: var(--blue-light); margin-top: 6px;
-    }
-    .clan-tag { font-size: 12px; color: var(--muted); }
-    .clan-stats { display:flex; justify-content:space-around; margin-top:12px; }
-    .clan-stat { text-align: center; }
-    .clan-stat .sv { font-family:'Cinzel',serif; font-size: 18px; font-weight: 700; color: var(--gold); }
-    .clan-stat .sl { font-size: 11px; color: var(--muted); }
-
-    .member-card {
-      background: rgba(25,12,2,0.9); border: 1px solid rgba(100,60,10,0.3);
-      border-radius: 12px; padding: 12px; margin-bottom: 8px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .m-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--blue), #0d2a3a);
-      display: flex; align-items: center; justify-content: center;
-      font-family:'Cinzel',serif; font-weight: 700; font-size: 15px;
-      color: var(--parchment); flex-shrink: 0;
-      border: 1px solid rgba(46,134,193,0.3);
-    }
-    .m-name { font-family:'Cinzel',serif; font-size: 13px; font-weight: 600; color: var(--parchment); }
-    .m-power { font-size: 12px; color: var(--muted); }
-    .m-rank { margin-left: auto; font-size: 18px; flex-shrink: 0; }
-
-    .clan-list-card {
-      background: rgba(25,12,2,0.9); border: 1px solid rgba(100,60,10,0.3);
-      border-radius: 14px; padding: 14px; margin-bottom: 10px;
-    }
-    .cl-top { display:flex; align-items:center; gap:12px; }
-    .cl-icon { font-size: 36px; flex-shrink: 0; }
-    .cl-info { flex: 1; }
-    .cl-name { font-family:'Cinzel',serif; font-size: 15px; font-weight: 700; color: var(--parchment); }
-    .cl-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .cl-desc { font-size: 12px; color: var(--muted); margin-top: 8px; border-top: 1px solid rgba(100,60,10,0.3); padding-top: 8px; }
-    .cl-actions { display:flex; gap:8px; margin-top:10px; }
-    .cl-btn {
-      flex:1; padding:8px; border:none; border-radius:8px;
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; cursor:pointer;
-    }
-    .cl-btn.join {
-      background: linear-gradient(135deg, rgba(26,82,118,0.9), rgba(13,42,58,0.95));
-      color: var(--parchment); border: 1px solid rgba(46,134,193,0.4);
-    }
-    .cl-btn.join:disabled { background: rgba(20,10,0,0.5); color: var(--muted); border-color: rgba(60,30,5,0.3); cursor:default; }
-    .cl-btn.view { background: rgba(40,20,4,0.8); color: var(--muted); border: 1px solid rgba(80,50,10,0.3); }
-
-    .req-badge {
-      display: inline-block; padding: 2px 8px; border-radius: 8px;
-      font-family:'Cinzel',serif; font-size: 10px; font-weight: 700;
-      background: rgba(180,110,0,0.15); color: var(--gold);
-      border: 1px solid rgba(180,110,0,0.3);
-    }
-    .clan-tabs { display:flex; gap:6px; margin-bottom:14px; }
-    .clan-tab-btn {
-      flex:1; padding:8px 4px;
-      border: 1px solid rgba(100,60,10,0.3);
-      background: rgba(25,12,2,0.8); color: var(--muted);
-      border-radius: 10px; font-family:'Cinzel',serif; font-size:11px; font-weight:600; cursor:pointer;
-      transition: all 0.2s;
-    }
-    .clan-tab-btn.active {
-      background: linear-gradient(135deg, rgba(26,82,118,0.9), rgba(13,42,58,0.95));
-      color: var(--parchment); border-color: rgba(46,134,193,0.5);
-    }
-    .danger-btn {
-      width:100%; padding:10px;
-      border: 1px solid rgba(192,57,43,0.4);
-      background: rgba(100,20,10,0.2); color: var(--red-light);
-      border-radius:10px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; cursor:pointer;
-      margin-top:10px;
-    }
-    .success-btn {
-      padding:6px 12px; border:none; border-radius:8px;
-      background: linear-gradient(135deg, #1a5a2a, #0e3018);
-      color: var(--parchment);
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; cursor:pointer;
-      border: 1px solid rgba(76,175,80,0.3);
-    }
-    .reject-btn {
-      padding:6px 12px; border:none; border-radius:8px;
-      background: rgba(100,20,10,0.3); color: var(--red-light);
-      font-family:'Cinzel',serif; font-size:11px; font-weight:700; cursor:pointer;
-      border: 1px solid rgba(192,57,43,0.3);
-    }
-    .form-group { margin-bottom: 12px; }
-    .form-label {
-      font-family:'Cinzel',serif; font-size: 11px; color: var(--muted); font-weight: 600;
-      margin-bottom: 4px; display: block; letter-spacing: 0.5px;
-    }
-    .form-input {
-      width: 100%; padding: 10px 12px;
-      background: rgba(10,5,0,0.7); border: 1px solid rgba(120,80,20,0.4);
-      border-radius: 10px; color: var(--parchment); font-family:'Crimson Text',serif; font-size: 14px;
-      outline: none; transition: border-color 0.2s;
-    }
-    .form-input:focus { border-color: rgba(212,146,10,0.6); }
-    .form-textarea {
-      width: 100%; padding: 10px 12px;
-      background: rgba(10,5,0,0.7); border: 1px solid rgba(120,80,20,0.4);
-      border-radius: 10px; color: var(--parchment); font-family:'Crimson Text',serif; font-size: 13px;
-      outline: none; resize: none; height: 70px; transition: border-color 0.2s;
-    }
-    .form-textarea:focus { border-color: rgba(212,146,10,0.6); }
-    .create-btn {
-      width:100%; padding:12px; border:none; border-radius:12px;
-      background: linear-gradient(135deg, #7a5010, #4a2e08);
-      color: var(--parchment2); font-family:'Cinzel',serif; font-size:14px; font-weight:800;
-      cursor:pointer; margin-top:4px;
-      border: 1px solid rgba(212,146,10,0.4);
-      transition: all 0.2s;
-    }
-    .create-btn:hover { background: linear-gradient(135deg, #9a6a18, #6a4010); }
-    .modal-panel {
-      background: rgba(20,10,2,0.9); border: 1px solid rgba(100,60,10,0.3);
-      border-radius: 16px; padding: 18px; margin-bottom: 14px;
-    }
-    .modal-panel h3 { font-family:'Cinzel',serif; font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--parchment); }
-
-    /* ─── QUESTS ─── */
-    .quest-card {
-      background: linear-gradient(135deg, rgba(35,18,4,0.95), rgba(20,10,2,0.98));
-      border: 1px solid rgba(100,60,10,0.35);
-      border-radius: 12px; padding: 14px; margin-bottom: 10px;
-      transition: border-color 0.2s;
-    }
-    .q-header { display:flex; align-items:flex-start; justify-content:space-between; }
-    .q-icon { font-size: 28px; }
-    .q-info { flex:1; margin-left:10px; }
-    .q-name { font-family:'Cinzel',serif; font-size: 13px; font-weight: 700; color: var(--parchment); }
-    .q-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .q-reward { text-align: right; }
-    .qr-gold { color: var(--gold); font-family:'Cinzel',serif; font-size: 12px; font-weight: 700; }
-    .quest-progress { margin-top: 10px; }
-    .q-prog-bar { height: 6px; background: rgba(30,15,0,0.7); border-radius: 3px; overflow: hidden; border: 1px solid rgba(80,50,10,0.3); }
-    .q-prog-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #2d7a3a, #4caf50);
-      border-radius: 3px; transition: width 0.4s;
-      box-shadow: 0 0 4px rgba(76,175,80,0.4);
-    }
-    .q-prog-label { font-size: 11px; color: var(--muted); margin-top: 3px; display:flex; justify-content:space-between; font-family:'Cinzel',serif; }
-    .claim-btn {
-      width:100%; margin-top:10px; padding:8px;
-      border:none; border-radius:8px;
-      font-family:'Cinzel',serif; font-size:12px; font-weight:700; cursor:pointer;
-      transition: all 0.2s;
-    }
-    .claim-btn:not(:disabled) {
-      background: linear-gradient(135deg, #1a5a2a, #0e3018);
-      color: var(--parchment); border: 1px solid rgba(76,175,80,0.4);
-    }
-    .claim-btn:disabled {
-      background: rgba(20,10,0,0.5); color: var(--muted); cursor: default;
-      border: 1px solid rgba(60,30,5,0.2);
-    }
-
-    /* ─── TOASTS ─── */
-    #toast-container {
-      position: fixed; top: 88px; left: 50%; transform: translateX(-50%);
-      z-index: 300; display:flex; flex-direction:column; gap:6px; pointer-events:none;
-    }
-    .toast {
-      background: rgba(20,10,2,0.95);
-      border: 1px solid;
-      border-radius: 12px; padding: 8px 16px;
-      font-family:'Cinzel',serif; font-size: 12px; font-weight: 600;
-      white-space: nowrap;
-      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .toast.success { border-color: rgba(76,175,80,0.6); color: #4caf50; }
-    .toast.error { border-color: rgba(192,57,43,0.6); color: var(--red-light); }
-    .toast.info { border-color: rgba(212,146,10,0.5); color: var(--gold); }
-    @keyframes toastIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes toastOut { from{opacity:1} to{opacity:0} }
-
-    /* ─── IDLE POPUP ─── */
-    .idle-popup {
-      position: fixed; inset: 0; z-index: 150;
-      background: rgba(5,2,0,0.85);
-      backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center; padding: 20px;
-    }
-    .idle-box {
-      background: linear-gradient(160deg, #261508, #160b03);
-      border: 2px solid var(--gold);
-      border-radius: 20px; padding: 28px; text-align: center;
-      width: 100%; max-width: 320px;
-      box-shadow: 0 0 40px rgba(212,146,10,0.2);
-    }
-    .idle-icon { font-size: 56px; }
-    .idle-box h3 { font-family:'Cinzel',serif; font-size: 18px; font-weight: 700; margin: 10px 0 4px; color: var(--gold-light); letter-spacing:2px; }
-    .idle-box p { font-size: 13px; color: var(--muted); }
-    .idle-amount { font-family:'Cinzel',serif; font-size: 32px; font-weight: 900; color: var(--gold); margin: 12px 0; text-shadow: 0 2px 8px rgba(212,146,10,0.4); }
-
-    /* ─── TABS ─── */
-    #tabs {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: linear-gradient(0deg, rgba(8,4,0,0.99) 0%, rgba(20,10,2,0.97) 100%);
-      border-top: 2px solid;
-      border-image: linear-gradient(90deg, transparent, var(--gold), var(--parchment2), var(--gold), transparent) 1;
-      overflow-x: auto; overflow-y: hidden;
-      display: flex; padding: 0;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    #tabs::-webkit-scrollbar { display: none; }
-    #tabs-inner {
-      display: flex; flex-direction: row;
-      min-width: max-content;
-      padding: 0 4px;
-    }
-    .tab-btn {
-      flex-shrink: 0;
-      min-width: 68px;
-      padding: 9px 10px 7px;
-      background: none; border: none; color: rgba(140,100,40,0.7);
-      cursor: pointer; font-family:'Cinzel',serif; font-size: 9px; font-weight: 600;
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      transition: all 0.2s; letter-spacing: 0.5px; position: relative;
-    }
-    .tab-btn .t-icon { font-size: 21px; transition: transform 0.2s; }
-    .tab-btn.active { color: var(--gold-light); }
-    .tab-btn.active .t-icon { transform: translateY(-1px); }
-    .tab-btn.active::before {
-      content: ''; position: absolute; top: 0; left: 15%; right: 15%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
-    }
-    /* Fade edges to hint scrollability */
-    #tabs::before, #tabs::after {
-      content: ''; position: absolute; top: 0; bottom: 0; width: 18px;
-      pointer-events: none; z-index: 2;
-    }
-    #tabs::before {
-      left: 0;
-      background: linear-gradient(90deg, rgba(8,4,0,0.8), transparent);
-    }
-    #tabs::after {
-      right: 0;
-      background: linear-gradient(270deg, rgba(8,4,0,0.8), transparent);
-    }
-
-    /* ─── REWARD SCREEN ─── */
-    .reward-hero {
-      background: linear-gradient(160deg, #1a1205 0%, #0e0a03 100%);
-      border: 1px solid rgba(212,146,10,0.4);
-      border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 14px;
-      position: relative; overflow: hidden;
-    }
-    .reward-hero::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(212,146,10,0.18) 0%, transparent 65%);
-      pointer-events: none;
-    }
-    .reward-hero-icon { font-size: 52px; line-height:1; }
-    .reward-hero-title {
-      font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
-      color: var(--gold-light); letter-spacing: 4px; margin-top: 8px;
-      text-shadow: 0 2px 10px rgba(212,146,10,0.5);
-    }
-    .reward-hero-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-    #wheel-container { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-
-    .wheel-wrap {
-      position: relative; width: 300px; height: 300px;
-      filter: drop-shadow(0 8px 24px rgba(212,146,10,0.3));
-    }
-    .wheel-pointer {
-      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-      font-size: 28px; color: var(--gold-light); z-index: 10;
-      text-shadow: 0 2px 8px rgba(212,146,10,0.8);
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-    }
-    #wheel-canvas { border-radius: 50%; cursor: pointer; display: block; }
-
-    .wt-label { font-family: 'Cinzel', serif; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
-    .wt-time {
-      font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900;
-      color: var(--gold-light); text-shadow: 0 2px 8px rgba(212,146,10,0.4);
-      margin-top: 4px;
-    }
-    #wheel-timer-box { text-align: center; }
-
-    .spin-btn {
-      width: 200px; padding: 14px;
-      background: linear-gradient(135deg, #8a5a08, #5a3a04);
-      border: 2px solid var(--gold);
-      border-radius: 14px;
-      color: var(--parchment2); font-family: 'Cinzel', serif;
-      font-size: 16px; font-weight: 900; cursor: pointer; letter-spacing: 2px;
-      transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(212,146,10,0.3);
-    }
-    .spin-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #aa7010, #7a5008);
-      box-shadow: 0 6px 20px rgba(212,146,10,0.5);
-      transform: translateY(-1px);
-    }
-    .spin-btn:disabled {
-      background: rgba(30,15,2,0.7); color: var(--muted);
-      border-color: rgba(100,60,10,0.3); cursor: not-allowed;
-      box-shadow: none; transform: none;
-    }
-
-    #wheel-result-box {
-      background: linear-gradient(160deg, rgba(30,18,3,0.95), rgba(15,8,1,0.98));
-      border: 2px solid var(--gold);
-      border-radius: 16px; padding: 20px; text-align: center; width: 100%;
-      animation: slideUp 0.4s ease;
-      box-shadow: 0 0 30px rgba(212,146,10,0.2);
-    }
-    .wr-icon { font-size: 56px; }
-    .wr-title { font-family:'Cinzel',serif; font-size:20px; font-weight:900; color:var(--gold-light); margin:8px 0 4px; letter-spacing:2px; }
-    .wr-troops { font-family:'Cinzel',serif; font-size:28px; font-weight:900; color:var(--parchment); margin: 6px 0; }
-    .wr-sub { font-size:12px; color:var(--muted); margin-bottom:14px; }
-    .wr-close-btn {
-      padding: 10px 28px; border: 1px solid rgba(212,146,10,0.4);
-      border-radius: 10px; background: linear-gradient(135deg,#7a5010,#4a2e08);
-      color: var(--parchment2); font-family:'Cinzel',serif;
-      font-size:13px; font-weight:700; cursor:pointer;
-    }
-
-    /* ─── SCROLLBAR ─── */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: rgba(10,5,0,0.5); }
-    ::-webkit-scrollbar-thumb { background: rgba(120,80,20,0.5); border-radius: 2px; }
-  </style>
+#tabs{position:fixed;bottom:0;left:0;right:0;z-index:100;background:linear-gradient(0deg,rgba(8,4,0,0.99),rgba(20,10,2,0.97));border-top:2px solid;border-image:linear-gradient(90deg,transparent,var(--gold),var(--parchment2),var(--gold),transparent) 1;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+#tabs-inner{display:flex;min-width:max-content;padding:0 4px}
+.tab-btn{flex-shrink:0;min-width:66px;padding:9px 8px 7px;background:none;border:none;color:rgba(140,100,40,0.7);cursor:pointer;font-family:'Cinzel',serif;font-size:9px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;transition:all 0.2s;letter-spacing:0.5px;position:relative}
+.tab-btn .t-icon{font-size:20px;transition:transform 0.2s}
+.tab-btn.active{color:var(--gold-light)}
+.tab-btn.active .t-icon{transform:translateY(-1px)}
+.tab-btn.active::before{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,var(--gold-light),transparent)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:rgba(10,5,0,0.5)}
+::-webkit-scrollbar-thumb{background:rgba(120,80,20,0.5);border-radius:2px}
+</style>
 </head>
 <body>
-
-<!-- TOP BAR -->
 <div id="topbar">
   <div class="topbar-inner">
-    <div class="player-badge">
+    <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
       <div class="avatar-wrap">
-        <div class="avatar" id="user-avatar">K</div>
-        <div class="level-ring" id="user-level-badge">Sv.1</div>
+        <div class="avatar" id="ua">K</div>
+        <div class="level-ring" id="ulb">Sv.1</div>
       </div>
       <div>
-        <div class="player-name" id="user-name">Komutan</div>
+        <div class="player-name" id="un">Komutan</div>
         <div class="player-title">İmparator</div>
       </div>
     </div>
     <div class="resources-bar">
-      <div class="res-pill"><span class="ri">🪙</span><span class="rv" id="res-gold">500</span></div>
-      <div class="res-pill"><span class="ri">🌾</span><span class="rv" id="res-food">200</span></div>
-      <div class="res-pill"><span class="ri">⚔️</span><span class="rv" id="res-power">0</span></div>
+      <div class="res-pill"><span class="ri">🪙</span><span class="rv" id="rg">500</span></div>
+      <div class="res-pill"><span class="ri">🌾</span><span class="rv" id="rf">200</span></div>
+      <div class="res-pill"><span class="ri">⚔️</span><span class="rv" id="rp">0</span></div>
     </div>
   </div>
   <div class="power-strip">
     <span class="ps-label">XP</span>
-    <div class="ps-bar"><div class="ps-fill" id="xp-fill" style="width:0%"></div></div>
-    <span class="ps-val" id="xp-label-top">0/100</span>
+    <div class="ps-bar"><div class="ps-fill" id="xpf" style="width:0%"></div></div>
+    <span class="ps-val" id="xpl">0/100</span>
   </div>
 </div>
 
-<!-- MAIN -->
 <div id="main">
-
-  <!-- CASTLE SCREEN -->
   <div class="screen active" id="screen-castle">
     <div class="castle-hero">
-      <span class="castle-emoji" id="castle-emoji">🏰</span>
-      <div class="castle-name" id="castle-name">TON OF EMPIRES</div>
-      <div class="castle-level" id="castle-level-text">Seviye 1 · İmparatorluk</div>
+      <span class="castle-emoji">🏰</span>
+      <div class="castle-name">TON OF EMPIRES</div>
+      <div class="castle-level" id="cls">Seviye 1 · İmparatorluk</div>
+      <div class="xp-bar"><div class="xp-bar-fill" id="xpf2" style="width:0%"></div></div>
+      <div class="xp-lbl" id="xpl2">0 / 100 XP</div>
     </div>
-
-    <div class="section-title">⚒ Binalar</div>
-    <div class="buildings-grid" id="buildings-grid"></div>
+    <div class="sec-title">⚒ Binalar</div>
+    <div class="buildings-grid" id="bld-grid"></div>
   </div>
 
-  <!-- TROOPS SCREEN -->
   <div class="screen" id="screen-troops">
-    <div class="section-title">🗡 Ordu</div>
-    <div id="troops-list"></div>
+    <div class="sec-title">🗡 Ordu</div>
+    <div id="troop-list"></div>
   </div>
 
-  <!-- BATTLE SCREEN -->
   <div class="screen" id="screen-battle">
     <div class="battle-hero">
       <h2>⚔ ÇATIŞMALAR</h2>
       <p>Düşmanları yenerek altın ve zafer kazan!</p>
     </div>
-    <div class="section-title">🩸 Düşmanlar</div>
+    <div class="sec-title">🩸 Düşmanlar</div>
     <div id="enemy-list"></div>
   </div>
 
-  <!-- CLAN SCREEN -->
   <div class="screen" id="screen-clan">
-    <div id="clan-content">
-      <div style="color:var(--muted);text-align:center;padding:40px;font-family:'Cinzel',serif">⏳ Yükleniyor...</div>
-    </div>
+    <div id="clan-content"><div style="color:var(--muted);text-align:center;padding:40px;font-family:Cinzel,serif">⏳ Yükleniyor...</div></div>
   </div>
 
-  <!-- QUESTS SCREEN -->
   <div class="screen" id="screen-quests">
-    <div class="section-title">📜 Günlük Görevler</div>
-    <div id="quests-list"></div>
+    <div class="sec-title">📜 Günlük Görevler</div>
+    <div id="quest-list"></div>
   </div>
 
-  <!-- REWARD SCREEN -->
   <div class="screen" id="screen-reward">
-    <div class="reward-hero">
-      <div class="reward-hero-icon">🎡</div>
-      <div class="reward-hero-title">ÖDÜL ÇARKI</div>
-      <div class="reward-hero-sub">Her 12 saatte bir çevir, asker kazan!</div>
+    <div class="rw-hero">
+      <div class="rw-hero-icon">🎡</div>
+      <div class="rw-hero-title">ÖDÜL ÇARKI</div>
+      <div class="rw-hero-sub">Her 12 saatte bir çevir, asker kazan!</div>
     </div>
     <div id="wheel-container">
       <div class="wheel-wrap">
-        <div class="wheel-pointer">▼</div>
+        <div class="wheel-ptr">▼</div>
         <canvas id="wheel-canvas" width="300" height="300"></canvas>
       </div>
       <div id="wheel-timer-box">
-        <div class="wt-label">⏳ Sonraki Çevirme</div>
-        <div class="wt-time" id="wheel-countdown">Hazır!</div>
+        <div class="wt-lbl">⏳ Sonraki Çevirme</div>
+        <div class="wt-time" id="wcd">Hazır!</div>
       </div>
       <button class="spin-btn" id="spin-btn" onclick="spinWheel()">🎰 ÇEVİR!</button>
       <div id="wheel-result-box" style="display:none"></div>
     </div>
   </div>
-
 </div>
 
-<!-- TABS -->
 <div id="tabs">
   <div id="tabs-inner">
-    <button class="tab-btn active" onclick="switchTab('castle')" id="tab-castle">
-      <span class="t-icon">🏰</span>Şehir
-    </button>
-    <button class="tab-btn" onclick="switchTab('troops')" id="tab-troops">
-      <span class="t-icon">⚔️</span>Ordu
-    </button>
-    <button class="tab-btn" onclick="switchTab('battle')" id="tab-battle">
-      <span class="t-icon">🔥</span>Savaş
-    </button>
-    <button class="tab-btn" onclick="switchTab('clan')" id="tab-clan">
-      <span class="t-icon">🛡️</span>Klan
-    </button>
-    <button class="tab-btn" onclick="switchTab('quests')" id="tab-quests">
-      <span class="t-icon">📋</span>Görevler
-    </button>
-    <button class="tab-btn" onclick="switchTab('reward')" id="tab-reward">
-      <span class="t-icon">🎡</span>Ödül
-    </button>
+    <button class="tab-btn active" id="tab-castle" onclick="switchTab('castle')"><span class="t-icon">🏰</span>Şehir</button>
+    <button class="tab-btn" id="tab-troops" onclick="switchTab('troops')"><span class="t-icon">⚔️</span>Ordu</button>
+    <button class="tab-btn" id="tab-battle" onclick="switchTab('battle')"><span class="t-icon">🔥</span>Savaş</button>
+    <button class="tab-btn" id="tab-clan" onclick="switchTab('clan')"><span class="t-icon">🛡️</span>Klan</button>
+    <button class="tab-btn" id="tab-quests" onclick="switchTab('quests')"><span class="t-icon">📋</span>Görevler</button>
+    <button class="tab-btn" id="tab-reward" onclick="switchTab('reward')"><span class="t-icon">🎡</span>Ödül</button>
   </div>
 </div>
-
 <div id="toast-container"></div>
 
 <script>
-// ============================================================
-//  GAME STATE
-// ============================================================
-const DEFAULT_STATE = {
-  player: {
-    name: 'Komutan',
-    level: 1,
-    xp: 0,
-    xpNext: 100,
-    gold: 500,
-    food: 200,
-    lastOnline: Date.now(),
-    clanId: null
+// STORAGE
+var MEM={};
+function lsGet(k){try{return localStorage.getItem(k)||null}catch(e){return MEM[k]||null}}
+function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){MEM[k]=v}}
+function lsDel(k){try{localStorage.removeItem(k)}catch(e){delete MEM[k]}}
+function lsList(prefix){
+  var keys=new Set();
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith(prefix))keys.add(k)}}catch(e){}
+  Object.keys(MEM).forEach(function(k){if(k.startsWith(prefix))keys.add(k)});
+  return Array.from(keys);
+}
+async function storeSet(k,v){if(window.storage){try{await window.storage.set(k,v,true);return}catch(e){}}lsSet('TOE_'+k,v)}
+async function storeGet(k){if(window.storage){try{var r=await window.storage.get(k,true);return r?r.value:null}catch(e){}}return lsGet('TOE_'+k)}
+async function storeDel(k){if(window.storage){try{await window.storage.delete(k,true);return}catch(e){}}lsDel('TOE_'+k)}
+async function storeList(prefix){
+  if(window.storage){try{var r=await window.storage.list(prefix,true);return r?r.keys:[]}catch(e){}}
+  return lsList('TOE_'+prefix).map(function(k){return k.replace('TOE_','')});
+}
+
+// STATE
+var G={
+  player:{name:'Komutan',level:1,xp:0,xpNext:100,gold:500,food:200,lastOnline:Date.now(),clanId:null},
+  buildings:{
+    castle:{level:1,upgrading:false,upgradeEnd:0},
+    barracks:{level:1,upgrading:false,upgradeEnd:0},
+    farm:{level:1,upgrading:false,upgradeEnd:0},
+    mine:{level:1,upgrading:false,upgradeEnd:0},
+    walls:{level:1,upgrading:false,upgradeEnd:0},
+    forge:{level:0,upgrading:false,upgradeEnd:0}
   },
-  buildings: {
-    castle:    { level: 1, upgrading: false, upgradeEnd: 0 },
-    barracks:  { level: 1, upgrading: false, upgradeEnd: 0 },
-    farm:      { level: 1, upgrading: false, upgradeEnd: 0 },
-    mine:      { level: 1, upgrading: false, upgradeEnd: 0 },
-    walls:     { level: 1, upgrading: false, upgradeEnd: 0 },
-    forge:     { level: 0, upgrading: false, upgradeEnd: 0 }
-  },
-  troops: {
-    swordsman:  { count: 5 },
-    archer:     { count: 3 },
-    cavalry:    { count: 0 },
-    catapult:   { count: 0 }
-  },
-  quests: {}
+  troops:{swordsman:{count:5},archer:{count:3},cavalry:{count:0},catapult:{count:0}},
+  quests:{}
 };
+function saveGame(){lsSet('toe_save',JSON.stringify(G));syncPlayer()}
+function loadGame(){try{var r=lsGet('toe_save');if(r)G=JSON.parse(r)}catch(e){}}
+function getPid(){var p=lsGet('toe_pid');if(!p){p='player_'+Math.random().toString(36).slice(2,10)+'_'+Date.now();lsSet('toe_pid',p)}return p}
+var PID=getPid();
 
-let G = deepClone(DEFAULT_STATE);
-function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+// SHARED
+async function syncPlayer(){try{await storeSet(PID,JSON.stringify({name:G.player.name,level:G.player.level,power:calcPower(),clanId:G.player.clanId||null,lastSeen:Date.now()}))}catch(e){}}
+async function loadPlayers(){
+  try{
+    var keys=await storeList('player_'),pl=[];
+    for(var i=0;i<keys.length;i++){if(keys[i]===PID)continue;try{var r=await storeGet(keys[i]);if(!r)continue;var p=JSON.parse(r);if(Date.now()-p.lastSeen>7*24*3600000)continue;pl.push(Object.assign({},p,{pid:keys[i]}))}catch(e){}}
+    return pl;
+  }catch(e){return[]}
+}
+async function getAllClans(){
+  try{var keys=await storeList('clan_'),cl=[];for(var i=0;i<keys.length;i++){try{var r=await storeGet(keys[i]);if(r)cl.push(JSON.parse(r))}catch(e){}}return cl}catch(e){return[]}
+}
+async function getClan(id){if(!id)return null;try{var r=await storeGet('clan_'+id);return r?JSON.parse(r):null}catch(e){return null}}
+async function saveClan(c){await storeSet('clan_'+c.id,JSON.stringify(c))}
 
-// ============================================================
-//  PLAYER ID
-// ============================================================
-function getPlayerId() {
-  try {
-    let pid = localStorage.getItem('toe_player_id');
-    if (!pid) {
-      pid = 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
-      localStorage.setItem('toe_player_id', pid);
-    }
-    return pid;
-  } catch(e) {
-    return 'player_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+// CONFIG
+var BC={
+  castle:  {name:'Kale',   icon:'🏰',maxLevel:10,upgradeCost:function(l){return{gold:200*l*l,food:50*l}},upgradeTime:function(l){return l*30},bonus:function(l){return 'Maks seviye +'+l}},
+  barracks:{name:'Kışla',  icon:'⚔️',maxLevel:8, upgradeCost:function(l){return{gold:150*l,food:30*l}},upgradeTime:function(l){return l*20},bonus:function(l){return 'Kapasite +'+(l*2)}},
+  farm:    {name:'Çiftlik',icon:'🌾',maxLevel:8, upgradeCost:function(l){return{gold:100*l,food:10}},upgradeTime:function(l){return l*15},bonus:function(l){return '+'+(l*10)+' yiyecek/saat'}},
+  mine:    {name:'Maden',  icon:'⛏️',maxLevel:8, upgradeCost:function(l){return{gold:120*l,food:20*l}},upgradeTime:function(l){return l*18},bonus:function(l){return '+'+(l*15)+' altın/saat'}},
+  walls:   {name:'Surlar', icon:'🧱',maxLevel:8, upgradeCost:function(l){return{gold:180*l,food:40*l}},upgradeTime:function(l){return l*25},bonus:function(l){return 'Savunma +'+(l*20)}},
+  forge:   {name:'Demirci',icon:'🔨',maxLevel:8, upgradeCost:function(l){return{gold:200*l,food:60*l}},upgradeTime:function(l){return l*22},bonus:function(l){return 'Saldırı +'+(l*15)}}
+};
+var TC={
+  swordsman:{name:'Kılıçlı',icon:'🗡️',attack:10,defense:8, hp:50, cost:{gold:50, food:10},req:1,desc:'Dengeli piyadeler.'},
+  archer:   {name:'Okçu',   icon:'🏹',attack:15,defense:4, hp:35, cost:{gold:70, food:8}, req:1,desc:'Yüksek saldırı.'},
+  cavalry:  {name:'Süvari', icon:'🐎',attack:22,defense:12,hp:80, cost:{gold:130,food:25},req:3,desc:'Güçlü. Kışla 3 gerekli.'},
+  catapult: {name:'Mancınık',icon:'💣',attack:50,defense:2,hp:120,cost:{gold:300,food:60},req:5,desc:'Kışla 5 gerekli.'}
+};
+var ENEMIES=[
+  {id:'bandit', name:'Haydut Kampı',  icon:'🏕️',power:50,  reward:{gold:80,  xp:20}, diff:'easy',  story:'Küçük bir eşkıya grubu.'},
+  {id:'goblin', name:'Goblin Kulesi', icon:'🗼',power:120, reward:{gold:150, xp:40}, diff:'easy',  story:'Goblinler kule inşa etmiş.'},
+  {id:'orc',    name:'Ork Kabilesi',  icon:'🪓',power:250, reward:{gold:280, xp:80}, diff:'medium',story:'Vahşi orklar sınırı geçmiş.'},
+  {id:'dragon', name:'Ejder Yuvası',  icon:'🐉',power:500, reward:{gold:550, xp:160},diff:'medium',story:'Genç bir ejder yerleşmiş.'},
+  {id:'undead', name:'Ölümsüz Ordu',  icon:'💀',power:900, reward:{gold:900, xp:280},diff:'hard',  story:'Büyücünün ölümsüz lejyonu.'},
+  {id:'warlord',name:'Savaş Lordu',   icon:'👑',power:1500,reward:{gold:1400,xp:450},diff:'hard',  story:'Ünlü bir savaş lordu.'}
+];
+var QUESTS=[
+  {id:'q_battle', name:'Savaşçı',      icon:'⚔️',desc:'3 düşman yenilgiyle gönder',target:3,reward:{gold:200,xp:50}, type:'battle'},
+  {id:'q_upgrade',name:'İnşaatçı',     icon:'🏗️',desc:'1 bina yükselt',            target:1,reward:{gold:150,xp:40}, type:'upgrade'},
+  {id:'q_train',  name:'Komutan',      icon:'🪖',desc:'5 asker eğit',              target:5,reward:{gold:120,xp:30}, type:'train'},
+  {id:'q_login',  name:'Sadık Komutan',icon:'📅',desc:'Bugün giriş yap',           target:1,reward:{gold:100,xp:25}, type:'login'}
+];
+
+// HELPERS
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return String(Math.floor(n))}
+function calcPower(){
+  var p=0;
+  Object.keys(TC).forEach(function(id){if(G.troops[id])p+=G.troops[id].count*(TC[id].attack+TC[id].defense)});
+  return p+G.buildings.walls.level*20+G.buildings.forge.level*15;
+}
+function levelUp(){
+  while(G.player.xp>=G.player.xpNext){
+    G.player.xp-=G.player.xpNext;G.player.level++;
+    G.player.xpNext=Math.floor(100*Math.pow(1.4,G.player.level-1));
+    toast('🎉 Seviye '+G.player.level+'! Tebrikler!','success');
   }
 }
-const PLAYER_ID = getPlayerId();
-
-// Kalıcı depo (tüm ortamlarda çalışır)
-const LS_PREFIX = 'toe_shared_';
-const MEM_STORE = {};
-
-function saveGame() {
-  try { localStorage.setItem('toe_save', JSON.stringify(G)); } catch(e) { MEM_STORE['__save__'] = JSON.stringify(G); }
-  syncPlayerToShared();
-}
-function loadGame() {
-  try {
-    const raw = localStorage.getItem('toe_save') ?? MEM_STORE['__save__'] ?? null;
-    if (raw) G = JSON.parse(raw);
-  } catch(e) { console.warn('Save load error', e); }
-}
-
-// ============================================================
-//  STORAGE LAYER — Çoklu fallback: window.storage → localStorage → bellek
-// ============================================================
-
-function lsSet(key, value) { try { localStorage.setItem(LS_PREFIX + key, value); } catch(e) { MEM_STORE[key] = value; } }
-function lsGet(key) { try { return localStorage.getItem(LS_PREFIX + key) ?? MEM_STORE[key] ?? null; } catch(e) { return MEM_STORE[key] ?? null; } }
-function lsDel(key) { try { localStorage.removeItem(LS_PREFIX + key); } catch(e) {} delete MEM_STORE[key]; }
-function lsList(prefix) {
-  const keys = new Set();
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(LS_PREFIX + prefix)) keys.add(k.slice(LS_PREFIX.length));
-    }
-  } catch(e) {}
-  Object.keys(MEM_STORE).forEach(k => { if (k.startsWith(prefix)) keys.add(k); });
-  return [...keys];
-}
-
-async function storeSet(key, value, shared) {
-  if (window.storage) { try { await window.storage.set(key, value, shared); return; } catch(e) {} }
-  lsSet(key, value);
-}
-async function storeGet(key, shared) {
-  if (window.storage) { try { const r = await window.storage.get(key, shared); return r ? r.value : null; } catch(e) {} }
-  return lsGet(key);
-}
-async function storeDelete(key, shared) {
-  if (window.storage) { try { await window.storage.delete(key, shared); return; } catch(e) {} }
-  lsDel(key);
-}
-async function storeList(prefix, shared) {
-  if (window.storage) { try { const r = await window.storage.list(prefix, shared); return r ? r.keys : []; } catch(e) {} }
-  return lsList(prefix);
-}
-
-async function syncPlayerToShared() {
-  try {
-    const playerData = { name: G.player.name, level: G.player.level, power: calcTotalPower(), clanId: G.player.clanId || null, lastSeen: Date.now() };
-    await storeSet(PLAYER_ID, JSON.stringify(playerData), true);
-  } catch(e) {}
-}
-
-async function loadSharedPlayers() {
-  try {
-    const keys = await storeList('player_', true);
-    const players = [];
-    for (const key of keys) {
-      if (key === PLAYER_ID) continue;
-      try {
-        const raw = await storeGet(key, true);
-        if (!raw) continue;
-        const p = JSON.parse(raw);
-        if (Date.now() - p.lastSeen > 7 * 24 * 3600 * 1000) continue;
-        players.push({ ...p, pid: key });
-      } catch(e) {}
-    }
-    return players;
-  } catch(e) { return []; }
-}
-
-async function getAllClans() {
-  try {
-    const keys = await storeList('clan_', true);
-    const clans = [];
-    for (const key of keys) {
-      try {
-        const raw = await storeGet(key, true);
-        if (raw) clans.push(JSON.parse(raw));
-      } catch(e) {}
-    }
-    return clans;
-  } catch(e) { return []; }
-}
-
-async function getClan(clanId) {
-  if (!clanId) return null;
-  try {
-    const raw = await storeGet('clan_' + clanId, true);
-    return raw ? JSON.parse(raw) : null;
-  } catch(e) { return null; }
-}
-
-async function saveClan(clan) {
-  await storeSet('clan_' + clan.id, JSON.stringify(clan), true);
-}
-
-// ============================================================
-//  CLAN SCREEN
-// ============================================================
-let clanView = 'main';
-
-async function renderClan() {
-  const root = document.getElementById('clan-content');
-  root.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px;font-family:\'Cinzel\',serif">⏳ Yükleniyor...</div>';
-  await syncPlayerToShared();
-  if (G.player.clanId) { await renderMyClan(root); }
-  else { await renderNoClan(root); }
-}
-
-async function renderNoClan(root) {
-  root.innerHTML = `
-    <div class="modal-panel" style="text-align:center">
-      <div style="font-size:56px">🛡️</div>
-      <div style="font-family:'Cinzel',serif;font-size:16px;font-weight:700;margin:10px 0 4px;color:var(--parchment)">Klansızsın</div>
-      <div style="font-size:13px;color:var(--muted)">Bir klana katıl veya kendi klanını kur!</div>
-    </div>
-    <div class="clan-tabs">
-      <button class="clan-tab-btn ${clanView==='browse'?'active':''}" onclick="setClanView('browse')">🔍 Klan Bul</button>
-      <button class="clan-tab-btn ${clanView==='create'?'active':''}" onclick="setClanView('create')">➕ Klan Kur</button>
-    </div>
-    <div id="clan-sub"></div>
-  `;
-  if (clanView === 'browse') await renderBrowseClans();
-  else if (clanView === 'create') renderCreateClan();
-}
-
-async function renderBrowseClans() {
-  const sub = document.getElementById('clan-sub');
-  if (!sub) return;
-  sub.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px;font-family:\'Cinzel\',serif">⏳ Klanlar aranıyor...</div>';
-  const clans = await getAllClans();
-  if (clans.length === 0) {
-    sub.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz hiç klan yok.<br>İlk klanı sen kur! 🚀</div>`;
-    return;
-  }
-  sub.innerHTML = '';
-  for (const clan of clans) {
-    const memberCount = (clan.members || []).length;
-    const myReq = (clan.requests || []).find(r => r.pid === PLAYER_ID);
-    const isMember = (clan.members || []).includes(PLAYER_ID);
-    const full = memberCount >= 30;
-    const card = document.createElement('div');
-    card.className = 'clan-list-card';
-    card.innerHTML = `
-      <div class="cl-top">
-        <div class="cl-icon">${clan.icon || '🛡️'}</div>
-        <div class="cl-info">
-          <div class="cl-name">${clan.name}</div>
-          <div class="cl-meta">#${clan.tag} • ${memberCount}/30 üye • 👑 ${clan.ownerName}</div>
-        </div>
-      </div>
-      ${clan.desc ? `<div class="cl-desc">${clan.desc}</div>` : ''}
-      <div class="cl-actions">
-        ${isMember ? `<button class="cl-btn view" disabled>✅ Üyesin</button>`
-          : myReq ? `<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>`
-          : full ? `<button class="cl-btn join" disabled>Dolu</button>`
-          : `<button class="cl-btn join" onclick="requestJoinClan('${clan.id}')">📨 Katılım Talebi</button>`}
-      </div>`;
-    sub.appendChild(card);
-  }
-}
-
-function renderCreateClan() {
-  const sub = document.getElementById('clan-sub');
-  if (!sub) return;
-  sub.innerHTML = `
-    <div class="modal-panel">
-      <h3>⚔️ Yeni Klan Kur</h3>
-      <div class="form-group"><label class="form-label">Klan Adı *</label><input class="form-input" id="new-clan-name" placeholder="örn. Demir Kalkan" maxlength="24"></div>
-      <div class="form-group"><label class="form-label">Klan Etiketi * (4 harf)</label><input class="form-input" id="new-clan-tag" placeholder="örn. DEMİR" maxlength="6" style="text-transform:uppercase"></div>
-      <div class="form-group"><label class="form-label">İkon (emoji)</label><input class="form-input" id="new-clan-icon" placeholder="🛡️" maxlength="4" value="🛡️"></div>
-      <div class="form-group"><label class="form-label">Açıklama</label><textarea class="form-textarea" id="new-clan-desc" placeholder="Klanın hakkında kısa bir açıklama..."></textarea></div>
-      <button class="create-btn" onclick="createClan()">🏰 Klanı Kur</button>
-    </div>`;
-}
-
-async function renderMyClan(root) {
-  const clan = await getClan(G.player.clanId);
-  if (!clan) { G.player.clanId = null; saveGame(); await renderNoClan(root); return; }
-  const isOwner = clan.ownerId === PLAYER_ID;
-  const memberCount = (clan.members || []).length;
-  const requests = clan.requests || [];
-  const allPlayers = await loadSharedPlayers();
-  const mePlayer = { pid: PLAYER_ID, name: G.player.name, power: calcTotalPower(), level: G.player.level, isMe: true };
-  const members = [mePlayer, ...allPlayers.filter(p => (clan.members || []).includes(p.pid) && p.pid !== PLAYER_ID)];
-  members.sort((a, b) => b.power - a.power);
-  const totalPower = members.reduce((s, m) => s + (m.power || 0), 0);
-  root.innerHTML = `
-    <div class="clan-header">
-      <span class="clan-icon">${clan.icon || '🛡️'}</span>
-      <div class="clan-name">${clan.name}</div>
-      <div class="clan-tag">#${clan.tag} • ${memberCount}/30 üye</div>
-      <div class="clan-stats">
-        <div class="clan-stat"><div class="sv">${fmtNum(totalPower)}</div><div class="sl">Toplam Güç</div></div>
-        <div class="clan-stat"><div class="sv">${memberCount}</div><div class="sl">Üye</div></div>
-        <div class="clan-stat"><div class="sv">${isOwner ? '👑' : '🛡️'}</div><div class="sl">${isOwner ? 'Lider' : 'Üye'}</div></div>
-      </div>
-      ${clan.desc ? `<div style="font-size:12px;color:var(--muted);margin-top:10px">${clan.desc}</div>` : ''}
-    </div>
-    ${isOwner && requests.length > 0 ? `<div class="section-title">📨 Katılım Talepleri (${requests.length})</div><div id="requests-list"></div>` : ''}
-    <div class="section-title">👥 Üyeler</div>
-    <div id="members-list"></div>
-    ${isOwner ? `<button class="danger-btn" onclick="disbandClanConfirm()">💀 Klanı Dağıt</button>` : `<button class="danger-btn" onclick="leaveClanConfirm()">🚪 Klandan Ayrıl</button>`}
-  `;
-  if (isOwner && requests.length > 0) {
-    const reqList = document.getElementById('requests-list');
-    requests.forEach(req => {
-      const card = document.createElement('div');
-      card.className = 'member-card';
-      card.innerHTML = `
-        <div class="m-avatar" style="background:linear-gradient(135deg,#5a3a7a,#3a1a5a)">${req.name[0].toUpperCase()}</div>
-        <div style="flex:1"><div class="m-name">${req.name}</div><div class="m-power">💪 ${fmtNum(req.power || 0)} güç • Sv.${req.level || 1}</div></div>
-        <div style="display:flex;gap:6px">
-          <button class="success-btn" onclick="approveRequest('${clan.id}','${req.pid}','${req.name}')">✅</button>
-          <button class="reject-btn" onclick="rejectRequest('${clan.id}','${req.pid}')">❌</button>
-        </div>`;
-      reqList.appendChild(card);
-    });
-  }
-  const memList = document.getElementById('members-list');
-  const rankIcons = ['🥇','🥈','🥉'];
-  members.forEach((m, i) => {
-    const card = document.createElement('div');
-    card.className = 'member-card';
-    const rank = i < 3 ? rankIcons[i] : `${i+1}`;
-    card.innerHTML = `
-      <div class="m-avatar" style="${m.isMe ? 'background:linear-gradient(135deg,var(--gold),var(--wood))' : m.pid===clan.ownerId ? 'background:linear-gradient(135deg,#7a4a00,#5a3000)' : ''}">${m.name[0].toUpperCase()}</div>
-      <div style="flex:1">
-        <div class="m-name">${m.name}${m.isMe ? ' <span style="color:var(--gold);font-size:11px">(Sen)</span>' : ''}${m.pid===clan.ownerId ? ' 👑' : ''}</div>
-        <div class="m-power">💪 ${fmtNum(m.power || 0)} güç${m.level ? ` • Sv.${m.level}` : ''}</div>
-      </div>
-      ${isOwner && !m.isMe && m.pid !== clan.ownerId
-        ? `<button class="reject-btn" style="font-size:11px;padding:4px 8px" onclick="kickMember('${clan.id}','${m.pid}','${m.name}')">Çıkar</button>`
-        : `<div class="m-rank">${rank}</div>`}`;
-    memList.appendChild(card);
+function qProgress(type,amt){
+  var today=new Date().toDateString();
+  QUESTS.forEach(function(q){
+    if(q.type!==type)return;
+    if(!G.quests[q.id])G.quests[q.id]={progress:0,claimed:false,date:today};
+    var s=G.quests[q.id];
+    if(s.claimed||s.date!==today)return;
+    s.progress=Math.min(q.target,s.progress+amt);
   });
-}
-
-// ─── CLAN ACTIONS ───
-function setClanView(view) { clanView = view; renderClan(); }
-
-async function createClan() {
-  const name = document.getElementById('new-clan-name')?.value.trim();
-  const tag = document.getElementById('new-clan-tag')?.value.trim().toUpperCase();
-  const icon = document.getElementById('new-clan-icon')?.value.trim() || '🛡️';
-  const desc = document.getElementById('new-clan-desc')?.value.trim();
-  if (!name || name.length < 2) { showToast('Klan adı en az 2 karakter!', 'error'); return; }
-  if (!tag || tag.length < 2) { showToast('Etiket en az 2 karakter!', 'error'); return; }
-  const existing = await getAllClans();
-  if (existing.find(c => c.tag === tag)) { showToast('Bu etiket zaten alınmış!', 'error'); return; }
-  const clanId = 'c' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-  const clan = { id: clanId, name, tag, icon, desc, ownerId: PLAYER_ID, ownerName: G.player.name, members: [PLAYER_ID], requests: [], createdAt: Date.now() };
-  await saveClan(clan);
-  G.player.clanId = clanId;
   saveGame();
-  showToast(`🎉 ${name} klanı kuruldu!`, 'success');
-  clanView = 'main'; renderClan();
+}
+function toast(msg,type){
+  var tc=document.getElementById('toast-container'),t=document.createElement('div');
+  t.className='toast '+(type||'info');t.textContent=msg;
+  tc.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove()},2500);
 }
 
-async function requestJoinClan(clanId) {
-  const clan = await getClan(clanId);
-  if (!clan) { showToast('Klan bulunamadı!', 'error'); return; }
-  if ((clan.members || []).includes(PLAYER_ID)) { showToast('Zaten üyesin!', 'error'); return; }
-  if ((clan.requests || []).find(r => r.pid === PLAYER_ID)) { showToast('Zaten talep gönderdin!', 'info'); return; }
-  clan.requests = clan.requests || [];
-  clan.requests.push({ pid: PLAYER_ID, name: G.player.name, power: calcTotalPower(), level: G.player.level, sentAt: Date.now() });
-  await saveClan(clan);
-  showToast(`📨 ${clan.name} klanına talep gönderildi!`, 'success'); renderClan();
+// RENDER
+function updateTopBar(){
+  var p=G.player,pct=Math.min(100,(p.xp/p.xpNext)*100);
+  document.getElementById('ua').textContent=p.name[0].toUpperCase();
+  document.getElementById('un').textContent=p.name;
+  document.getElementById('ulb').textContent='Sv.'+p.level;
+  document.getElementById('rg').textContent=fmt(p.gold);
+  document.getElementById('rf').textContent=fmt(p.food);
+  document.getElementById('rp').textContent=fmt(calcPower());
+  document.getElementById('xpf').style.width=pct+'%';
+  document.getElementById('xpl').textContent=fmt(p.xp)+'/'+fmt(p.xpNext);
+  document.getElementById('xpf2').style.width=pct+'%';
+  document.getElementById('xpl2').textContent=p.xp+' / '+p.xpNext+' XP';
+  document.getElementById('cls').textContent='Seviye '+G.buildings.castle.level+' · İmparatorluk';
 }
 
-async function approveRequest(clanId, pid, pname) {
-  const clan = await getClan(clanId);
-  if (!clan || clan.ownerId !== PLAYER_ID) return;
-  if ((clan.members || []).length >= 30) { showToast('Klan dolu!', 'error'); return; }
-  clan.requests = (clan.requests || []).filter(r => r.pid !== pid);
-  clan.members = clan.members || [];
-  if (!clan.members.includes(pid)) clan.members.push(pid);
-  await saveClan(clan);
-  showToast(`✅ ${pname} klana kabul edildi!`, 'success'); renderClan();
-}
-
-async function rejectRequest(clanId, pid) {
-  const clan = await getClan(clanId);
-  if (!clan || clan.ownerId !== PLAYER_ID) return;
-  clan.requests = (clan.requests || []).filter(r => r.pid !== pid);
-  await saveClan(clan);
-  showToast('❌ Talep reddedildi.', 'info'); renderClan();
-}
-
-async function kickMember(clanId, pid, pname) {
-  const clan = await getClan(clanId);
-  if (!clan || clan.ownerId !== PLAYER_ID) return;
-  clan.members = (clan.members || []).filter(m => m !== pid);
-  await saveClan(clan);
-  showToast(`🚫 ${pname} klandan çıkarıldı.`, 'info'); renderClan();
-}
-
-function leaveClanConfirm() {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay'; overlay.id = 'confirm-modal';
-  overlay.innerHTML = `
-    <div class="modal" style="text-align:center">
-      <div style="font-size:48px">🚪</div>
-      <h3 style="margin:12px 0 8px">Klandan ayrıl?</h3>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Bu işlem geri alınamaz.</p>
-      <div style="display:flex;gap:10px">
-        <button style="flex:1;padding:12px;border:1px solid rgba(100,60,10,0.3);border-radius:10px;background:rgba(30,15,3,0.8);color:var(--muted);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer" onclick="document.getElementById('confirm-modal').remove()">İptal</button>
-        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#7a1010,#4a0808);color:var(--parchment);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer" onclick="leaveClan()">Ayrıl</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-async function leaveClan() {
-  const modal = document.getElementById('confirm-modal');
-  if (modal) modal.remove();
-  const clan = await getClan(G.player.clanId);
-  if (clan) {
-    clan.members = (clan.members || []).filter(m => m !== PLAYER_ID);
-    await saveClan(clan);
-  }
-  G.player.clanId = null; saveGame();
-  showToast('🚪 Klandan ayrıldın.', 'info');
-  clanView = 'browse'; renderClan();
-}
-
-function disbandClanConfirm() {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay'; overlay.id = 'confirm-modal';
-  overlay.innerHTML = `
-    <div class="modal" style="text-align:center">
-      <div style="font-size:48px">💀</div>
-      <h3 style="margin:12px 0 8px">Klanı dağıt?</h3>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Tüm üyeler çıkarılır. Geri alınamaz!</p>
-      <div style="display:flex;gap:10px">
-        <button style="flex:1;padding:12px;border:1px solid rgba(100,60,10,0.3);border-radius:10px;background:rgba(30,15,3,0.8);color:var(--muted);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer" onclick="document.getElementById('confirm-modal').remove()">İptal</button>
-        <button style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#7a1010,#4a0808);color:var(--parchment);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer" onclick="disbandClan()">Dağıt</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-}
-
-async function disbandClan() {
-  const modal = document.getElementById('confirm-modal');
-  if (modal) modal.remove();
-  const clanId = G.player.clanId;
-  try { await storeDelete('clan_' + clanId, true); } catch(e) {}
-  G.player.clanId = null; saveGame();
-  showToast('💀 Klan dağıtıldı.', 'info');
-  clanView = 'browse'; renderClan();
-}
-
-// ============================================================
-//  CONFIG DATA
-// ============================================================
-const BUILDINGS_CONFIG = {
-  castle:   { name:'Kale',     icon:'🏰', desc:'Ana kale. Diğer binaların max seviyesini belirler.', maxLevel:10, upgradeCost:(l)=>({gold:200*l*l,food:50*l}), upgradeTime:(l)=>l*30, bonus:(l)=>`Maks seviye +${l}` },
-  barracks: { name:'Kışla',    icon:'⚔️', desc:'Asker eğitmek için.', maxLevel:8, upgradeCost:(l)=>({gold:150*l,food:30*l}), upgradeTime:(l)=>l*20, bonus:(l)=>`Eğitim kapasitesi +${l*2}` },
-  farm:     { name:'Çiftlik',  icon:'🌾', desc:'Yiyecek üretir.', maxLevel:8, upgradeCost:(l)=>({gold:100*l,food:10}), upgradeTime:(l)=>l*15, bonus:(l)=>`+${l*10} yiyecek/saat` },
-  mine:     { name:'Maden',    icon:'⛏️', desc:'Altın üretir.', maxLevel:8, upgradeCost:(l)=>({gold:120*l,food:20*l}), upgradeTime:(l)=>l*18, bonus:(l)=>`+${l*15} altın/saat` },
-  walls:    { name:'Surlar',   icon:'🧱', desc:'Savunmayı artırır.', maxLevel:8, upgradeCost:(l)=>({gold:180*l,food:40*l}), upgradeTime:(l)=>l*25, bonus:(l)=>`Savunma +${l*20}` },
-  forge:    { name:'Demirci',  icon:'🔨', desc:'Silahları güçlendirir.', maxLevel:8, upgradeCost:(l)=>({gold:200*l,food:60*l}), upgradeTime:(l)=>l*22, bonus:(l)=>`Saldırı +${l*15}` }
-};
-
-const TROOPS_CONFIG = {
-  swordsman: { name:'Kılıçlı', icon:'🗡️', attack:10, defense:8,  hp:50,  cost:{gold:50,food:10},  requiresBarracks:1, desc:'Dengeli, temel piyadeler.' },
-  archer:    { name:'Okçu',    icon:'🏹', attack:15, defense:4,  hp:35,  cost:{gold:70,food:8},   requiresBarracks:1, desc:'Yüksek saldırı, düşük savunma.' },
-  cavalry:   { name:'Süvari',  icon:'🐎', attack:22, defense:12, hp:80,  cost:{gold:130,food:25}, requiresBarracks:3, desc:'Güçlü ama pahalı. Kışla 3 gerekli.' },
-  catapult:  { name:'Mancınık',icon:'💣', attack:50, defense:2,  hp:120, cost:{gold:300,food:60}, requiresBarracks:5, desc:'Kale düşürücü. Kışla 5 gerekli.' }
-};
-
-const ENEMIES = [
-  { id:'bandit',  name:'Haydut Kampı',   icon:'🏕️', power:50,   reward:{gold:80,  xp:20},  diff:'easy',   story:'Küçük bir eşkıya grubu yolu kesmiş.' },
-  { id:'goblin',  name:'Goblin Kulesi',  icon:'🗼', power:120,  reward:{gold:150, xp:40},  diff:'easy',   story:'Goblinler kule inşa etmiş.' },
-  { id:'orc',     name:'Ork Kabilesi',   icon:'🪓', power:250,  reward:{gold:280, xp:80},  diff:'medium', story:'Vahşi orklar sınırı geçmiş.' },
-  { id:'dragon',  name:'Ejder Yuvası',   icon:'🐉', power:500,  reward:{gold:550, xp:160}, diff:'medium', story:'Genç bir ejder bölgeye yerleşmiş.' },
-  { id:'undead',  name:'Ölümsüz Ordu',   icon:'💀', power:900,  reward:{gold:900, xp:280}, diff:'hard',   story:'Büyücünün kaldırdığı ölümsüz lejyon.' },
-  { id:'warlord', name:'Savaş Lordu',    icon:'👑', power:1500, reward:{gold:1400,xp:450}, diff:'hard',   story:'Ünlü bir savaş lordu istila başlattı.' }
-];
-
-const DAILY_QUESTS = [
-  { id:'q_battle',  name:'Savaşçı',      icon:'⚔️', desc:'3 düşman yenilgiyle gönder', target:3, reward:{gold:200,xp:50},  type:'battle' },
-  { id:'q_upgrade', name:'İnşaatçı',     icon:'🏗️', desc:'1 bina yükselt',             target:1, reward:{gold:150,xp:40},  type:'upgrade' },
-  { id:'q_train',   name:'Komutan',      icon:'🪖', desc:'5 asker eğit',               target:5, reward:{gold:120,xp:30},  type:'train' },
-  { id:'q_login',   name:'Sadık Komutan',icon:'📅', desc:'Bugün giriş yap',             target:1, reward:{gold:100,xp:25},  type:'login' }
-];
-
-// ============================================================
-//  COMPUTED
-// ============================================================
-function calcTotalPower() {
-  let p = 0;
-  for (const [id, cfg] of Object.entries(TROOPS_CONFIG)) { p += (G.troops[id]?.count || 0) * (cfg.attack + cfg.defense); }
-  p += G.buildings.walls.level * 20;
-  p += G.buildings.forge.level * 15;
-  return p;
-}
-
-function processIdleIncome() {
-  const now = Date.now();
-  const elapsed = (now - G.player.lastOnline) / 1000 / 3600;
-  if (elapsed < 0.01) return 0;
-  const goldPerHour = G.buildings.mine.level * 15 + 10;
-  const foodPerHour = G.buildings.farm.level * 10 + 5;
-  const hours = Math.min(elapsed, 8);
-  const goldEarned = Math.floor(goldPerHour * hours);
-  const foodEarned = Math.floor(foodPerHour * hours);
-  G.player.gold += goldEarned;
-  G.player.food += foodEarned;
-  G.player.lastOnline = now;
-  saveGame();
-  return { gold: goldEarned, food: foodEarned, hours: hours.toFixed(1) };
-}
-
-function checkLevelUp() {
-  while (G.player.xp >= G.player.xpNext) {
-    G.player.xp -= G.player.xpNext;
-    G.player.level++;
-    G.player.xpNext = Math.floor(100 * Math.pow(1.4, G.player.level - 1));
-    showToast(`🎉 Seviye ${G.player.level}! Tebrikler!`, 'success');
-  }
-}
-
-// ============================================================
-//  UI RENDER
-// ============================================================
-function updateTopBar() {
-  const p = G.player;
-  document.getElementById('user-avatar').textContent = p.name[0].toUpperCase();
-  document.getElementById('user-name').textContent = p.name;
-  document.getElementById('user-level-badge').textContent = `Sv.${p.level}`;
-  document.getElementById('res-gold').textContent = fmtNum(p.gold);
-  document.getElementById('res-food').textContent = fmtNum(p.food);
-  document.getElementById('res-power').textContent = fmtNum(calcTotalPower());
-  const xpPct = Math.min(100, (p.xp / p.xpNext) * 100);
-  document.getElementById('xp-fill').style.width = `${xpPct}%`;
-  document.getElementById('xp-label-top').textContent = `${fmtNum(p.xp)}/${fmtNum(p.xpNext)}`;
-  document.getElementById('castle-level-text').textContent = `Seviye ${G.buildings.castle.level} · İmparatorluk`;
-}
-
-function fmtNum(n) {
-  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
-  return String(Math.floor(n));
-}
-
-function renderBuildings() {
-  const grid = document.getElementById('buildings-grid');
-  grid.innerHTML = '';
-  for (const [id, cfg] of Object.entries(BUILDINGS_CONFIG)) {
-    const b = G.buildings[id];
-    const lvl = b.level;
-    const cost = cfg.upgradeCost(lvl);
-    const canAfford = G.player.gold >= cost.gold && G.player.food >= cost.food;
-    const maxLvl = lvl >= cfg.maxLevel;
-    const isUpgrading = b.upgrading && Date.now() < b.upgradeEnd;
-    const timeLeft = isUpgrading ? Math.ceil((b.upgradeEnd - Date.now()) / 1000) : 0;
-
-    const card = document.createElement('div');
-    card.className = `building-card${canAfford && !maxLvl && !isUpgrading ? ' can-upgrade' : ''}`;
-
-    let btnLabel = '', btnDisabled = true;
-    if (maxLvl) { btnLabel = '✦ MAX ✦'; }
-    else if (isUpgrading) { btnLabel = `⏳ ${timeLeft}s`; }
-    else if (!canAfford) { btnLabel = `🪙${fmtNum(cost.gold)} 🌾${fmtNum(cost.food)}`; }
-    else { btnLabel = `⬆ Yükselt (${fmtNum(cost.gold)}🪙)`; btnDisabled = false; }
-
-    card.innerHTML = `
-      <div class="b-header">
-        <span class="b-icon">${cfg.icon}</span>
-        <span class="b-lvl">Sv.${lvl}</span>
-      </div>
-      <div class="b-name">${cfg.name}</div>
-      <div class="b-desc">${cfg.bonus(lvl)}</div>
-      ${isUpgrading ? `<div class="upgrade-progress"><div class="upgrade-progress-fill" style="width:${Math.min(100,((cfg.upgradeTime(lvl)*1000-(b.upgradeEnd-Date.now()))/(cfg.upgradeTime(lvl)*1000))*100)}%"></div></div>` : ''}
-      <button class="upgrade-btn" ${btnDisabled?'disabled':''} onclick="upgradeBuilding('${id}')">${btnLabel}</button>
-    `;
+function renderBuildings(){
+  var grid=document.getElementById('bld-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  Object.keys(BC).forEach(function(id){
+    var cfg=BC[id],b=G.buildings[id],lvl=b.level,cost=cfg.upgradeCost(lvl);
+    var canAfford=G.player.gold>=cost.gold&&G.player.food>=cost.food;
+    var maxLvl=lvl>=cfg.maxLevel;
+    var isUp=b.upgrading&&Date.now()<b.upgradeEnd;
+    var timeLeft=isUp?Math.ceil((b.upgradeEnd-Date.now())/1000):0;
+    var card=document.createElement('div');
+    card.className='b-card'+(canAfford&&!maxLvl&&!isUp?' can-up':'');
+    var btnTxt,btnDis=true;
+    if(maxLvl){btnTxt='✦ MAX ✦'}
+    else if(isUp){btnTxt='⏳ '+timeLeft+'s'}
+    else if(!canAfford){btnTxt='🪙'+fmt(cost.gold)+' 🌾'+fmt(cost.food)}
+    else{btnTxt='⬆ Yükselt ('+fmt(cost.gold)+'🪙)';btnDis=false}
+    var prog='';
+    if(isUp){var pp=Math.min(100,((cfg.upgradeTime(lvl)*1000-(b.upgradeEnd-Date.now()))/(cfg.upgradeTime(lvl)*1000))*100);prog='<div class="up-prog"><div class="up-prog-fill" style="width:'+pp+'%"></div></div>'}
+    card.innerHTML='<div class="b-head"><span class="b-icon">'+cfg.icon+'</span><span class="b-lvl">Sv.'+lvl+'</span></div>'
+      +'<div class="b-name">'+cfg.name+'</div><div class="b-desc">'+cfg.bonus(lvl)+'</div>'
+      +prog+'<button class="up-btn"'+(btnDis?' disabled':'')+' onclick="upgradeBuilding(\''+id+'\')">'+btnTxt+'</button>';
     grid.appendChild(card);
-  }
+  });
 }
 
-function renderTroops() {
-  const list = document.getElementById('troops-list');
-  list.innerHTML = '';
-  for (const [id, cfg] of Object.entries(TROOPS_CONFIG)) {
-    const count = G.troops[id]?.count || 0;
-    const barracksLvl = G.buildings.barracks.level;
-    const unlocked = barracksLvl >= cfg.requiresBarracks;
-    const canTrain = unlocked && G.player.gold >= cfg.cost.gold && G.player.food >= cfg.cost.food;
-    const card = document.createElement('div');
-    card.className = 'troop-card';
-    card.innerHTML = `
-      <div class="t-icon-wrap">${unlocked ? cfg.icon : '🔒'}</div>
-      <div class="t-info">
-        <div class="t-name">${cfg.name} ${!unlocked ? `<span style="color:var(--muted);font-size:10px">(Kışla Sv.${cfg.requiresBarracks})</span>` : ''}</div>
-        <div class="t-stats">⚔️${cfg.attack} 🛡️${cfg.defense} ❤️${cfg.hp}</div>
-        <div class="t-stats" style="margin-top:2px">🪙${cfg.cost.gold} 🌾${cfg.cost.food}</div>
-      </div>
-      <div class="t-count">${count}</div>
-      <div class="t-actions">
-        <button class="troop-btn train" ${!canTrain?'disabled':''} onclick="trainTroop('${id}')">+1 Eğit</button>
-        ${count > 0 ? `<button class="troop-btn disband" onclick="disbandTroop('${id}')">-1</button>` : ''}
-      </div>
-    `;
-    list.appendChild(card);
-  }
-}
-
-function renderEnemies() {
-  const list = document.getElementById('enemy-list');
-  list.innerHTML = '';
-  ENEMIES.forEach(enemy => {
-    const card = document.createElement('div');
-    card.className = 'enemy-card';
-    card.innerHTML = `
-      <div class="e-icon">${enemy.icon}</div>
-      <div class="e-info">
-        <div class="e-name">${enemy.name}</div>
-        <div class="e-power">💪 Güç: ${enemy.power}</div>
-        <span class="difficulty-badge diff-${enemy.diff}">${enemy.diff==='easy'?'KOLAY':enemy.diff==='medium'?'ORTA':'ZOR'}</span>
-      </div>
-      <div class="e-reward">
-        <div class="r-gold">+${enemy.reward.gold}🪙</div>
-        <div class="r-xp">+${enemy.reward.xp} XP</div>
-      </div>
-    `;
-    card.onclick = () => openBattleModal(enemy);
+function renderTroops(){
+  var list=document.getElementById('troop-list');
+  if(!list)return;
+  list.innerHTML='';
+  Object.keys(TC).forEach(function(id){
+    var cfg=TC[id];
+    if(!G.troops[id])G.troops[id]={count:0};
+    var cnt=G.troops[id].count,unlocked=G.buildings.barracks.level>=cfg.req;
+    var canTrain=unlocked&&G.player.gold>=cfg.cost.gold&&G.player.food>=cfg.cost.food;
+    var card=document.createElement('div');card.className='troop-card';
+    card.innerHTML='<div class="ti-wrap">'+(unlocked?cfg.icon:'🔒')+'</div>'
+      +'<div class="t-info"><div class="t-name">'+cfg.name+(!unlocked?' <span style="color:var(--muted);font-size:10px">(Kışla '+cfg.req+')</span>':'')+'</div>'
+      +'<div class="t-stats">⚔️'+cfg.attack+' 🛡️'+cfg.defense+' ❤️'+cfg.hp+'</div>'
+      +'<div class="t-stats">🪙'+cfg.cost.gold+' 🌾'+cfg.cost.food+'</div></div>'
+      +'<div class="t-count">'+cnt+'</div>'
+      +'<div class="t-acts"><button class="troop-btn train"'+(canTrain?'':' disabled')+' onclick="trainTroop(\''+id+'\')">+1 Eğit</button>'
+      +(cnt>0?'<button class="troop-btn disband" onclick="disbandTroop(\''+id+'\')">-1</button>':'')
+      +'</div>';
     list.appendChild(card);
   });
 }
 
-function renderQuests() {
-  const list = document.getElementById('quests-list');
-  list.innerHTML = '';
-  const today = new Date().toDateString();
-  DAILY_QUESTS.forEach(q => {
-    const saved = G.quests[q.id] || { progress: 0, claimed: false, date: '' };
-    if (saved.date !== today) { saved.progress = q.id === 'q_login' ? 1 : 0; saved.claimed = false; saved.date = today; G.quests[q.id] = saved; }
-    const pct = Math.min(100, (saved.progress / q.target) * 100);
-    const done = saved.progress >= q.target;
-    const card = document.createElement('div');
-    card.className = 'quest-card';
-    card.innerHTML = `
-      <div class="q-header">
-        <div class="q-icon">${q.icon}</div>
-        <div class="q-info"><div class="q-name">${q.name}</div><div class="q-desc">${q.desc}</div></div>
-        <div class="q-reward"><div class="qr-gold">+${q.reward.gold}🪙</div><div style="color:var(--green-light);font-size:11px;font-family:'Cinzel',serif">+${q.reward.xp} XP</div></div>
-      </div>
-      <div class="quest-progress">
-        <div class="q-prog-bar"><div class="q-prog-fill" style="width:${pct}%"></div></div>
-        <div class="q-prog-label"><span>${q.desc}</span><span>${saved.progress}/${q.target}</span></div>
-      </div>
-      ${done && !saved.claimed
-        ? `<button class="claim-btn" onclick="claimQuest('${q.id}')">🎁 Ödülü Al</button>`
-        : saved.claimed
-          ? `<button class="claim-btn" disabled>✅ Alındı</button>`
-          : `<button class="claim-btn" disabled>Devam ediyor...</button>`}
-    `;
+function renderEnemies(){
+  var list=document.getElementById('enemy-list');
+  if(!list)return;
+  list.innerHTML='';
+  ENEMIES.forEach(function(e){
+    var card=document.createElement('div');card.className='enemy-card';
+    var dl=e.diff==='easy'?'KOLAY':e.diff==='medium'?'ORTA':'ZOR';
+    card.innerHTML='<div class="e-icon">'+e.icon+'</div>'
+      +'<div class="e-info"><div class="e-name">'+e.name+'</div><div class="e-power">💪 Güç: '+e.power+'</div><span class="diff-badge diff-'+e.diff+'">'+dl+'</span></div>'
+      +'<div class="e-reward"><div class="r-gold">+'+e.reward.gold+'🪙</div><div class="r-xp">+'+e.reward.xp+' XP</div></div>';
+    card.onclick=function(){openBattle(e)};
+    list.appendChild(card);
+  });
+}
+
+function renderQuests(){
+  var list=document.getElementById('quest-list');
+  if(!list)return;
+  list.innerHTML='';
+  var today=new Date().toDateString();
+  QUESTS.forEach(function(q){
+    var s=G.quests[q.id]||{progress:0,claimed:false,date:''};
+    if(s.date!==today){s.progress=q.id==='q_login'?1:0;s.claimed=false;s.date=today;G.quests[q.id]=s}
+    var pct=Math.min(100,(s.progress/q.target)*100),done=s.progress>=q.target;
+    var card=document.createElement('div');card.className='quest-card';
+    var btn=done&&!s.claimed?'<button class="claim-btn" onclick="claimQuest(\''+q.id+'\')">🎁 Ödülü Al</button>'
+      :s.claimed?'<button class="claim-btn" disabled>✅ Alındı</button>'
+      :'<button class="claim-btn" disabled>Devam ediyor...</button>';
+    card.innerHTML='<div class="q-hdr"><div class="q-icon">'+q.icon+'</div>'
+      +'<div class="q-info"><div class="q-name">'+q.name+'</div><div class="q-desc">'+q.desc+'</div></div>'
+      +'<div class="q-reward"><div class="qr-gold">+'+q.reward.gold+'🪙</div><div style="color:var(--green-light);font-size:11px">+'+q.reward.xp+' XP</div></div></div>'
+      +'<div class="q-prog-bar"><div class="q-prog-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="q-prog-lbl"><span>'+q.desc+'</span><span>'+s.progress+'/'+q.target+'</span></div>'+btn;
     list.appendChild(card);
   });
   saveGame();
 }
-
-function renderAll() {
-  updateTopBar();
-  renderBuildings();
-  renderTroops();
-  renderEnemies();
-  renderClan();
-  renderQuests();
+function claimQuest(id){
+  var q=QUESTS.find(function(x){return x.id===id});if(!q)return;
+  var s=G.quests[id];if(!s||s.claimed||s.progress<q.target)return;
+  G.player.gold+=q.reward.gold;G.player.xp+=q.reward.xp;s.claimed=true;levelUp();
+  toast('🎁 '+q.name+' ödülü alındı!','success');saveGame();renderAll();
 }
 
-// ============================================================
-//  ACTIONS
-// ============================================================
-function upgradeBuilding(id) {
-  const cfg = BUILDINGS_CONFIG[id]; const b = G.buildings[id];
-  if (b.level >= cfg.maxLevel) return;
-  if (b.upgrading && Date.now() < b.upgradeEnd) return;
-  const cost = cfg.upgradeCost(b.level);
-  if (G.player.gold < cost.gold || G.player.food < cost.food) { showToast('Yetersiz kaynak!', 'error'); return; }
-  G.player.gold -= cost.gold; G.player.food -= cost.food;
-  const time = cfg.upgradeTime(b.level) * 1000;
-  b.upgrading = true; b.upgradeEnd = Date.now() + time;
-  setTimeout(() => {
-    b.level++; b.upgrading = false; b.upgradeEnd = 0;
-    G.player.xp += 15 * b.level; checkLevelUp();
-    questProgress('upgrade', 1);
-    showToast(`✅ ${cfg.name} Seviye ${b.level}!`, 'success');
-    saveGame(); renderAll();
-  }, time);
-  showToast(`🏗️ ${cfg.name} yükseltiliyor...`, 'info');
-  saveGame(); renderAll();
+function renderAll(){
+  try{updateTopBar()}catch(e){}
+  try{renderBuildings()}catch(e){console.error('rb',e)}
+  try{renderTroops()}catch(e){console.error('rt',e)}
+  try{renderEnemies()}catch(e){console.error('re',e)}
+  try{renderQuests()}catch(e){console.error('rq',e)}
+  renderClan().catch(function(e){console.error('rc',e)});
 }
 
-function trainTroop(id) {
-  const cfg = TROOPS_CONFIG[id];
-  if (G.player.gold < cfg.cost.gold || G.player.food < cfg.cost.food) { showToast('Yetersiz kaynak!', 'error'); return; }
-  if (G.buildings.barracks.level < cfg.requiresBarracks) { showToast(`Kışla Seviye ${cfg.requiresBarracks} gerekli!`, 'error'); return; }
-  G.player.gold -= cfg.cost.gold; G.player.food -= cfg.cost.food;
-  G.troops[id].count++;
-  G.player.xp += 5; checkLevelUp();
-  questProgress('train', 1);
-  showToast(`+1 ${cfg.name} eğitildi!`, 'success');
-  saveGame(); renderAll();
+// ACTIONS
+function upgradeBuilding(id){
+  var cfg=BC[id],b=G.buildings[id];
+  if(b.level>=cfg.maxLevel||b.upgrading&&Date.now()<b.upgradeEnd)return;
+  var cost=cfg.upgradeCost(b.level);
+  if(G.player.gold<cost.gold||G.player.food<cost.food){toast('Yetersiz kaynak!','error');return}
+  G.player.gold-=cost.gold;G.player.food-=cost.food;
+  var time=cfg.upgradeTime(b.level)*1000;b.upgrading=true;b.upgradeEnd=Date.now()+time;
+  setTimeout(function(){b.level++;b.upgrading=false;b.upgradeEnd=0;G.player.xp+=15*b.level;levelUp();qProgress('upgrade',1);toast('✅ '+cfg.name+' Seviye '+b.level+'!','success');saveGame();renderAll()},time);
+  toast('🏗️ '+cfg.name+' yükseltiliyor...','info');saveGame();renderAll();
+}
+function trainTroop(id){
+  var cfg=TC[id];
+  if(G.player.gold<cfg.cost.gold||G.player.food<cfg.cost.food){toast('Yetersiz kaynak!','error');return}
+  if(G.buildings.barracks.level<cfg.req){toast('Kışla Seviye '+cfg.req+' gerekli!','error');return}
+  G.player.gold-=cfg.cost.gold;G.player.food-=cfg.cost.food;
+  if(!G.troops[id])G.troops[id]={count:0};
+  G.troops[id].count++;G.player.xp+=5;levelUp();qProgress('train',1);
+  toast('+1 '+cfg.name+' eğitildi!','success');saveGame();renderAll();
+}
+function disbandTroop(id){
+  if(!G.troops[id]||G.troops[id].count<=0)return;
+  G.troops[id].count--;G.player.gold+=Math.floor(TC[id].cost.gold*0.3);
+  toast(TC[id].name+' terhis edildi.','info');saveGame();renderAll();
 }
 
-function disbandTroop(id) {
-  if (G.troops[id].count <= 0) return;
-  G.troops[id].count--;
-  const cfg = TROOPS_CONFIG[id];
-  G.player.gold += Math.floor(cfg.cost.gold * 0.3);
-  showToast(`${cfg.name} terhis edildi.`, 'info');
-  saveGame(); renderAll();
+// BATTLE
+var activeBattle=null;
+function openBattle(enemy){
+  activeBattle=enemy;var pp=calcPower();
+  var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+enemy.power))*100)));
+  var segs=10,ps=Math.round((pp/(pp+enemy.power))*segs),barH='';
+  for(var i=0;i<segs;i++)barH+='<div class="bar-seg '+(i<ps?'fp':'fe')+'"></div>';
+  var o=document.createElement('div');o.className='modal-overlay';o.id='battle-modal';
+  o.innerHTML='<div class="modal"><h3>⚔️ '+enemy.name+'</h3><p style="color:var(--muted);font-size:12px;margin-top:4px">'+enemy.story+'</p>'
+    +'<div class="battle-vs"><div class="combatant"><div class="icon">🏰</div><div class="lbl">'+G.player.name+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(pp)+'</div></div>'
+    +'<div class="vs-text">VS</div>'
+    +'<div class="combatant"><div class="icon">'+enemy.icon+'</div><div class="lbl">'+enemy.name+'</div><div style="color:var(--red-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+enemy.power+'</div></div></div>'
+    +'<div class="pwr-cmp"><div class="p-row"><span>Kazanma şansı</span><span style="color:'+(wc>=50?'var(--green-light)':'var(--red-light)')+';font-family:Cinzel,serif;font-weight:700">%'+wc+'</span></div><div class="pwr-bars">'+barH+'</div></div>'
+    +'<div class="modal-btns"><button class="btn-cancel" onclick="closeBattle()">İptal</button><button class="btn-attack" onclick="doBattle()">⚔️ Saldır!</button></div></div>';
+  document.body.appendChild(o);
 }
-
-// ============================================================
-//  BATTLE MODAL
-// ============================================================
-let activeBattle = null;
-
-function openBattleModal(enemy) {
-  activeBattle = enemy;
-  const playerPower = calcTotalPower();
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay'; overlay.id = 'battle-modal';
-  const winChance = Math.min(95, Math.max(5, Math.round((playerPower / (playerPower + enemy.power)) * 100)));
-  const segments = 10;
-  const playerSegs = Math.round((playerPower / (playerPower + enemy.power)) * segments);
-  let barHtml = '';
-  for (let i = 0; i < segments; i++) { barHtml += `<div class="bar-seg ${i < playerSegs ? 'fill-player' : 'fill-enemy'}"></div>`; }
-  overlay.innerHTML = `
-    <div class="modal">
-      <h3>⚔️ ${enemy.name}</h3>
-      <p style="color:var(--muted);font-size:12px;margin-top:4px">${enemy.story}</p>
-      <div class="battle-vs">
-        <div class="combatant">
-          <div class="icon">🏰</div>
-          <div class="lbl">${G.player.name}</div>
-          <div style="color:var(--blue-light);font-family:'Cinzel',serif;font-size:12px;font-weight:700">💪${fmtNum(playerPower)}</div>
-        </div>
-        <div class="vs-text">VS</div>
-        <div class="combatant">
-          <div class="icon">${enemy.icon}</div>
-          <div class="lbl">${enemy.name}</div>
-          <div style="color:var(--red-light);font-family:'Cinzel',serif;font-size:12px;font-weight:700">💪${enemy.power}</div>
-        </div>
-      </div>
-      <div class="power-compare">
-        <div class="p-row"><span>Kazanma şansı</span><span style="color:${winChance>=50?'var(--green-light)':'var(--red-light)'};font-family:'Cinzel',serif;font-weight:700">%${winChance}</span></div>
-        <div class="power-bar-wrap">${barHtml}</div>
-      </div>
-      <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeBattleModal()">İptal</button>
-        <button class="btn-attack" onclick="doBattle()">⚔️ Saldır!</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-function closeBattleModal() {
-  const m = document.getElementById('battle-modal'); if (m) m.remove();
-  const r = document.getElementById('result-modal'); if (r) r.remove();
-  activeBattle = null;
-}
-
-function doBattle() {
-  if (!activeBattle) return;
-  const enemy = activeBattle;
-  const playerPower = calcTotalPower();
-  const winChance = Math.min(0.95, Math.max(0.05, playerPower / (playerPower + enemy.power)));
-  const won = Math.random() < winChance;
-  closeBattleModal();
-  if (won) {
-    G.player.gold += enemy.reward.gold;
-    G.player.xp += enemy.reward.xp;
-    checkLevelUp();
-    questProgress('battle', 1);
-    saveGame();
-    showResultModal(true, enemy);
-  } else {
-    const troopTypes = Object.keys(G.troops).filter(t => G.troops[t].count > 0);
-    if (troopTypes.length > 0) {
-      const t = troopTypes[Math.floor(Math.random() * troopTypes.length)];
-      const losses = Math.min(G.troops[t].count, Math.ceil(Math.random() * 3));
-      G.troops[t].count -= losses;
-    }
-    saveGame();
-    showResultModal(false, enemy);
-  }
+function closeBattle(){var m=document.getElementById('battle-modal');if(m)m.remove();var r=document.getElementById('result-modal');if(r)r.remove();activeBattle=null}
+function doBattle(){
+  if(!activeBattle)return;var e=activeBattle,pp=calcPower();
+  var won=Math.random()<Math.min(0.95,Math.max(0.05,pp/(pp+e.power)));
+  closeBattle();
+  if(won){G.player.gold+=e.reward.gold;G.player.xp+=e.reward.xp;levelUp();qProgress('battle',1);saveGame();showResult(true,e)}
+  else{var types=Object.keys(G.troops).filter(function(t){return G.troops[t]&&G.troops[t].count>0});if(types.length){var t=types[Math.floor(Math.random()*types.length)];G.troops[t].count-=Math.min(G.troops[t].count,Math.ceil(Math.random()*3))}saveGame();showResult(false,e)}
   renderAll();
 }
-
-function showResultModal(won, enemy) {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay'; overlay.id = 'result-modal';
-  overlay.innerHTML = `
-    <div class="modal result-modal">
-      <div class="result-icon">${won ? '🏆' : '💔'}</div>
-      <div class="result-title ${won?'win':'lose'}">${won ? 'ZAFER!' : 'YENİLGİ'}</div>
-      <div class="result-msg">${won ? `${enemy.name} bozguna uğratıldı!` : 'Ordun geri çekilmek zorunda kaldı...'}</div>
-      ${won ? `
-        <div class="result-rewards">
-          <div class="reward-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+${enemy.reward.gold}</span></div>
-          <div class="reward-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+${enemy.reward.xp} XP</span></div>
-        </div>` : `
-        <div class="result-rewards">
-          <div class="reward-row"><span>💀 Kayıplar</span><span style="color:var(--red-light)">Asker kaybedildi</span></div>
-        </div>`}
-      <button class="collect-btn" style="background:${won?'linear-gradient(135deg,#1a5a2a,#0e3018)':'rgba(40,20,4,0.8)'};color:var(--parchment);border:1px solid ${won?'rgba(76,175,80,0.4)':'rgba(100,60,10,0.3)'};" onclick="closeBattleModal()">Devam Et</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
+function showResult(won,e){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='result-modal';
+  var rw=won?'<div class="res-rewards"><div class="rw-row"><span>🪙 Altın</span><span style="color:var(--gold-light)">+'+e.reward.gold+'</span></div><div class="rw-row"><span>⭐ Deneyim</span><span style="color:var(--green-light)">+'+e.reward.xp+' XP</span></div></div>'
+    :'<div class="res-rewards"><div class="rw-row"><span>💀 Kayıplar</span><span style="color:var(--red-light)">Asker kaybedildi</span></div></div>';
+  o.innerHTML='<div class="modal result-modal"><div class="res-icon">'+(won?'🏆':'💔')+'</div><div class="res-title '+(won?'win':'lose')+'">'+(won?'ZAFER!':'YENİLGİ')+'</div>'
+    +'<div class="res-msg">'+(won?e.name+' bozguna uğratıldı!':'Ordun geri çekilmek zorunda kaldı...')+'</div>'+rw
+    +'<button class="collect-btn" style="background:'+(won?'linear-gradient(135deg,#1a5a2a,#0e3018)':'rgba(40,20,4,0.8)')+';color:var(--parchment);border:1px solid '+(won?'rgba(76,175,80,0.4)':'rgba(100,60,10,0.3)')+';" onclick="closeBattle()">Devam Et</button></div>';
+  document.body.appendChild(o);
 }
 
-// ============================================================
-//  QUEST PROGRESS
-// ============================================================
-function questProgress(type, amount) {
-  const today = new Date().toDateString();
-  DAILY_QUESTS.forEach(q => {
-    if (q.type !== type) return;
-    if (!G.quests[q.id]) G.quests[q.id] = { progress: 0, claimed: false, date: today };
-    if (G.quests[q.id].claimed) return;
-    if (G.quests[q.id].date !== today) return;
-    G.quests[q.id].progress = Math.min(q.target, G.quests[q.id].progress + amount);
+// CLAN
+var clanView='main';
+async function renderClan(){
+  var root=document.getElementById('clan-content');if(!root)return;
+  root.innerHTML='<div style="color:var(--muted);text-align:center;padding:40px;font-family:Cinzel,serif">⏳ Yükleniyor...</div>';
+  await syncPlayer();
+  if(G.player.clanId)await renderMyClan(root);else await renderNoClan(root);
+}
+async function renderNoClan(root){
+  root.innerHTML='<div class="mpanel" style="text-align:center"><div style="font-size:56px">🛡️</div><div style="font-family:Cinzel,serif;font-size:16px;font-weight:700;margin:10px 0 4px;color:var(--parchment)">Klansızsın</div><div style="font-size:13px;color:var(--muted)">Bir klana katıl veya kendi klanını kur!</div></div>'
+    +'<div class="clan-tabs"><button class="clan-tab-btn '+(clanView==='browse'?'active':'')+'" onclick="setClanView(\'browse\')">🔍 Klan Bul</button><button class="clan-tab-btn '+(clanView==='create'?'active':'')+'" onclick="setClanView(\'create\')">➕ Klan Kur</button></div>'
+    +'<div id="clan-sub"></div>';
+  if(clanView==='browse')await renderBrowseClans();
+  else if(clanView==='create')renderCreateClan();
+}
+async function renderBrowseClans(){
+  var sub=document.getElementById('clan-sub');if(!sub)return;
+  sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Yükleniyor...</div>';
+  var clans=await getAllClans();
+  if(!clans.length){sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz hiç klan yok. İlk klanı sen kur! 🚀</div>';return}
+  sub.innerHTML='';
+  clans.forEach(function(clan){
+    var mc=(clan.members||[]).length,myReq=(clan.requests||[]).find(function(r){return r.pid===PID}),isMem=(clan.members||[]).includes(PID),full=mc>=30;
+    var card=document.createElement('div');card.className='clan-list-card';
+    card.innerHTML='<div class="cl-top"><div class="cl-icon">'+(clan.icon||'🛡️')+'</div><div class="cl-info"><div class="cl-name">'+clan.name+'</div><div class="cl-meta">#'+clan.tag+' • '+mc+'/30 üye • 👑 '+clan.ownerName+'</div></div></div>'
+      +(clan.desc?'<div class="cl-desc">'+clan.desc+'</div>':'')
+      +'<div class="cl-acts">'+(isMem?'<button class="cl-btn view" disabled>✅ Üyesin</button>':myReq?'<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>':full?'<button class="cl-btn join" disabled>Dolu</button>':'<button class="cl-btn join" onclick="reqJoin(\''+clan.id+'\')">📨 Katılım Talebi</button>')+'</div>';
+    sub.appendChild(card);
   });
-  saveGame();
 }
-
-function claimQuest(id) {
-  const q = DAILY_QUESTS.find(x => x.id === id);
-  if (!q) return;
-  const saved = G.quests[id];
-  if (!saved || saved.claimed || saved.progress < q.target) return;
-  G.player.gold += q.reward.gold;
-  G.player.xp += q.reward.xp;
-  saved.claimed = true;
-  checkLevelUp();
-  showToast(`🎁 ${q.name} ödülü alındı!`, 'success');
-  saveGame(); renderAll();
+function renderCreateClan(){
+  var sub=document.getElementById('clan-sub');if(!sub)return;
+  sub.innerHTML='<div class="mpanel"><h3>⚔️ Yeni Klan Kur</h3>'
+    +'<div class="form-group"><label class="form-lbl">Klan Adı *</label><input class="form-input" id="nc-name" placeholder="örn. Demir Kalkan" maxlength="24"></div>'
+    +'<div class="form-group"><label class="form-lbl">Klan Etiketi *</label><input class="form-input" id="nc-tag" placeholder="örn. DEMIR" maxlength="6"></div>'
+    +'<div class="form-group"><label class="form-lbl">İkon</label><input class="form-input" id="nc-icon" value="🛡️" maxlength="4"></div>'
+    +'<div class="form-group"><label class="form-lbl">Açıklama</label><textarea class="form-textarea" id="nc-desc" placeholder="Klan açıklaması..."></textarea></div>'
+    +'<button class="create-btn" onclick="createClan()">🏰 Klanı Kur</button></div>';
 }
-
-// ============================================================
-//  TAB SWITCHING
-// ============================================================
-function switchTab(tab) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + tab).classList.add('active');
-  const activeBtn = document.getElementById('tab-' + tab);
-  if (activeBtn) {
-    activeBtn.classList.add('active');
-    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }
-  if (tab === 'quests') renderQuests();
-  if (tab === 'clan') renderClan();
-  if (tab === 'reward') initWheel();
-}
-
-// ============================================================
-//  TOAST
-// ============================================================
-function showToast(msg, type = 'info') {
-  const tc = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`; t.textContent = msg;
-  tc.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
-}
-
-// ============================================================
-//  IDLE POPUP
-// ============================================================
-function showIdlePopup(earned) {
-  if (earned.gold < 10 && earned.food < 10) return;
-  const popup = document.createElement('div');
-  popup.className = 'idle-popup';
-  popup.innerHTML = `
-    <div class="idle-box">
-      <div class="idle-icon">⏰</div>
-      <h3>Hoş Geldin, Komutan!</h3>
-      <p>${earned.hours} saatlik yokluğunda kaynaklar toplandı.</p>
-      <div class="idle-amount">🪙 +${fmtNum(earned.gold)}</div>
-      <div style="color:var(--green-light);font-family:'Cinzel',serif;font-size:18px;font-weight:700;margin-bottom:12px">🌾 +${fmtNum(earned.food)}</div>
-      <button class="collect-btn" style="background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);border:1px solid rgba(212,146,10,0.4);font-family:'Cinzel',serif;font-size:15px;font-weight:800;cursor:pointer;padding:14px;border-radius:12px;width:100%" onclick="this.closest('.idle-popup').remove()">✅ Topla!</button>
-    </div>
-  `;
-  document.body.appendChild(popup);
-}
-
-// ============================================================
-//  TELEGRAM INIT
-// ============================================================
-function initTelegram() {
-  const tg = window.Telegram?.WebApp;
-  if (tg) {
-    tg.ready(); tg.expand();
-    tg.setHeaderColor('#0d0805');
-    tg.setBackgroundColor('#0d0805');
-    const user = tg.initDataUnsafe?.user;
-    if (user) { G.player.name = user.first_name || 'Komutan'; }
-  }
-}
-
-// ============================================================
-//  RESOURCE TICK
-// ============================================================
-function startResourceTick() {
-  setInterval(() => {
-    G.player.gold += G.buildings.mine.level * 2;
-    G.player.food += G.buildings.farm.level * 1;
-    G.player.lastOnline = Date.now();
-    saveGame(); updateTopBar();
-  }, 5000);
-}
-
-// ============================================================
-//  KEYBOARD
-// ============================================================
-document.addEventListener('keydown', (e) => {
-  const key = e.key.toLowerCase();
-  if (key === 'e') {
-    const battleModal = document.getElementById('battle-modal');
-    if (battleModal) { doBattle(); return; }
-    const activeScreen = document.querySelector('.screen.active');
-    if (activeScreen && activeScreen.id === 'screen-battle') {
-      const firstEnemy = document.querySelector('.enemy-card');
-      if (firstEnemy) firstEnemy.click();
-    }
-    return;
-  }
-  if (key === 'escape') { closeBattleModal(); return; }
-  const tabMap = {'1':'castle','2':'troops','3':'battle','4':'clan','5':'quests','6':'reward'};
-  if (tabMap[e.key]) switchTab(tabMap[e.key]);
-});
-
-// ============================================================
-//  ÖDÜL ÇARKI
-// ============================================================
-const WHEEL_SEGMENTS = [
-  { label: '100\nAsker',  troops: 100,  color: '#3a5a20', textColor: '#a8d870' },
-  { label: '250\nAsker',  troops: 250,  color: '#5a3010', textColor: '#f0b870' },
-  { label: '500\nAsker',  troops: 500,  color: '#1a3a5a', textColor: '#70b0f0' },
-  { label: '150\nAsker',  troops: 150,  color: '#4a1a1a', textColor: '#f07070' },
-  { label: '750\nAsker',  troops: 750,  color: '#4a3a08', textColor: '#f0d050' },
-  { label: '200\nAsker',  troops: 200,  color: '#2a1a4a', textColor: '#b080f0' },
-  { label: '1000\nAsker', troops: 1000, color: '#6a4a00', textColor: '#ffd060' },
-  { label: '300\nAsker',  troops: 300,  color: '#0a3a2a', textColor: '#60d0a0' },
-];
-
-const SPIN_COOLDOWN = 12 * 60 * 60 * 1000; // 12 saat ms
-let wheelAngle = 0;
-let wheelSpinning = false;
-let wheelInited = false;
-let countdownInterval = null;
-
-function getLastSpinTime() {
-  try { return parseInt(localStorage.getItem('toe_last_spin') || '0'); } catch(e) { return 0; }
-}
-function setLastSpinTime(t) {
-  try { localStorage.setItem('toe_last_spin', String(t)); } catch(e) {}
-}
-
-function canSpin() {
-  return Date.now() - getLastSpinTime() >= SPIN_COOLDOWN;
-}
-
-function getTimeUntilSpin() {
-  const diff = SPIN_COOLDOWN - (Date.now() - getLastSpinTime());
-  if (diff <= 0) return null;
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-function drawWheel(angle) {
-  const canvas = document.getElementById('wheel-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
-  const r = cx - 6;
-  const seg = WHEEL_SEGMENTS.length;
-  const arc = (Math.PI * 2) / seg;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Outer ring
-  ctx.beginPath();
-  ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(212,146,10,0.8)';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  for (let i = 0; i < seg; i++) {
-    const startAngle = angle + i * arc;
-    const endAngle = startAngle + arc;
-    const s = WHEEL_SEGMENTS[i];
-
-    // Segment fill
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, startAngle, endAngle);
-    ctx.closePath();
-    ctx.fillStyle = s.color;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(212,146,10,0.3)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Text
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(startAngle + arc / 2);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = s.textColor;
-    ctx.font = 'bold 12px Cinzel, serif';
-    const lines = s.label.split('\n');
-    lines.forEach((line, li) => {
-      ctx.fillText(line, r - 10, (li - (lines.length - 1) / 2) * 16);
+async function renderMyClan(root){
+  var clan=await getClan(G.player.clanId);
+  if(!clan){G.player.clanId=null;saveGame();await renderNoClan(root);return}
+  var isOwner=clan.ownerId===PID,mc=(clan.members||[]).length,reqs=clan.requests||[];
+  var allP=await loadPlayers(),meP={pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,isMe:true};
+  var members=[meP].concat(allP.filter(function(p){return(clan.members||[]).includes(p.pid)&&p.pid!==PID}));
+  members.sort(function(a,b){return b.power-a.power});
+  var totalP=members.reduce(function(s,m){return s+(m.power||0)},0);
+  root.innerHTML='<div class="clan-hdr"><span class="clan-icon">'+(clan.icon||'🛡️')+'</span><div class="clan-nm">'+clan.name+'</div><div class="clan-tag">#'+clan.tag+' • '+mc+'/30 üye</div>'
+    +'<div class="clan-stats"><div class="clan-stat"><div class="c-sv">'+fmt(totalP)+'</div><div class="c-sl">Toplam Güç</div></div><div class="clan-stat"><div class="c-sv">'+mc+'</div><div class="c-sl">Üye</div></div><div class="clan-stat"><div class="c-sv">'+(isOwner?'👑':'🛡️')+'</div><div class="c-sl">'+(isOwner?'Lider':'Üye')+'</div></div></div>'
+    +(clan.desc?'<div style="font-size:12px;color:var(--muted);margin-top:10px">'+clan.desc+'</div>':'')+'</div>'
+    +(isOwner&&reqs.length?'<div class="sec-title">📨 Katılım Talepleri ('+reqs.length+')</div><div id="req-list"></div>':'')
+    +'<div class="sec-title">👥 Üyeler</div><div id="mem-list"></div>'
+    +(isOwner?'<button class="danger-btn" onclick="disbandConfirm()">💀 Klanı Dağıt</button>':'<button class="danger-btn" onclick="leaveConfirm()">🚪 Klandan Ayrıl</button>');
+  if(isOwner&&reqs.length){
+    var rl=document.getElementById('req-list');
+    reqs.forEach(function(r){
+      var c=document.createElement('div');c.className='member-card';
+      c.innerHTML='<div class="m-av">'+r.name[0].toUpperCase()+'</div><div style="flex:1"><div class="m-name">'+r.name+'</div><div class="m-power">💪 '+fmt(r.power||0)+' • Sv.'+(r.level||1)+'</div></div>'
+        +'<div style="display:flex;gap:6px"><button class="success-btn" onclick="approveReq(\''+clan.id+'\',\''+r.pid+'\',\''+r.name+'\')">✅</button><button class="reject-btn" onclick="rejectReq(\''+clan.id+'\',\''+r.pid+'\')">❌</button></div>';
+      rl.appendChild(c);
     });
+  }
+  var ml=document.getElementById('mem-list'),ri=['🥇','🥈','🥉'];
+  members.forEach(function(m,i){
+    var c=document.createElement('div');c.className='member-card';
+    c.innerHTML='<div class="m-av" style="'+(m.isMe?'background:linear-gradient(135deg,var(--gold),var(--wood))':m.pid===clan.ownerId?'background:linear-gradient(135deg,#7a4a00,#5a3000)':'')+'">'+m.name[0].toUpperCase()+'</div>'
+      +'<div style="flex:1"><div class="m-name">'+m.name+(m.isMe?' <span style="color:var(--gold);font-size:11px">(Sen)</span>':'')+(m.pid===clan.ownerId?' 👑':'')+'</div><div class="m-power">💪 '+fmt(m.power||0)+(m.level?' • Sv.'+m.level:'')+'</div></div>'
+      +(isOwner&&!m.isMe&&m.pid!==clan.ownerId?'<button class="reject-btn" style="font-size:11px;padding:4px 8px" onclick="kickMember(\''+clan.id+'\',\''+m.pid+'\',\''+m.name+'\')">Çıkar</button>':'<div class="m-rank">'+(i<3?ri[i]:(i+1))+'</div>');
+    ml.appendChild(c);
+  });
+}
+function setClanView(v){clanView=v;renderClan()}
+async function createClan(){
+  var name=(document.getElementById('nc-name')||{}).value||'';name=name.trim();
+  var tag=(document.getElementById('nc-tag')||{}).value||'';tag=tag.trim().toUpperCase();
+  var icon=(document.getElementById('nc-icon')||{}).value||'🛡️';icon=icon.trim();
+  var desc=(document.getElementById('nc-desc')||{}).value||'';desc=desc.trim();
+  if(name.length<2){toast('Klan adı en az 2 karakter!','error');return}
+  if(tag.length<2){toast('Etiket en az 2 karakter!','error');return}
+  var existing=await getAllClans();
+  if(existing.find(function(c){return c.tag===tag})){toast('Bu etiket zaten alınmış!','error');return}
+  var cid='c'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+  var clan={id:cid,name:name,tag:tag,icon:icon,desc:desc,ownerId:PID,ownerName:G.player.name,members:[PID],requests:[],createdAt:Date.now()};
+  await saveClan(clan);G.player.clanId=cid;saveGame();
+  toast('🎉 '+name+' klanı kuruldu!','success');clanView='main';renderClan();
+}
+async function reqJoin(cid){
+  var clan=await getClan(cid);if(!clan){toast('Klan bulunamadı!','error');return}
+  if((clan.members||[]).includes(PID)){toast('Zaten üyesin!','error');return}
+  if((clan.requests||[]).find(function(r){return r.pid===PID})){toast('Zaten talep gönderdin!','info');return}
+  clan.requests=clan.requests||[];clan.requests.push({pid:PID,name:G.player.name,power:calcPower(),level:G.player.level,sentAt:Date.now()});
+  await saveClan(clan);toast('📨 '+clan.name+' klanına talep gönderildi!','success');renderClan();
+}
+async function approveReq(cid,pid,pname){
+  var clan=await getClan(cid);if(!clan||clan.ownerId!==PID)return;
+  if((clan.members||[]).length>=30){toast('Klan dolu!','error');return}
+  clan.requests=(clan.requests||[]).filter(function(r){return r.pid!==pid});
+  clan.members=clan.members||[];if(!clan.members.includes(pid))clan.members.push(pid);
+  await saveClan(clan);toast('✅ '+pname+' klana kabul edildi!','success');renderClan();
+}
+async function rejectReq(cid,pid){
+  var clan=await getClan(cid);if(!clan||clan.ownerId!==PID)return;
+  clan.requests=(clan.requests||[]).filter(function(r){return r.pid!==pid});
+  await saveClan(clan);toast('❌ Talep reddedildi.','info');renderClan();
+}
+async function kickMember(cid,pid,pname){
+  var clan=await getClan(cid);if(!clan||clan.ownerId!==PID)return;
+  clan.members=(clan.members||[]).filter(function(m){return m!==pid});
+  await saveClan(clan);toast('🚫 '+pname+' klandan çıkarıldı.','info');renderClan();
+}
+function leaveConfirm(){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='confirm-modal';
+  o.innerHTML='<div class="modal" style="text-align:center"><div style="font-size:48px">🚪</div><h3 style="margin:12px 0 8px">Klandan ayrıl?</h3><p style="color:var(--muted);font-size:13px;margin-bottom:20px">Bu işlem geri alınamaz.</p><div class="modal-btns"><button class="btn-cancel" onclick="document.getElementById(\'confirm-modal\').remove()">İptal</button><button class="btn-attack" onclick="leaveClan()">Ayrıl</button></div></div>';
+  document.body.appendChild(o);
+}
+async function leaveClan(){
+  var m=document.getElementById('confirm-modal');if(m)m.remove();
+  var clan=await getClan(G.player.clanId);
+  if(clan){clan.members=(clan.members||[]).filter(function(x){return x!==PID});await saveClan(clan)}
+  G.player.clanId=null;saveGame();toast('🚪 Klandan ayrıldın.','info');clanView='browse';renderClan();
+}
+function disbandConfirm(){
+  var o=document.createElement('div');o.className='modal-overlay';o.id='confirm-modal';
+  o.innerHTML='<div class="modal" style="text-align:center"><div style="font-size:48px">💀</div><h3 style="margin:12px 0 8px">Klanı dağıt?</h3><p style="color:var(--muted);font-size:13px;margin-bottom:20px">Tüm üyeler çıkarılır. Geri alınamaz!</p><div class="modal-btns"><button class="btn-cancel" onclick="document.getElementById(\'confirm-modal\').remove()">İptal</button><button class="btn-attack" onclick="disbandClan()">Dağıt</button></div></div>';
+  document.body.appendChild(o);
+}
+async function disbandClan(){
+  var m=document.getElementById('confirm-modal');if(m)m.remove();
+  try{await storeDel('clan_'+G.player.clanId)}catch(e){}
+  G.player.clanId=null;saveGame();toast('💀 Klan dağıtıldı.','info');clanView='browse';renderClan();
+}
+
+// WHEEL
+var WSEGS=[
+  {troops:100, color:'#3a5a20',tc:'#a8d870'},
+  {troops:250, color:'#5a3010',tc:'#f0b870'},
+  {troops:500, color:'#1a3a5a',tc:'#70b0f0'},
+  {troops:150, color:'#4a1a1a',tc:'#f07070'},
+  {troops:750, color:'#4a3a08',tc:'#f0d050'},
+  {troops:200, color:'#2a1a4a',tc:'#b080f0'},
+  {troops:1000,color:'#6a4a00',tc:'#ffd060'},
+  {troops:300, color:'#0a3a2a',tc:'#60d0a0'}
+];
+var wAngle=0,wSpin=false,wInit=false,wCdInt=null;
+var W_CD=12*60*60*1000;
+function getLS(){try{return parseInt(lsGet('toe_last_spin')||'0')}catch(e){return 0}}
+function setLS(t){lsSet('toe_last_spin',String(t))}
+function canSpin(){return Date.now()-getLS()>=W_CD}
+function getCd(){
+  var diff=W_CD-(Date.now()-getLS());if(diff<=0)return null;
+  var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function drawWheel(angle){
+  var canvas=document.getElementById('wheel-canvas');if(!canvas)return;
+  var ctx=canvas.getContext('2d'),cx=150,cy=150,r=144,n=WSEGS.length,arc=(Math.PI*2)/n;
+  ctx.clearRect(0,0,300,300);
+  ctx.beginPath();ctx.arc(cx,cy,r+4,0,Math.PI*2);ctx.strokeStyle='rgba(212,146,10,0.8)';ctx.lineWidth=3;ctx.stroke();
+  for(var i=0;i<n;i++){
+    var sa=angle+i*arc,ea=sa+arc,seg=WSEGS[i];
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,sa,ea);ctx.closePath();
+    ctx.fillStyle=seg.color;ctx.fill();ctx.strokeStyle='rgba(212,146,10,0.25)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(sa+arc/2);
+    ctx.textAlign='right';ctx.fillStyle=seg.tc;ctx.font='bold 13px Cinzel,serif';ctx.fillText(seg.troops+'',r-10,-6);
+    ctx.font='bold 10px Cinzel,serif';ctx.fillStyle='rgba(255,255,255,0.7)';ctx.fillText('Asker',r-10,8);
     ctx.restore();
   }
-
-  // Center circle
-  ctx.beginPath();
-  ctx.arc(cx, cy, 26, 0, Math.PI * 2);
-  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 26);
-  grad.addColorStop(0, '#d4920a');
-  grad.addColorStop(1, '#5a3a04');
-  ctx.fillStyle = grad;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,210,80,0.6)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Center icon
-  ctx.font = '20px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('⚔️', cx, cy);
+  ctx.beginPath();ctx.arc(cx,cy,26,0,Math.PI*2);
+  var g=ctx.createRadialGradient(cx,cy,0,cx,cy,26);g.addColorStop(0,'#d4920a');g.addColorStop(1,'#5a3a04');
+  ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='rgba(255,210,80,0.6)';ctx.lineWidth=2;ctx.stroke();
+  ctx.font='18px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⚔️',cx,cy);
 }
-
-function initWheel() {
-  if (!document.getElementById('wheel-canvas')) return;
-  drawWheel(wheelAngle);
-  updateSpinUI();
-  if (!wheelInited) {
-    wheelInited = true;
-    if (countdownInterval) clearInterval(countdownInterval);
-    countdownInterval = setInterval(updateSpinUI, 1000);
-  }
+function initWheel(){
+  if(!document.getElementById('wheel-canvas'))return;
+  drawWheel(wAngle);updateSpinUI();
+  if(!wInit){wInit=true;if(wCdInt)clearInterval(wCdInt);wCdInt=setInterval(updateSpinUI,1000)}
 }
-
-function updateSpinUI() {
-  const btn = document.getElementById('spin-btn');
-  const cd = document.getElementById('wheel-countdown');
-  if (!btn || !cd) return;
-  if (canSpin()) {
-    cd.textContent = 'Hazır!';
-    cd.style.color = 'var(--green-light)';
-    btn.disabled = false;
-    btn.textContent = '🎰 ÇEVİR!';
-  } else {
-    const t = getTimeUntilSpin();
-    cd.textContent = t || 'Hazır!';
-    cd.style.color = 'var(--gold)';
-    btn.disabled = true;
-    btn.textContent = '⏳ Bekleniyor...';
-  }
+function updateSpinUI(){
+  var btn=document.getElementById('spin-btn'),cd=document.getElementById('wcd');if(!btn||!cd)return;
+  if(canSpin()){cd.textContent='Hazır!';cd.style.color='var(--green-light)';btn.disabled=false;btn.textContent='🎰 ÇEVİR!'}
+  else{cd.textContent=getCd()||'Hazır!';cd.style.color='var(--gold)';btn.disabled=true;btn.textContent='⏳ Bekleniyor...'}
 }
-
-function spinWheel() {
-  if (wheelSpinning || !canSpin()) return;
-  wheelSpinning = true;
-
-  // Hide result
-  const resultBox = document.getElementById('wheel-result-box');
-  if (resultBox) resultBox.style.display = 'none';
-
-  const btn = document.getElementById('spin-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '🌀 Dönüyor...'; }
-
-  // Pick random segment
-  const seg = WHEEL_SEGMENTS.length;
-  const arc = (Math.PI * 2) / seg;
-  const winIndex = Math.floor(Math.random() * seg);
-
-  // Calculate target angle: spin 5-8 full rounds + land on winner
-  const extraSpins = (5 + Math.floor(Math.random() * 3)) * Math.PI * 2;
-  // We want pointer (top = -π/2) to point at center of winIndex segment
-  // Segment i starts at: wheelAngle + i*arc, center at: wheelAngle + i*arc + arc/2
-  // We want that center to be at -π/2 (top)
-  const targetSegCenter = winIndex * arc + arc / 2;
-  const targetAngle = -Math.PI / 2 - targetSegCenter;
-  const fullTarget = wheelAngle + extraSpins + ((targetAngle - wheelAngle) % (Math.PI * 2));
-
-  const duration = 4000 + Math.random() * 1000;
-  const startTime = performance.now();
-  const startAngle = wheelAngle;
-
-  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
-
-  function animate(now) {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easedProgress = easeOut(progress);
-    const current = startAngle + (fullTarget - startAngle) * easedProgress;
-    wheelAngle = current;
-    drawWheel(current);
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      wheelAngle = current % (Math.PI * 2);
-      wheelSpinning = false;
-      setLastSpinTime(Date.now());
-
-      // Determine actual winner from final angle
-      const normalizedAngle = (((-wheelAngle - Math.PI / 2) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-      const actualIndex = Math.floor(normalizedAngle / arc) % seg;
-      const winner = WHEEL_SEGMENTS[actualIndex];
-      // Random troop count between 100-1000 (segment value is the max hint, actual is random in range)
-      const troopCount = winner.troops;
-
-      // Give troops first, then show result
-      const chosenTroop = giveWheelTroops(troopCount);
-      showWheelResult(winner, troopCount, chosenTroop);
-      updateSpinUI();
+function spinWheel(){
+  if(wSpin||!canSpin())return;wSpin=true;
+  var rb=document.getElementById('wheel-result-box');if(rb)rb.style.display='none';
+  var btn=document.getElementById('spin-btn');if(btn){btn.disabled=true;btn.textContent='🌀 Dönüyor...'}
+  var n=WSEGS.length,arc=(Math.PI*2)/n,winIdx=Math.floor(Math.random()*n);
+  var extraSpins=(5+Math.floor(Math.random()*3))*Math.PI*2;
+  var tgt=-Math.PI/2-(winIdx*arc+arc/2);
+  var fullTgt=wAngle+extraSpins+((tgt-wAngle)%(Math.PI*2));
+  var dur=4000+Math.random()*1000,st=performance.now(),sa=wAngle;
+  function ease(t){return 1-Math.pow(1-t,4)}
+  function anim(now){
+    var el=now-st,pr=Math.min(el/dur,1),cur=sa+(fullTgt-sa)*ease(pr);
+    wAngle=cur;drawWheel(cur);
+    if(pr<1){requestAnimationFrame(anim)}
+    else{
+      wAngle=cur%(Math.PI*2);wSpin=false;setLS(Date.now());
+      var norm=((-wAngle-Math.PI/2)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+      var idx=Math.floor(norm/arc)%n;
+      var winner=WSEGS[idx];
+      var chosen=giveWheelTroops(winner.troops);
+      showWheelResult(winner.troops,chosen);updateSpinUI();
     }
   }
-
-  requestAnimationFrame(animate);
+  requestAnimationFrame(anim);
+}
+function giveWheelTroops(count){
+  Object.keys(TC).forEach(function(id){if(!G.troops[id])G.troops[id]={count:0}});
+  var unlocked=Object.keys(TC).filter(function(id){return G.buildings.barracks.level>=TC[id].req});
+  var chosen=unlocked.length?unlocked[Math.floor(Math.random()*unlocked.length)]:'swordsman';
+  G.troops[chosen].count=(G.troops[chosen].count||0)+count;
+  G.player.xp+=20;levelUp();saveGame();renderAll();return chosen;
+}
+function showWheelResult(count,chosenId){
+  var rb=document.getElementById('wheel-result-box');if(!rb)return;
+  var cfg=TC[chosenId]||TC.swordsman;
+  rb.style.display='block';
+  rb.innerHTML='<div class="wr-icon">🏆</div><div class="wr-title">TEBRİKLER!</div>'
+    +'<div class="wr-troops">'+cfg.icon+' +'+count+' '+cfg.name+'</div>'
+    +'<div class="wr-sub">Birlikler orduna katıldı! Ordu sekmesinden kontrol edebilirsin.</div>'
+    +'<button class="wr-close-btn" onclick="document.getElementById(\'wheel-result-box\').style.display=\'none\'">✅ Harika!</button>';
+  toast('🎡 +'+count+' '+cfg.name+' kazandın!','success');
 }
 
-function giveWheelTroops(count) {
-  // Önce tüm birlik slotlarının var olduğundan emin ol
-  Object.keys(TROOPS_CONFIG).forEach(id => {
-    if (!G.troops[id]) G.troops[id] = { count: 0 };
-  });
-
-  // Açık (kilidi açılmış) birlik türleri
-  const unlocked = Object.keys(TROOPS_CONFIG).filter(
-    id => G.buildings.barracks.level >= TROOPS_CONFIG[id].requiresBarracks
-  );
-
-  // Hiç açık yoksa kılıçlıya ver
-  let chosen = 'swordsman';
-  if (unlocked.length > 0) {
-    chosen = unlocked[Math.floor(Math.random() * unlocked.length)];
-  }
-
-  // Güvenli şekilde ekle
-  if (!G.troops[chosen]) G.troops[chosen] = { count: 0 };
-  G.troops[chosen].count = (G.troops[chosen].count || 0) + count;
-
-  G.player.xp += 20;
-  checkLevelUp();
-  saveGame();
-  renderAll();
-  updateTopBar();
-  return chosen; // hangi birliğe verildiğini döndür
+// TAB
+function switchTab(tab){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  var sc=document.getElementById('screen-'+tab);if(sc)sc.classList.add('active');
+  var btn=document.getElementById('tab-'+tab);if(btn){btn.classList.add('active');btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}
+  if(tab==='quests')renderQuests();
+  if(tab==='clan')renderClan();
+  if(tab==='reward')initWheel();
 }
 
-function showWheelResult(winner, troopCount, chosenTroop) {
-  const resultBox = document.getElementById('wheel-result-box');
-  if (!resultBox) return;
-  const troopName = chosenTroop && TROOPS_CONFIG[chosenTroop] ? TROOPS_CONFIG[chosenTroop].name : 'Asker';
-  const troopIcon = chosenTroop && TROOPS_CONFIG[chosenTroop] ? TROOPS_CONFIG[chosenTroop].icon : '⚔️';
-  resultBox.style.display = 'block';
-  resultBox.innerHTML = `
-    <div class="wr-icon">🏆</div>
-    <div class="wr-title">TEBRİKLER!</div>
-    <div class="wr-troops">${troopIcon} +${troopCount} ${troopName}</div>
-    <div class="wr-sub">Birlikler orduna katıldı! Ordu sekmesinden kontrol edebilirsin.</div>
-    <button class="wr-close-btn" onclick="document.getElementById('wheel-result-box').style.display='none'">✅ Harika!</button>
-  `;
-  showToast(`🎡 +${troopCount} ${troopName} kazandın!`, 'success');
+// IDLE
+function showIdlePopup(earned){
+  if(earned.gold<10&&earned.food<10)return;
+  var p=document.createElement('div');p.className='idle-popup';
+  p.innerHTML='<div class="idle-box"><div class="idle-icon">⏰</div><h3>Hoş Geldin, Komutan!</h3><p>'+earned.hours+' saatlik yokluğunda kaynaklar toplandı.</p><div class="idle-amount">🪙 +'+fmt(earned.gold)+'</div><div style="color:var(--green-light);font-family:Cinzel,serif;font-size:18px;font-weight:700;margin-bottom:12px">🌾 +'+fmt(earned.food)+'</div><button onclick="this.closest(\'.idle-popup\').remove()" style="width:100%;padding:14px;border:1px solid rgba(212,146,10,0.4);border-radius:12px;background:linear-gradient(135deg,#7a5010,#4a2e08);color:var(--parchment2);font-family:Cinzel,serif;font-size:15px;font-weight:800;cursor:pointer">✅ Topla!</button></div>';
+  document.body.appendChild(p);
+}
+function processIdleIncome(){
+  var now=Date.now(),elapsed=(now-G.player.lastOnline)/3600000;if(elapsed<0.01)return null;
+  var hours=Math.min(elapsed,8),gold=Math.floor((G.buildings.mine.level*15+10)*hours),food=Math.floor((G.buildings.farm.level*10+5)*hours);
+  G.player.gold+=gold;G.player.food+=food;G.player.lastOnline=now;saveGame();
+  return{gold:gold,food:food,hours:hours.toFixed(1)};
+}
+function initTelegram(){
+  var tg=window.Telegram&&window.Telegram.WebApp;
+  if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0d0805');tg.setBackgroundColor('#0d0805');var u=tg.initDataUnsafe&&tg.initDataUnsafe.user;if(u)G.player.name=u.first_name||'Komutan'}
+}
+function startTick(){
+  setInterval(function(){G.player.gold+=G.buildings.mine.level*2;G.player.food+=G.buildings.farm.level;G.player.lastOnline=Date.now();saveGame();updateTopBar()},5000);
 }
 
-// ============================================================
-//  INIT
-// ============================================================
-window.onload = async () => {
-  loadGame();
-  initTelegram();
-  const today = new Date().toDateString();
-  if (!G.quests['q_login'] || G.quests['q_login'].date !== today) {
-    G.quests['q_login'] = { progress: 1, claimed: false, date: today };
-    saveGame();
+function initGame(){
+  try{loadGame()}catch(e){console.error('loadGame err',e)}
+  try{initTelegram()}catch(e){console.error('tg err',e)}
+  try{
+    var today=new Date().toDateString();
+    if(!G.quests['q_login']||G.quests['q_login'].date!==today){G.quests['q_login']={progress:1,claimed:false,date:today};saveGame()}
+  }catch(e){}
+  try{var earned=processIdleIncome();if(earned&&(earned.gold>10||earned.food>10))setTimeout(function(){showIdlePopup(earned)},800)}catch(e){}
+  try{renderBuildings()}catch(e){console.error('renderBuildings',e)}
+  try{renderTroops()}catch(e){console.error('renderTroops',e)}
+  try{renderEnemies()}catch(e){console.error('renderEnemies',e)}
+  try{renderQuests()}catch(e){console.error('renderQuests',e)}
+  try{updateTopBar()}catch(e){console.error('topbar',e)}
+  syncPlayer().catch(function(){});
+  renderClan().catch(function(){});
+  startTick();
+}
+
+window.onload=function(){
+  // Telegram WebApp bazen geç yüklenebilir; kısa bir timeout ile güvene alıyoruz
+  if(document.readyState==='complete'){
+    setTimeout(initGame, 100);
+  } else {
+    window.addEventListener('load', function(){ setTimeout(initGame, 100); });
   }
-  const earned = processIdleIncome();
-  if (earned && (earned.gold > 10 || earned.food > 10)) {
-    setTimeout(() => showIdlePopup(earned), 800);
-  }
-  await syncPlayerToShared();
-  renderAll();
-  startResourceTick();
 };
+
+// Eğer onload zaten geçtiyse direkt çalıştır
+if(document.readyState==='complete'){
+  setTimeout(initGame, 150);
+}
 </script>
 </body>
 </html>
