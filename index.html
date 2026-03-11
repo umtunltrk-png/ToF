@@ -930,44 +930,6 @@ function disbandTroop(id){
 // BATTLE
 var activeBattle=null;
 var battleTab='npc';
-function setBattleTab(tab){
-  battleTab=tab;
-  document.querySelectorAll('.battle-tab-btn').forEach(function(b){b.classList.remove('active')});
-  document.querySelectorAll('.battle-section').forEach(function(s){s.classList.remove('active')});
-  var btn=document.getElementById('btab-'+tab);if(btn)btn.classList.add('active');
-  var sec=document.getElementById(tab+'-battle');if(sec)sec.classList.add('active');
-  if(tab==='pvp')renderPvPPlayers();
-}
-async function renderPvPPlayers(){
-  console.log('=== PvP oyuncu listesi yükleniyor ===');
-  var list=document.getElementById('player-list');if(!list)return;
-  list.innerHTML='<div style="text-align:center;color:var(--muted);padding:20px">⏳ Oyuncular yükleniyor...</div>';
-  try{
-    var players=await loadPlayers();
-    console.log('PvP için yüklenen oyuncu sayısı:',players.length);
-    if(players.length===0){
-      list.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px"><div style="font-size:42px;margin-bottom:10px">👥</div><div style="font-size:13px">Henüz başka oyuncu yok.<br>Arkadaşlarını davet et!</div></div>';
-      return;
-    }
-    list.innerHTML='';
-    players.sort(function(a,b){return b.power-a.power});
-    players.forEach(function(p){
-      var isOnline=Date.now()-p.lastSeen<5*60*1000;
-      var card=document.createElement('div');
-      card.className='player-card'+(isOnline?'':' offline');
-      var clanBadge=p.clanId?'<span class="pvp-badge">🛡️ KLAN</span>':'';
-      card.innerHTML='<div class="p-avatar">'+p.name[0].toUpperCase()+'</div>'
-        +'<div class="p-info"><div class="p-name">'+p.name+' '+clanBadge+'</div>'
-        +'<div class="p-stats">💪 '+fmt(p.power||0)+' • Sv.'+(p.level||1)+'</div>'
-        +'<div class="p-status '+(isOnline?'online':'offline')+'">'+(isOnline?'🟢 Çevrimiçi':'⚫ Çevrimdışı')+'</div></div>';
-      card.onclick=function(){openPvPBattle(p)};
-      list.appendChild(card);
-    });
-  }catch(e){
-    console.error('renderPvPPlayers hatası:',e);
-    list.innerHTML='<div style="text-align:center;color:var(--red-light);padding:20px">⚠️ Oyuncular yüklenemedi</div>';
-  }
-}
 function openPvPBattle(player){
   activeBattle={type:'pvp',player:player};
   var myPower=calcPower(),enemyPower=player.power||100;
@@ -1096,24 +1058,6 @@ function doOasisBattle(){
     document.body.appendChild(res);
   }
   renderAll();
-}
-
-function openPvPBattle(player){
-  activeBattle={...player,type:'pvp'};
-  var pp=calcPower(),ep=player.power||100;
-  var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+ep))*100)));
-  var segs=10,ps=Math.round((pp/(pp+ep))*segs),barH='';
-  for(var i=0;i<segs;i++)barH+='<div class="bar-seg '+(i<ps?'fp':'fe')+'"></div>';
-  var possibleLoot=Math.floor(ep*0.3);
-  var o=document.createElement('div');o.className='modal-overlay';o.id='battle-modal';
-  o.innerHTML='<div class="modal"><h3>⚔️ '+player.name+'</h3><p style="color:var(--muted);font-size:12px;margin-top:4px">Seviye '+(player.level||1)+' oyuncuyla savaş</p>'
-    +'<div class="battle-vs"><div class="combatant"><div class="icon">🏰</div><div class="lbl">'+G.player.name+'</div><div style="color:var(--blue-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+fmt(pp)+'</div></div>'
-    +'<div class="vs-text">VS</div>'
-    +'<div class="combatant"><div class="icon">🏰</div><div class="lbl">'+player.name+'</div><div style="color:var(--red-light);font-family:Cinzel,serif;font-size:12px;font-weight:700">💪'+ep+'</div></div></div>'
-    +'<div class="pwr-cmp"><div class="p-row"><span>Kazanma şansı</span><span style="color:'+(wc>=50?'var(--green-light)':'var(--red-light)')+';font-family:Cinzel,serif;font-weight:700">%'+wc+'</span></div><div class="pwr-bars">'+barH+'</div></div>'
-    +'<div style="background:rgba(25,15,5,0.5);border:1px solid rgba(212,146,10,0.2);border-radius:8px;padding:10px;margin-bottom:14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Olası Ganimet</div><div style="font-size:16px;font-family:Cinzel,serif;font-weight:700;color:var(--gold-light)">~'+possibleLoot+'🪙 + Kaynaklar</div></div>'
-    +'<div class="modal-btns"><button class="btn-cancel" onclick="closeBattle()">İptal</button><button class="btn-attack" onclick="doPvPBattle()">⚔️ Saldır!</button></div></div>';
-  document.body.appendChild(o);
 }
 
 function doPvPBattle(){
