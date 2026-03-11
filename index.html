@@ -396,157 +396,209 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 <div id="toast-container"></div>
 
 <script>
-// STORAGE - Gerçek Shared Storage Sistemi
+// STORAGE - Gelişmiş Shared Storage Sistemi
 var MEM={};
+var STORAGE_READY=false;
+var STORAGE_CHECK_ATTEMPTS=0;
+var MAX_STORAGE_ATTEMPTS=10;
 
 function lsGet(k){try{return localStorage.getItem(k)||null}catch(e){return MEM[k]||null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){MEM[k]=v}}
 function lsDel(k){try{localStorage.removeItem(k)}catch(e){delete MEM[k]}}
-function lsList(prefix){
-  var keys=new Set();
-  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith(prefix))keys.add(k)}}catch(e){}
-  Object.keys(MEM).forEach(function(k){if(k.startsWith(prefix))keys.add(k)});
-  return Array.from(keys);
-}
 
-// GERÇEK SHARED STORAGE - Tüm kullanıcılar arasında paylaşılır
+// GERÇEK SHARED STORAGE
 async function storeSet(k,v){
-  console.log('📝 storeSet çağrıldı:',k);
-  
-  if(!window.storage){
-    console.error('❌ window.storage bulunamadı!');
-    toast('⚠️ Multiplayer devre dışı','error');
-    return false;
+  if(!STORAGE_READY){
+    console.log('⏳ Storage henüz hazır değil, localStorage kullanılıyor');
+    lsSet('TOE_'+k,v);
+    return true;
   }
   
   try{
-    console.log('→ window.storage.set çağrılıyor...',k,v.substring(0,50)+'...');
-    var result=await window.storage.set(k,v,true); // shared=true ÇOK ÖNEMLİ!
-    
+    var result=await window.storage.set(k,v,true);
     if(result){
-      console.log('✅ BAŞARILI! Key kaydedildi:',k);
+      console.log('✅ Shared storage SET:',k);
       return true;
     }else{
-      console.error('❌ window.storage.set null döndü');
+      console.warn('⚠️ Storage set null döndü:',k);
+      lsSet('TOE_'+k,v);
       return false;
     }
   }catch(e){
-    console.error('❌ storeSet HATA:',k,e);
+    console.error('❌ storeSet error:',k,e.message);
+    lsSet('TOE_'+k,v);
     return false;
   }
 }
 
 async function storeGet(k){
-  console.log('📖 storeGet çağrıldı:',k);
-  
-  if(!window.storage){
-    console.error('❌ window.storage bulunamadı!');
-    return null;
+  if(!STORAGE_READY){
+    return lsGet('TOE_'+k);
   }
   
   try{
-    console.log('→ window.storage.get çağrılıyor...',k);
-    var result=await window.storage.get(k,true); // shared=true ÇOK ÖNEMLİ!
-    
+    var result=await window.storage.get(k,true);
     if(result&&result.value!==undefined){
-      console.log('✅ BAŞARILI! Value bulundu:',k,result.value.substring(0,50)+'...');
+      console.log('✅ Shared storage GET:',k);
       return result.value;
     }else{
-      console.log('⚠️ Key bulunamadı:',k);
-      return null;
+      // Shared'da yoksa localStorage'a bak
+      return lsGet('TOE_'+k);
     }
   }catch(e){
-    console.error('❌ storeGet HATA:',k,e);
-    return null;
+    console.error('❌ storeGet error:',k,e.message);
+    return lsGet('TOE_'+k);
   }
 }
 
 async function storeDel(k){
-  console.log('🗑️ storeDel çağrıldı:',k);
-  
-  if(!window.storage){
-    console.error('❌ window.storage bulunamadı!');
-    return false;
+  if(!STORAGE_READY){
+    lsDel('TOE_'+k);
+    return true;
   }
   
   try{
-    await window.storage.delete(k,true); // shared=true ÇOK ÖNEMLİ!
-    console.log('✅ Key silindi:',k);
+    await window.storage.delete(k,true);
+    console.log('✅ Shared storage DELETE:',k);
+    lsDel('TOE_'+k);
     return true;
   }catch(e){
-    console.error('❌ storeDel HATA:',k,e);
+    console.error('❌ storeDel error:',k,e.message);
+    lsDel('TOE_'+k);
     return false;
   }
 }
 
 async function storeList(prefix){
-  console.log('📋 storeList çağrıldı:',prefix);
-  
-  if(!window.storage){
-    console.error('❌ window.storage bulunamadı!');
-    return [];
+  if(!STORAGE_READY){
+    var localKeys=Object.keys(localStorage).filter(function(k){
+      return k.startsWith('TOE_'+prefix);
+    }).map(function(k){
+      return k.replace('TOE_','');
+    });
+    console.log('📋 localStorage list:',prefix,'→',localKeys.length);
+    return localKeys;
   }
   
   try{
-    console.log('→ window.storage.list çağrılıyor...',prefix);
-    var result=await window.storage.list(prefix,true); // shared=true ÇOK ÖNEMLİ!
-    
+    var result=await window.storage.list(prefix,true);
     if(result&&result.keys){
-      console.log('✅ BAŞARILI! '+result.keys.length+' key bulundu:',prefix);
-      console.log('Keys:',result.keys);
-      return result.keys;
+      console.log('✅ Shared storage LIST:',prefix,'→',result.keys.length);
+      
+      // localStorage'dakilerle birleştir
+      var localKeys=Object.keys(localStorage).filter(function(k){
+        return k.startsWith('TOE_'+prefix);
+      }).map(function(k){
+        return k.replace('TOE_','');
+      });
+      
+      var allKeys=new Set(result.keys.concat(localKeys));
+      return Array.from(allKeys);
     }else{
-      console.log('⚠️ Liste boş:',prefix);
-      return [];
+      // Fallback
+      var localKeys=Object.keys(localStorage).filter(function(k){
+        return k.startsWith('TOE_'+prefix);
+      }).map(function(k){
+        return k.replace('TOE_','');
+      });
+      return localKeys;
     }
   }catch(e){
-    console.error('❌ storeList HATA:',prefix,e);
-    return [];
+    console.error('❌ storeList error:',prefix,e.message);
+    var localKeys=Object.keys(localStorage).filter(function(k){
+      return k.startsWith('TOE_'+prefix);
+    }).map(function(k){
+      return k.replace('TOE_','');
+    });
+    return localKeys;
   }
 }
 
+async function waitForStorage(maxAttempts){
+  return new Promise(function(resolve){
+    var attempts=0;
+    var checkInterval=setInterval(function(){
+      attempts++;
+      
+      if(window.storage){
+        clearInterval(checkInterval);
+        console.log('✅ window.storage API bulundu! ('+attempts+'. denemede)');
+        resolve(true);
+      }else if(attempts>=maxAttempts){
+        clearInterval(checkInterval);
+        console.warn('⚠️ window.storage bulunamadı ('+attempts+' deneme)');
+        console.warn('⚠️ Oyun localStorage ile devam edecek (tek oyunculu)');
+        resolve(false);
+      }else{
+        console.log('⏳ Storage bekleniyor... ('+attempts+'/'+maxAttempts+')');
+      }
+    },500);
+  });
+}
+
 async function checkStorage(){
-  console.log('🔍 ===== STORAGE KONTROLÜ BAŞLIYOR =====');
+  console.log('');
+  console.log('🔍 ═══════════════════════════════════════');
+  console.log('   STORAGE SİSTEMİ KONTROLÜ');
+  console.log('🔍 ═══════════════════════════════════════');
+  console.log('');
   
-  if(!window.storage){
-    console.error('❌ FATAL: window.storage API bulunamadı!');
-    console.error('Bu artifact muhtemelen Claude.ai dışında çalışıyor.');
-    toast('❌ Multiplayer sadece Claude.ai\'de çalışır','error');
+  // window.storage hazır olana kadar bekle (max 5 saniye)
+  var storageFound=await waitForStorage(10);
+  
+  if(!storageFound){
+    console.log('');
+    console.log('❌ MULTIPLAYER KULLANILAMAZ');
+    console.log('   → window.storage API bulunamadı');
+    console.log('   → Oyun localStorage ile çalışacak');
+    console.log('   → Sadece bu cihazda oyun kaydı');
+    console.log('');
+    toast('⚠️ Tek oyunculu mod','info');
+    STORAGE_READY=false;
     return false;
   }
   
-  console.log('✅ window.storage API mevcut');
-  
+  // Storage API testi
   try{
-    var testKey='test_storage_'+Date.now();
-    var testValue='test_value_'+Math.random();
+    console.log('→ Storage API test ediliyor...');
+    var testKey='toe_test_'+Date.now();
+    var testValue='test_'+Math.random();
     
-    console.log('→ Test SET...');
     var setResult=await window.storage.set(testKey,testValue,true);
     if(!setResult){
-      throw new Error('SET failed');
+      throw new Error('SET döndü null');
     }
-    console.log('✅ Test SET başarılı');
+    console.log('✓ SET başarılı');
     
-    console.log('→ Test GET...');
     var getResult=await window.storage.get(testKey,true);
     if(!getResult||getResult.value!==testValue){
-      throw new Error('GET failed or value mismatch');
+      throw new Error('GET başarısız veya değer eşleşmedi');
     }
-    console.log('✅ Test GET başarılı');
+    console.log('✓ GET başarılı');
     
-    console.log('→ Test DELETE...');
     await window.storage.delete(testKey,true);
-    console.log('✅ Test DELETE başarılı');
+    console.log('✓ DELETE başarılı');
     
-    console.log('🎉 ===== SHARED STORAGE TAMAMEN ÇALIŞIYOR! =====');
+    console.log('');
+    console.log('✅ MULTIPLAYER AKTİF!');
+    console.log('   → Shared storage çalışıyor');
+    console.log('   → Tüm oyuncular birbirini görebilir');
+    console.log('   → Klanlar paylaşımlı');
+    console.log('');
+    
     toast('✅ Multiplayer aktif!','success');
+    STORAGE_READY=true;
     return true;
     
   }catch(e){
-    console.error('❌ ===== STORAGE TESTİ BAŞARISIZ! =====');
-    console.error('Hata:',e);
-    toast('❌ Multiplayer hatası: '+e.message,'error');
+    console.log('');
+    console.log('❌ STORAGE TESTİ BAŞARISIZ');
+    console.log('   Hata:',e.message);
+    console.log('   → localStorage fallback kullanılacak');
+    console.log('');
+    
+    toast('⚠️ Multiplayer hatası, localStorage kullanılıyor','error');
+    STORAGE_READY=false;
     return false;
   }
 }
@@ -1581,25 +1633,23 @@ function startTick(){
   },5000);
 }
 
-function initGame(){
+async function initGame(){
   console.log('');
   console.log('🏰 ═══════════════════════════════════════════════════');
   console.log('   TON OF EMPIRES - MULTIPLAYER STRATEGY GAME');
   console.log('🏰 ═══════════════════════════════════════════════════');
   console.log('');
   console.log('👤 Oyuncu ID:',PID);
-  console.log('');
   
-  // Storage kontrolü - ÇÖZÜNMÜŞ BEKLE
-  checkStorage().then(function(success){
-    console.log('');
-    if(success){
-      console.log('✅ Multiplayer MOD AKTIF - Tüm oyuncular birbirini görebilir!');
-    }else{
-      console.log('⚠️ Multiplayer DEVRE DIŞI - Sadece tek oyuncu modu');
-    }
-    console.log('');
-  });
+  // Storage kontrolü - BEKLE
+  var storageOk=await checkStorage();
+  
+  if(storageOk){
+    console.log('🎮 Multiplayer mod aktif - diğer oyuncularla etkileşime geçebilirsin!');
+  }else{
+    console.log('⚠️ Tek oyunculu mod - sadece bu cihazda kayıt');
+  }
+  console.log('');
   
   try{loadGame()}catch(e){console.error('loadGame err',e)}
   try{initTelegram()}catch(e){console.error('tg err',e)}
@@ -1623,17 +1673,17 @@ function initGame(){
   try{renderQuests()}catch(e){console.error('renderQuests',e)}
   try{updateTopBar()}catch(e){console.error('topbar',e)}
   
-  // İlk senkronizasyon - 1 saniye bekle ki storage hazır olsun
-  setTimeout(function(){
-    console.log('');
-    console.log('📡 Oyuncu bilgileri paylaşılıyor...');
-    syncPlayer().then(function(){
-      console.log('✅ Profiliniz diğer oyuncular tarafından görülebilir!');
-      console.log('');
-    }).catch(function(e){
-      console.error('❌ Senkronizasyon hatası:',e);
-    });
-  },1000);
+  // Senkronizasyon - sadece storage aktifse
+  if(storageOk||STORAGE_READY){
+    setTimeout(function(){
+      console.log('📡 Oyuncu bilgileri paylaşılıyor...');
+      syncPlayer().then(function(){
+        console.log('✅ Profiliniz diğer oyuncular tarafından görülebilir!');
+      }).catch(function(e){
+        console.error('❌ Senkronizasyon hatası:',e);
+      });
+    },1000);
+  }
   
   startTick();
   console.log('🎮 Oyun başlatıldı!');
@@ -1641,17 +1691,11 @@ function initGame(){
 }
 
 window.onload=function(){
-  // Telegram WebApp bazen geç yüklenebilir; kısa bir timeout ile güvene alıyoruz
-  if(document.readyState==='complete'){
-    setTimeout(initGame, 100);
-  } else {
-    window.addEventListener('load', function(){ setTimeout(initGame, 100); });
-  }
+  setTimeout(initGame,100);
 };
 
-// Eğer onload zaten geçtiyse direkt çalıştır
 if(document.readyState==='complete'){
-  setTimeout(initGame, 150);
+  setTimeout(initGame,150);
 }
 </script>
 </body>
