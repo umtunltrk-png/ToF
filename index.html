@@ -1518,18 +1518,7 @@ function switchTab(tab){
   if(tab==='battle'){
     console.log('⚔️ Savaş sekmesi açıldı');
     setBattleTab(battleTab);
-    // İlk yüklemede tüm sekmeleri hazırla
-    setTimeout(function(){
-      try{
-        console.log('📦 Tüm savaş içeriği hazırlanıyor...');
-        renderEnemies();
-        renderOases();
-        renderPvP();
-        console.log('✅ Tüm içerik hazır');
-      }catch(e){
-        console.error('❌ İçerik hazırlama hatası:',e);
-      }
-    },100);
+    // Sadece NPC'yi render et, vahalar ve PvP butonlara tıklayınca render edilecek
   }
 }
 
@@ -1576,6 +1565,38 @@ async function initGame(){
   console.log('');
   console.log('👤 Oyuncu:',PID);
   console.log('');
+  
+  // UYARI: Eğer hata varsa localStorage'ı temizle
+  var hasError=false;
+  try{
+    var savedOases=lsGet('oasis_selection');
+    if(savedOases){
+      console.log('📦 Kaydedilmiş vaha verisi var:',savedOases);
+      var ids=JSON.parse(savedOases);
+      ids.forEach(function(id){
+        var found=OASES.find(function(o){return o.id===id});
+        if(!found){
+          console.error('❌ Geçersiz vaha ID bulundu:',id);
+          hasError=true;
+        }
+      });
+    }
+  }catch(e){
+    console.error('❌ Vaha verisi kontrol hatası:',e);
+    hasError=true;
+  }
+  
+  if(hasError){
+    console.log('');
+    console.log('🔧 ═══════════════════════════════════════');
+    console.log('   UYARI: Bozuk veri tespit edildi!');
+    console.log('   Vaha verisi temizleniyor...');
+    console.log('🔧 ═══════════════════════════════════════');
+    console.log('');
+    lsDel('oasis_selection');
+    lsDel('oasis_day');
+    console.log('✅ Vaha verisi temizlendi');
+  }
   
   // Storage hazırla
   await checkStorage();
