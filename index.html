@@ -724,15 +724,42 @@ function renderOases(){
     
     var selectedOases;
     if(savedDay!==today||!savedOases){
+      // Yeni gün - yeni vahalar seç
       var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
       selectedOases=shuffled.slice(0,3);
       lsSet('oasis_day',today);
       lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
       console.log('Günlük vahalar:',selectedOases.map(function(o){return o.name}));
     }else{
-      var ids=JSON.parse(savedOases);
-      selectedOases=ids.map(function(id){return OASES.find(function(o){return o.id===id})}).filter(Boolean);
-      console.log('Mevcut vahalar:',selectedOases.map(function(o){return o.name}));
+      // Kaydedilmiş vahalar - ama bazıları silinmiş olabilir
+      try{
+        var ids=JSON.parse(savedOases);
+        selectedOases=[];
+        ids.forEach(function(id){
+          var oasis=OASES.find(function(o){return o.id===id});
+          if(oasis){
+            selectedOases.push(oasis);
+          }else{
+            console.warn('Vaha bulunamadı:',id);
+          }
+        });
+        
+        // Eğer hiç vaha kalmadıysa yeniden seç
+        if(selectedOases.length===0){
+          console.log('Kaydedilmiş vahalar geçersiz, yeniden seçiliyor...');
+          var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
+          selectedOases=shuffled.slice(0,3);
+          lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
+        }
+        
+        console.log('Mevcut vahalar:',selectedOases.map(function(o){return o.name}));
+      }catch(e){
+        console.error('Vaha yükleme hatası:',e);
+        // Hata varsa yeni vahalar seç
+        var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
+        selectedOases=shuffled.slice(0,3);
+        lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
+      }
     }
     
     if(selectedOases.length===0){
