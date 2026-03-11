@@ -709,66 +709,48 @@ function renderEnemies(){
 }
 
 function renderOases(){
-  console.log('🏝️ Vahalar render');
-  var list=document.getElementById('oasis-list');
-  if(!list){
-    console.error('oasis-list bulunamadı!');
+  console.log('🏝️ Vahalar render başladı');
+  
+  // OASES kontrolü
+  if(typeof OASES==='undefined'||!OASES||OASES.length===0){
+    console.error('❌ OASES dizisi tanımlı değil!');
+    var list=document.getElementById('oasis-list');
+    if(list){
+      list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">HATA: Vaha verisi yok</div>';
+    }
     return;
   }
   
+  console.log('✓ OASES dizisi mevcut:',OASES.length,'vaha');
+  
+  var list=document.getElementById('oasis-list');
+  if(!list){
+    console.error('❌ oasis-list elementi bulunamadı!');
+    return;
+  }
+  
+  console.log('✓ oasis-list elementi bulundu');
+  
   try{
-    // Her gün 3 random vaha
-    var today=new Date().toDateString();
-    var savedDay=lsGet('oasis_day');
-    var savedOases=lsGet('oasis_selection');
+    // Her zaman 3 random vaha seç
+    var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
+    var selectedOases=shuffled.slice(0,3);
     
-    var selectedOases;
-    if(savedDay!==today||!savedOases){
-      // Yeni gün - yeni vahalar seç
-      var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
-      selectedOases=shuffled.slice(0,3);
-      lsSet('oasis_day',today);
-      lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
-      console.log('Günlük vahalar:',selectedOases.map(function(o){return o.name}));
-    }else{
-      // Kaydedilmiş vahalar - ama bazıları silinmiş olabilir
-      try{
-        var ids=JSON.parse(savedOases);
-        selectedOases=[];
-        ids.forEach(function(id){
-          var oasis=OASES.find(function(o){return o.id===id});
-          if(oasis){
-            selectedOases.push(oasis);
-          }else{
-            console.warn('Vaha bulunamadı:',id);
-          }
-        });
-        
-        // Eğer hiç vaha kalmadıysa yeniden seç
-        if(selectedOases.length===0){
-          console.log('Kaydedilmiş vahalar geçersiz, yeniden seçiliyor...');
-          var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
-          selectedOases=shuffled.slice(0,3);
-          lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
-        }
-        
-        console.log('Mevcut vahalar:',selectedOases.map(function(o){return o.name}));
-      }catch(e){
-        console.error('Vaha yükleme hatası:',e);
-        // Hata varsa yeni vahalar seç
-        var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
-        selectedOases=shuffled.slice(0,3);
-        lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
-      }
-    }
+    console.log('✓ Vahalar seçildi:',selectedOases.map(function(o){return o.name}));
     
     if(selectedOases.length===0){
-      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Bugün vaha yok</div>';
+      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Vaha yok</div>';
       return;
     }
     
     list.innerHTML='';
+    
     selectedOases.forEach(function(o){
+      if(!o||!o.name){
+        console.error('❌ Geçersiz vaha:',o);
+        return;
+      }
+      
       var card=document.createElement('div');
       card.className='oasis-card';
       
@@ -814,8 +796,9 @@ function renderOases(){
     console.log('✅',selectedOases.length,'vaha gösteriliyor');
     
   }catch(e){
-    console.error('renderOases hatası:',e);
-    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">Hata: '+e.message+'</div>';
+    console.error('❌ renderOases HATASI:',e.message);
+    console.error('Stack trace:',e.stack);
+    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">HATA: '+e.message+'</div>';
   }
 }
 
