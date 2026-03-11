@@ -437,99 +437,8 @@ async function storeList(prefix){
 }
 
 async function checkStorage(){
-  console.log('');
-  console.log('🔍 ═══════════════════════════════════════');
-  console.log('   STORAGE SİSTEMİ');
-  console.log('🔍 ═══════════════════════════════════════');
-  console.log('');
-  
-  // Demo içerik oluştur
-  await createDemoWorld();
-  
-  console.log('✅ SİMÜLE MULTIPLAYER HAZIR!');
-  console.log('   → Demo oyuncular ve klanlar eklendi');
-  console.log('   → localStorage kullanılıyor');
-  console.log('   → Aynı tarayıcıda tüm sekmeler paylaşır');
-  console.log('');
-  
-  toast('✅ Oyun hazır!','success');
+  console.log('💾 Storage sistemi hazır (localStorage)');
   return true;
-}
-
-// Demo dünya oluştur
-async function createDemoWorld(){
-  var existingCheck=lsGet('DEMO_WORLD_CREATED');
-  if(existingCheck==='v2'){
-    console.log('Demo dünya zaten var');
-    return;
-  }
-  
-  console.log('🌍 Demo dünya oluşturuluyor...');
-  
-  // Demo oyuncular
-  var demoPlayers=[
-    {name:'Kral Arthur',level:10,power:520,clanId:'clan_golden_dragons',lastSeen:Date.now()-300000},
-    {name:'Prenses Diana',level:8,power:380,clanId:'clan_golden_dragons',lastSeen:Date.now()-180000},
-    {name:'Lord Maximus',level:12,power:650,clanId:'clan_iron_legion',lastSeen:Date.now()-600000},
-    {name:'Şövalye Galahad',level:7,power:340,clanId:null,lastSeen:Date.now()-120000},
-    {name:'Kraliçe Isabella',level:11,power:580,clanId:'clan_shadow_knights',lastSeen:Date.now()-240000},
-    {name:'Savaşçı Ragnar',level:9,power:460,clanId:'clan_iron_legion',lastSeen:Date.now()-420000}
-  ];
-  
-  for(var i=0;i<demoPlayers.length;i++){
-    var p=demoPlayers[i];
-    var pid='demo_player_'+(i+1);
-    await storeSet(pid,JSON.stringify(p));
-  }
-  console.log('✓ '+demoPlayers.length+' demo oyuncu');
-  
-  // Demo klanlar
-  var demoClans=[
-    {
-      id:'clan_golden_dragons',
-      name:'Altın Ejderhalar',
-      tag:'GOLD',
-      icon:'🐉',
-      desc:'Efsanevi savaşçılar topluluğu. Onur ve güçle yönetilir.',
-      ownerId:'demo_player_1',
-      ownerName:'Kral Arthur',
-      members:['demo_player_1','demo_player_2'],
-      requests:[{pid:'demo_player_4',name:'Şövalye Galahad',power:340,level:7,sentAt:Date.now()-3600000}],
-      createdAt:Date.now()-7*86400000
-    },
-    {
-      id:'clan_iron_legion',
-      name:'Demir Lejyon',
-      tag:'IRON',
-      icon:'⚔️',
-      desc:'Yenilmez savaşçılar birliği. Disiplin ve strateji esas.',
-      ownerId:'demo_player_3',
-      ownerName:'Lord Maximus',
-      members:['demo_player_3','demo_player_6'],
-      requests:[],
-      createdAt:Date.now()-14*86400000
-    },
-    {
-      id:'clan_shadow_knights',
-      name:'Gölge Şövalyeleri',
-      tag:'SHDW',
-      icon:'🌙',
-      desc:'Gecenin karanlığında güç bulan gizemli şövalyeler.',
-      ownerId:'demo_player_5',
-      ownerName:'Kraliçe Isabella',
-      members:['demo_player_5'],
-      requests:[],
-      createdAt:Date.now()-3*86400000
-    }
-  ];
-  
-  for(var j=0;j<demoClans.length;j++){
-    await storeSet('clan_'+demoClans[j].id,JSON.stringify(demoClans[j]));
-  }
-  console.log('✓ '+demoClans.length+' demo klan');
-  
-  lsSet('DEMO_WORLD_CREATED','v2');
-  console.log('✅ Demo dünya hazır!');
 }
 
 // STATE
@@ -800,108 +709,147 @@ function renderEnemies(){
 }
 
 function renderOases(){
-  console.log('=== renderOases başlatıldı ===');
+  console.log('🏝️ Vahalar render');
   var list=document.getElementById('oasis-list');
-  if(!list)return;
-  
-  // Her gün için random 3 vaha seç (günlük değişsin)
-  var today=new Date().toDateString();
-  var savedDay=lsGet('oasis_day');
-  var savedOases=lsGet('oasis_selection');
-  
-  var selectedOases;
-  if(savedDay!==today||!savedOases){
-    // Yeni gün - yeni random vahalar seç
-    var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
-    selectedOases=shuffled.slice(0,3);
-    lsSet('oasis_day',today);
-    lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
-    console.log('Günlük vahalar yenilendi:',selectedOases.map(function(o){return o.name}));
-  }else{
-    // Aynı günün vahalarını yükle
-    var ids=JSON.parse(savedOases);
-    selectedOases=ids.map(function(id){return OASES.find(function(o){return o.id===id})}).filter(Boolean);
-    console.log('Mevcut günlük vahalar:',selectedOases.map(function(o){return o.name}));
-  }
-  
-  if(selectedOases.length===0){
-    list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Bugün vaha yok</div>';
+  if(!list){
+    console.error('oasis-list bulunamadı!');
     return;
   }
   
-  list.innerHTML='';
-  selectedOases.forEach(function(o){
-    var card=document.createElement('div');card.className='oasis-card';
-    var lastAttack=G.oasisCooldowns[o.id]||0;
-    var cdRemaining=Math.max(0,o.cd-(Date.now()-lastAttack));
-    var canAttack=cdRemaining===0;
-    var cdText='';
-    if(!canAttack){
-      var mins=Math.ceil(cdRemaining/60000);
-      if(mins>=60){var hrs=Math.floor(mins/60),m=mins%60;cdText=hrs+'sa '+(m?m+'dk':'');}
-      else{cdText=mins+'dk';}
-    }
-    card.innerHTML='<div class="o-header"><div class="o-icon">'+o.icon+'</div>'
-      +'<div class="o-info"><div class="o-name">'+o.name+'</div><div class="o-desc">💪 '+o.power+' • '+o.desc+'</div></div></div>'
-      +'<div class="o-rewards"><div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
-      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
-      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div></div>'
-      +(canAttack?'':'<div class="o-cd">⏳ '+cdText+'</div>');
-    if(canAttack)card.onclick=function(){openOasisBattle(o)};
-    else{card.style.opacity='0.6';card.style.cursor='not-allowed';}
-    list.appendChild(card);
-  });
-}
-
-async function renderPvP(){
-  console.log('');
-  console.log('⚔️ === PvP OYUNCULAR YÜKLENİYOR ===');
-  var list=document.getElementById('pvp-list');
-  if(!list)return;
-  list.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:12px">⏳ Oyuncular yükleniyor...</div>';
-  
   try{
-    var players=await loadPlayers();
-    console.log('📊 Toplam oyuncu bulundu:',players.length);
+    // Her gün 3 random vaha
+    var today=new Date().toDateString();
+    var savedDay=lsGet('oasis_day');
+    var savedOases=lsGet('oasis_selection');
     
-    if(players.length===0){
-      console.log('⚠️ Henüz başka oyuncu yok');
-      list.innerHTML='<div style="text-align:center;padding:30px">'
-        +'<div style="font-size:48px;margin-bottom:12px">👥</div>'
-        +'<div style="font-family:Cinzel,serif;font-size:15px;font-weight:700;color:var(--parchment);margin-bottom:8px">Henüz oyuncu yok</div>'
-        +'<div style="font-size:13px;color:var(--muted);margin-bottom:16px">Arkadaşlarını davet et!<br>Klan kur ve güçlen!</div>'
-        +'<div style="font-size:11px;color:var(--gold);background:rgba(212,146,10,0.1);border:1px solid rgba(212,146,10,0.3);border-radius:8px;padding:8px">💡 İpucu: Her 10 saniyede oyuncular güncellenir</div>'
-        +'</div>';
+    var selectedOases;
+    if(savedDay!==today||!savedOases){
+      var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
+      selectedOases=shuffled.slice(0,3);
+      lsSet('oasis_day',today);
+      lsSet('oasis_selection',JSON.stringify(selectedOases.map(function(o){return o.id})));
+      console.log('Günlük vahalar:',selectedOases.map(function(o){return o.name}));
+    }else{
+      var ids=JSON.parse(savedOases);
+      selectedOases=ids.map(function(id){return OASES.find(function(o){return o.id===id})}).filter(Boolean);
+      console.log('Mevcut vahalar:',selectedOases.map(function(o){return o.name}));
+    }
+    
+    if(selectedOases.length===0){
+      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Bugün vaha yok</div>';
       return;
     }
     
     list.innerHTML='';
-    var displayCount=0;
-    
-    players.forEach(function(p){
-      if(p.pid===PID)return; // Kendini gösterme
+    selectedOases.forEach(function(o){
+      var card=document.createElement('div');
+      card.className='oasis-card';
       
-      displayCount++;
+      var lastAttack=G.oasisCooldowns[o.id]||0;
+      var cdRemaining=Math.max(0,o.cd-(Date.now()-lastAttack));
+      var canAttack=cdRemaining===0;
+      var cdText='';
+      
+      if(!canAttack){
+        var mins=Math.ceil(cdRemaining/60000);
+        if(mins>=60){
+          var hrs=Math.floor(mins/60);
+          var m=mins%60;
+          cdText=hrs+'sa '+(m?m+'dk':'');
+        }else{
+          cdText=mins+'dk';
+        }
+      }
+      
+      card.innerHTML='<div class="o-header">'
+        +'<div class="o-icon">'+o.icon+'</div>'
+        +'<div class="o-info">'
+        +'<div class="o-name">'+o.name+'</div>'
+        +'<div class="o-desc">💪 '+o.power+' • '+o.desc+'</div>'
+        +'</div></div>'
+        +'<div class="o-rewards">'
+        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
+        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
+        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div>'
+        +'</div>'
+        +(canAttack?'':'<div class="o-cd">⏳ '+cdText+'</div>');
+      
+      if(canAttack){
+        card.onclick=function(){openOasisBattle(o)};
+      }else{
+        card.style.opacity='0.6';
+        card.style.cursor='not-allowed';
+      }
+      
+      list.appendChild(card);
+    });
+    
+    console.log('✅',selectedOases.length,'vaha gösteriliyor');
+    
+  }catch(e){
+    console.error('renderOases hatası:',e);
+    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">Hata: '+e.message+'</div>';
+  }
+}
+
+async function renderPvP(){
+  console.log('⚔️ PvP render başladı');
+  var list=document.getElementById('pvp-list');
+  if(!list){
+    console.error('pvp-list bulunamadı!');
+    return;
+  }
+  
+  list.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Yükleniyor...</div>';
+  
+  try{
+    // Demo oyuncuları direkt oluştur
+    var demoPlayers=[
+      {pid:'demo_1',name:'Kral Arthur',level:10,power:520,clanId:'clan_1'},
+      {pid:'demo_2',name:'Prenses Diana',level:8,power:380,clanId:'clan_1'},
+      {pid:'demo_3',name:'Lord Maximus',level:12,power:650,clanId:'clan_2'},
+      {pid:'demo_4',name:'Şövalye Galahad',level:7,power:340,clanId:null},
+      {pid:'demo_5',name:'Kraliçe Isabella',level:11,power:580,clanId:'clan_3'},
+      {pid:'demo_6',name:'Savaşçı Ragnar',level:9,power:460,clanId:'clan_2'}
+    ];
+    
+    // Gerçek oyuncuları da ekle
+    var realPlayers=await loadPlayers();
+    var allPlayers=demoPlayers.concat(realPlayers);
+    
+    console.log('Toplam oyuncu:',allPlayers.length);
+    
+    list.innerHTML='';
+    var count=0;
+    
+    allPlayers.forEach(function(p){
+      if(p.pid===PID)return;
+      
+      count++;
       var card=document.createElement('div');
       card.className='pvp-card';
-      var possibleLoot=Math.floor((p.power||100)*0.3);
+      var loot=Math.floor((p.power||100)*0.3);
       
-      card.innerHTML='<div class="pvp-header"><div class="pvp-av">'+p.name[0].toUpperCase()+'</div>'
-        +'<div class="pvp-info"><div class="pvp-name">'+p.name+(p.clanId?' 🛡️':'')+'</div>'
-        +'<div class="pvp-stats">💪 Güç: '+(p.power||0)+' • Sv.'+(p.level||1)+'</div></div>'
-        +'<div class="pvp-reward"><div class="pvp-loot">~'+possibleLoot+'🪙</div>'
-        +'<div style="font-size:10px;color:var(--muted);margin-top:2px">Olası ganimet</div></div></div>';
+      card.innerHTML='<div class="pvp-header">'
+        +'<div class="pvp-av">'+p.name[0].toUpperCase()+'</div>'
+        +'<div class="pvp-info">'
+        +'<div class="pvp-name">'+p.name+(p.clanId?' 🛡️':'')+'</div>'
+        +'<div class="pvp-stats">💪 '+p.power+' • Sv.'+p.level+'</div>'
+        +'</div>'
+        +'<div class="pvp-reward">'
+        +'<div class="pvp-loot">~'+loot+'🪙</div>'
+        +'<div style="font-size:10px;color:var(--muted);margin-top:2px">Ganimet</div>'
+        +'</div></div>';
       
       card.onclick=function(){openPvPBattle(p)};
       list.appendChild(card);
     });
     
-    console.log('✅ '+displayCount+' oyuncu listelendi');
-    console.log('');
+    console.log('✅',count,'oyuncu listelendi');
     
   }catch(e){
-    console.error('❌ renderPvP HATASI:',e);
-    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">⚠️ Yükleme hatası: '+e.message+'</div>';
+    console.error('renderPvP hatası:',e);
+    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">Hata: '+e.message+'</div>';
   }
 }
 
@@ -1246,30 +1194,79 @@ async function renderNoClan(root){
   else if(clanView==='create')renderCreateClan();
 }
 async function renderBrowseClans(){
-  console.log('=== renderBrowseClans başlatıldı ===');
-  var sub=document.getElementById('clan-sub');if(!sub)return;
-  sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Klanlar yükleniyor...</div>';
+  console.log('🛡️ Klan listesi render');
+  var sub=document.getElementById('clan-sub');
+  if(!sub){
+    console.error('clan-sub bulunamadı!');
+    return;
+  }
+  
+  sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px">⏳ Yükleniyor...</div>';
+  
   try{
-    var clans=await getAllClans();
-    console.log('getAllClans tamamlandı. Klan sayısı:',clans.length);
-    if(!clans.length){
-      sub.innerHTML='<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz hiç klan yok. İlk klanı sen kur! 🚀</div>';
-      return;
-    }
+    // Demo klanlar
+    var demoClans=[
+      {
+        id:'clan_gold',
+        name:'Altın Ejderhalar',
+        tag:'GOLD',
+        icon:'🐉',
+        desc:'Efsanevi savaşçılar topluluğu',
+        ownerName:'Kral Arthur',
+        members:['demo_1','demo_2']
+      },
+      {
+        id:'clan_iron',
+        name:'Demir Lejyon',
+        tag:'IRON',
+        icon:'⚔️',
+        desc:'Yenilmez savaşçılar birliği',
+        ownerName:'Lord Maximus',
+        members:['demo_3','demo_6']
+      },
+      {
+        id:'clan_shadow',
+        name:'Gölge Şövalyeleri',
+        tag:'SHDW',
+        icon:'🌙',
+        desc:'Gecenin karanlığında güç bulan gizemli şövalyeler',
+        ownerName:'Kraliçe Isabella',
+        members:['demo_5']
+      }
+    ];
+    
+    // Gerçek klanları da ekle
+    var realClans=await getAllClans();
+    var allClans=demoClans.concat(realClans);
+    
+    console.log('Toplam klan:',allClans.length);
+    
     sub.innerHTML='';
-    clans.forEach(function(clan){
-      var mc=(clan.members||[]).length,myReq=(clan.requests||[]).find(function(r){return r.pid===PID}),isMem=(clan.members||[]).includes(PID),full=mc>=30;
-      console.log('Klan:',clan.name,'Üye:',mc,'Üyemiyim:',isMem,'Talebim var mı:',!!myReq);
-      var card=document.createElement('div');card.className='clan-list-card';
-      card.innerHTML='<div class="cl-top"><div class="cl-icon">'+(clan.icon||'🛡️')+'</div><div class="cl-info"><div class="cl-name">'+clan.name+'</div><div class="cl-meta">#'+clan.tag+' • '+mc+'/30 üye • 👑 '+clan.ownerName+'</div></div></div>'
+    
+    allClans.forEach(function(clan){
+      var mc=(clan.members||[]).length;
+      var isMem=(clan.members||[]).includes(PID);
+      
+      var card=document.createElement('div');
+      card.className='clan-list-card';
+      card.innerHTML='<div class="cl-top">'
+        +'<div class="cl-icon">'+(clan.icon||'🛡️')+'</div>'
+        +'<div class="cl-info">'
+        +'<div class="cl-name">'+clan.name+'</div>'
+        +'<div class="cl-meta">#'+clan.tag+' • '+mc+'/30 üye • 👑 '+clan.ownerName+'</div>'
+        +'</div></div>'
         +(clan.desc?'<div class="cl-desc">'+clan.desc+'</div>':'')
-        +'<div class="cl-acts">'+(isMem?'<button class="cl-btn view" disabled>✅ Üyesin</button>':myReq?'<button class="cl-btn view" disabled>⏳ Talep gönderildi</button>':full?'<button class="cl-btn join" disabled>Dolu</button>':'<button class="cl-btn join" onclick="reqJoin(\''+clan.id+'\')">📨 Katılım Talebi</button>')+'</div>';
+        +'<div class="cl-acts">'
+        +(isMem?'<button class="cl-btn view" disabled>✅ Üyesin</button>':'<button class="cl-btn join" onclick="reqJoin(\''+clan.id+'\')">📨 Katıl</button>')
+        +'</div>';
       sub.appendChild(card);
     });
-    console.log('Klan listesi oluşturuldu');
+    
+    console.log('✅ Klan listesi oluşturuldu');
+    
   }catch(e){
     console.error('renderBrowseClans hatası:',e);
-    sub.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px;font-size:13px">⚠️ Klanlar yüklenemedi: '+e.message+'<br><button class="create-btn" onclick="renderClan()" style="margin-top:12px">🔄 Tekrar Dene</button></div>';
+    sub.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">Hata: '+e.message+'</div>';
   }
 }
 function renderCreateClan(){
