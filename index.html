@@ -724,34 +724,37 @@ function renderOases(){
   var list=document.getElementById('oasis-list');
   if(!list)return;
   
-  // HER SEFERINDE YENİ 3 RANDOM VAHA - localStorage kullanma
+  // Her seferinde yeni 3 random vaha
   var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
   var selectedOases=shuffled.slice(0,3);
   
   list.innerHTML='';
   
-  selectedOases.forEach(function(o){
+  for(var i=0;i<selectedOases.length;i++){
+    var oasis=selectedOases[i]; // Her vaha için yeni değişken
+    
     var card=document.createElement('div');
     card.className='oasis-card';
     
-    // Cooldown kontrol - ama G.oasisCooldowns her zaman {} olduğu için hep saldırılabilir
-    var canAttack=true;
-    
     card.innerHTML='<div class="o-header">'
-      +'<div class="o-icon">'+o.icon+'</div>'
+      +'<div class="o-icon">'+oasis.icon+'</div>'
       +'<div class="o-info">'
-      +'<div class="o-name">'+o.name+'</div>'
-      +'<div class="o-desc">💪 '+o.power+' • '+o.desc+'</div>'
+      +'<div class="o-name">'+oasis.name+'</div>'
+      +'<div class="o-desc">💪 '+oasis.power+' • '+oasis.desc+'</div>'
       +'</div></div>'
       +'<div class="o-rewards">'
-      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
-      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
-      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+oasis.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+oasis.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+oasis.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div>'
       +'</div>';
     
-    card.onclick=function(){openOasisBattle(o)};
+    // Closure ile oasis objesini yakala
+    card.onclick=(function(oasisData){
+      return function(){openOasisBattle(oasisData)};
+    })(oasis);
+    
     list.appendChild(card);
-  });
+  }
 }
 
 async function renderPvP(){
@@ -1011,7 +1014,24 @@ function doBattle(){
 }
 
 function openOasisBattle(oasis){
-  activeBattle={...oasis,type:'oasis'};
+  if(!oasis||!oasis.id||!oasis.name){
+    console.error('❌ Geçersiz vaha objesi:',oasis);
+    toast('Hata: Vaha bulunamadı','error');
+    return;
+  }
+  
+  console.log('✓ Vaha battle açılıyor:',oasis.name);
+  
+  activeBattle={
+    id:oasis.id,
+    name:oasis.name,
+    icon:oasis.icon,
+    desc:oasis.desc,
+    power:oasis.power,
+    reward:oasis.reward,
+    type:'oasis'
+  };
+  
   var pp=calcPower();
   var wc=Math.min(95,Math.max(5,Math.round((pp/(pp+oasis.power))*100)));
   var segs=10,ps=Math.round((pp/(pp+oasis.power))*segs),barH='';
