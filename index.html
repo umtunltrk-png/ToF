@@ -461,7 +461,19 @@ function saveGame(){
   lsSet('toe_save',JSON.stringify(G));
   syncPlayer().catch(function(e){console.error('Senkronizasyon hatası:',e)});
 }
-function loadGame(){try{var r=lsGet('toe_save');if(r)G=JSON.parse(r)}catch(e){console.error('loadGame hatası:',e)}}
+function loadGame(){
+  try{
+    var r=lsGet('toe_save');
+    if(r){
+      G=JSON.parse(r);
+      // OASIS COOLDOWNS'I HER ZAMAN SIFIRLA - localStorage sorununu çöz
+      G.oasisCooldowns={};
+      console.log('✓ Oyun yüklendi (oasis cooldowns temizlendi)');
+    }
+  }catch(e){
+    console.error('loadGame hatası:',e);
+  }
+}
 function getPid(){var p=lsGet('toe_pid');if(!p){p='player_'+Math.random().toString(36).slice(2,10)+'_'+Date.now();lsSet('toe_pid',p);console.log('Yeni oyuncu ID:',p)}return p}
 var PID=getPid();
 console.log('Oyuncu ID:',PID);
@@ -709,97 +721,37 @@ function renderEnemies(){
 }
 
 function renderOases(){
-  console.log('🏝️ Vahalar render başladı');
-  
-  // OASES kontrolü
-  if(typeof OASES==='undefined'||!OASES||OASES.length===0){
-    console.error('❌ OASES dizisi tanımlı değil!');
-    var list=document.getElementById('oasis-list');
-    if(list){
-      list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">HATA: Vaha verisi yok</div>';
-    }
-    return;
-  }
-  
-  console.log('✓ OASES dizisi mevcut:',OASES.length,'vaha');
-  
   var list=document.getElementById('oasis-list');
-  if(!list){
-    console.error('❌ oasis-list elementi bulunamadı!');
-    return;
-  }
+  if(!list)return;
   
-  console.log('✓ oasis-list elementi bulundu');
+  // HER SEFERINDE YENİ 3 RANDOM VAHA - localStorage kullanma
+  var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
+  var selectedOases=shuffled.slice(0,3);
   
-  try{
-    // Her zaman 3 random vaha seç
-    var shuffled=OASES.slice().sort(function(){return Math.random()-0.5});
-    var selectedOases=shuffled.slice(0,3);
+  list.innerHTML='';
+  
+  selectedOases.forEach(function(o){
+    var card=document.createElement('div');
+    card.className='oasis-card';
     
-    console.log('✓ Vahalar seçildi:',selectedOases.map(function(o){return o.name}));
+    // Cooldown kontrol - ama G.oasisCooldowns her zaman {} olduğu için hep saldırılabilir
+    var canAttack=true;
     
-    if(selectedOases.length===0){
-      list.innerHTML='<div style="color:var(--muted);text-align:center;padding:30px">Vaha yok</div>';
-      return;
-    }
+    card.innerHTML='<div class="o-header">'
+      +'<div class="o-icon">'+o.icon+'</div>'
+      +'<div class="o-info">'
+      +'<div class="o-name">'+o.name+'</div>'
+      +'<div class="o-desc">💪 '+o.power+' • '+o.desc+'</div>'
+      +'</div></div>'
+      +'<div class="o-rewards">'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
+      +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div>'
+      +'</div>';
     
-    list.innerHTML='';
-    
-    selectedOases.forEach(function(o){
-      if(!o||!o.name){
-        console.error('❌ Geçersiz vaha:',o);
-        return;
-      }
-      
-      var card=document.createElement('div');
-      card.className='oasis-card';
-      
-      var lastAttack=G.oasisCooldowns[o.id]||0;
-      var cdRemaining=Math.max(0,o.cd-(Date.now()-lastAttack));
-      var canAttack=cdRemaining===0;
-      var cdText='';
-      
-      if(!canAttack){
-        var mins=Math.ceil(cdRemaining/60000);
-        if(mins>=60){
-          var hrs=Math.floor(mins/60);
-          var m=mins%60;
-          cdText=hrs+'sa '+(m?m+'dk':'');
-        }else{
-          cdText=mins+'dk';
-        }
-      }
-      
-      card.innerHTML='<div class="o-header">'
-        +'<div class="o-icon">'+o.icon+'</div>'
-        +'<div class="o-info">'
-        +'<div class="o-name">'+o.name+'</div>'
-        +'<div class="o-desc">💪 '+o.power+' • '+o.desc+'</div>'
-        +'</div></div>'
-        +'<div class="o-rewards">'
-        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.gold+'</div><div class="o-reward-lbl">🪙 Altın</div></div>'
-        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.food+'</div><div class="o-reward-lbl">🌾 Yiyecek</div></div>'
-        +'<div class="o-reward-item"><div class="o-reward-val">+'+o.reward.iron+'</div><div class="o-reward-lbl">⚒️ Demir</div></div>'
-        +'</div>'
-        +(canAttack?'':'<div class="o-cd">⏳ '+cdText+'</div>');
-      
-      if(canAttack){
-        card.onclick=function(){openOasisBattle(o)};
-      }else{
-        card.style.opacity='0.6';
-        card.style.cursor='not-allowed';
-      }
-      
-      list.appendChild(card);
-    });
-    
-    console.log('✅',selectedOases.length,'vaha gösteriliyor');
-    
-  }catch(e){
-    console.error('❌ renderOases HATASI:',e.message);
-    console.error('Stack trace:',e.stack);
-    list.innerHTML='<div style="color:var(--red-light);text-align:center;padding:20px">HATA: '+e.message+'</div>';
-  }
+    card.onclick=function(){openOasisBattle(o)};
+    list.appendChild(card);
+  });
 }
 
 async function renderPvP(){
